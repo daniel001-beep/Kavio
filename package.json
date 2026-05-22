@@ -20,6 +20,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.3.3",
+    "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.143",
     "bcryptjs": "^3.0.3",
     "dompurify": "^3.4.2",
