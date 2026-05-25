@@ -83,10 +83,10 @@ export async function GET() {
       );
     }
 
-    // 1. Fetch all registered users (strict tenant-partitioning)
+    // 1. Fetch all registered users (platform-wide visibility for admin console)
     let allUsers = [];
     try {
-      allUsers = await db.select().from(users).where(eq(users.id, currentUser[0]?.id));
+      allUsers = await db.select().from(users);
     } catch (usersErr) {
       console.error("Error fetching users for admin:", usersErr);
     }
@@ -107,7 +107,6 @@ export async function GET() {
         })
         .from(transactions)
         .leftJoin(users, eq(transactions.userId, users.id))
-        .where(eq(transactions.userId, currentUser[0]?.id))
         .orderBy(desc(transactions.createdAt));
     } catch (txErr) {
       console.error("Error fetching transactions for admin:", txErr);
@@ -131,7 +130,6 @@ export async function GET() {
         })
         .from(auditLogs)
         .leftJoin(users, eq(auditLogs.userId, users.id))
-        .where(eq(auditLogs.userId, currentUser[0]?.id))
         .orderBy(desc(auditLogs.timestamp))
         .limit(100);
     } catch (auditErr) {
