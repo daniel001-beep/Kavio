@@ -1,8 +1,6 @@
 import DashboardLayout from '@/app/components/DashboardLayout';
 import LedgerClient from '@/app/components/LedgerClient';
 
-export const dynamic = 'force-dynamic';
-
 export default async function LedgerPage() {
   // Returns immediately to bypass blocking DB fetches and timeout lag.
   // The client LedgerClient will immediately mount, parse from its local storage cache,

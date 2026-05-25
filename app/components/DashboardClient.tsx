@@ -52,77 +52,38 @@ export default function DashboardClient({
 
   // Load from localStorage cache on mount for instant sub-0.1s loading
   // This runs BEFORE any API fetch, so cached data is always visible first
+  // STRICT TENANT ISOLATION: Never load fallback cache from other users or global keys
   useEffect(() => {
-    // First, seed from server-rendered initialTransactions if they have data
+    // 1. Reset client states to clean baseline first to prevent brief cross-tenant bleed
+    setApiTransactions([]);
+    setInvoices([]);
+
     if (initialTransactions && initialTransactions.length > 0) {
       setApiTransactions(initialTransactions);
     }
 
-    // Determine target email for cache - fall back to last active user's cache to support logout persistence
-    let targetEmail = userEmail;
-    if (!targetEmail && typeof window !== 'undefined') {
-      targetEmail = localStorage.getItem('velox_last_active_user_email');
-    }
-
-    if (targetEmail) {
-      const cached = localStorage.getItem(`velox_cached_api_transactions_${targetEmail}`) || 
-                     localStorage.getItem(`velox_last_active_cached_api_transactions`);
+    if (userEmail) {
+      const cached = localStorage.getItem(`velox_cached_api_transactions_${userEmail}`);
       if (cached) {
         try {
           const parsedCache = JSON.parse(cached);
-          // Only use cache if it has data AND is larger than server data
-          if (parsedCache.length > 0) {
-            setApiTransactions(prev => {
-              // Merge: keep whichever has more entries
-              if (parsedCache.length >= prev.length) return parsedCache;
-              return prev;
-            });
+          if (Array.isArray(parsedCache)) {
+            setApiTransactions(parsedCache);
           }
         } catch (e) {
           console.warn('Failed to parse cached dashboard transactions:', e);
         }
       }
 
-      const cachedInvoices = localStorage.getItem(`velox_cached_invoices_${targetEmail}`) ||
-                             localStorage.getItem(`velox_last_active_cached_invoices`);
+      const cachedInvoices = localStorage.getItem(`velox_cached_invoices_${userEmail}`);
       if (cachedInvoices) {
         try {
-          setInvoices(JSON.parse(cachedInvoices));
+          const parsedInvoices = JSON.parse(cachedInvoices);
+          if (Array.isArray(parsedInvoices)) {
+            setInvoices(parsedInvoices);
+          }
         } catch (e) {
           console.warn('Failed to parse cached dashboard invoices:', e);
-        }
-      }
-    } else if (typeof window !== 'undefined') {
-      // If absolutely no email, check for any key matching velox_cached_api_transactions_
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('velox_cached_api_transactions_')) {
-          const val = localStorage.getItem(key);
-          if (val) {
-            try {
-              const parsed = JSON.parse(val);
-              if (parsed && parsed.length > 0) {
-                setApiTransactions(parsed);
-                break;
-              }
-            } catch (e) {}
-          }
-        }
-      }
-      
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('velox_cached_invoices_')) {
-          const val = localStorage.getItem(key);
-          if (val) {
-            try {
-              const parsed = JSON.parse(val);
-              if (parsed && parsed.length > 0) {
-                setInvoices(parsed);
-                break;
-              }
-            } catch (e) {}
-          }
         }
       }
     }
@@ -136,8 +97,8 @@ export default function DashboardClient({
   }, [userEmail]);
 
   // Fetch fresh transactions from the API on mount and after any change
-  // CRITICAL: Only overwrite state if the API returns ACTUAL data.
-  // If the API fails or returns empty, we preserve the cached data.
+  // CRITICAL: Overwrite state with [] if user has zero transactions.
+  // We only skip overwrite if the API actually failed with a non-OK status (500/503).
   const fetchLatestTransactions = useCallback(async () => {
     try {
       const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
@@ -151,38 +112,32 @@ export default function DashboardClient({
       
       const data = await res.json();
       
-      // CRITICAL: If the API returns an empty array, do NOT overwrite existing cached data.
-      // This prevents the "disappearing balance" bug caused by Drizzle timeouts.
-      if (!Array.isArray(data) || data.length === 0) {
-        console.warn('Dashboard: API returned empty data — preserving cached transactions');
-        return;
-      }
-      
-      const mapped: UITransaction[] = data.map((tx: any) => {
-        const amountInDollars = Number(tx.amount) / 100;
-        let meta = tx.metadata;
-        if (typeof meta === 'string') {
-          try {
-            meta = JSON.parse(meta);
-          } catch (e) {}
-        }
-        return {
-          id: tx.id?.toString(),
-          type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
-          description: meta?.description || tx.description || 'Transaction',
-          date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
-          amount: amountInDollars,
-          status: tx.status?.toUpperCase() || 'COMPLETED',
-        };
-      });
+      // Map data successfully. If data is an empty array [], mapped is [] (fully correct for new accounts)
+      const mapped: UITransaction[] = Array.isArray(data)
+        ? data.map((tx: any) => {
+            const amountInDollars = Number(tx.amount) / 100;
+            let meta = tx.metadata;
+            if (typeof meta === 'string') {
+              try {
+                meta = JSON.parse(meta);
+              } catch (e) {}
+            }
+            return {
+              id: tx.id?.toString(),
+              type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
+              description: meta?.description || tx.description || 'Transaction',
+              date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
+              amount: amountInDollars,
+              status: tx.status?.toUpperCase() || 'COMPLETED',
+            };
+          })
+        : [];
+
       setApiTransactions(mapped);
       
-      // Cache the newly retrieved list
+      // Cache the newly retrieved list strictly per-user
       if (userEmail) {
         localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(mapped));
-        localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(mapped));
-      } else {
-        localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(mapped));
       }
     } catch (err) {
       // Network error — preserve cached data, don't wipe it
@@ -325,12 +280,13 @@ export default function DashboardClient({
                 localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(updated));
                 return updated;
               });
+              
+              addNotification({
+                type: 'SENTINEL',
+                title: 'Sentinel Alert: New Ledger Entry',
+                message: `Detected invoice to ${newInvoice.client_name} of $${Number(newInvoice.amount).toLocaleString()}. Integrity verified.`,
+              });
             }
-            addNotification({
-              type: 'SENTINEL',
-              title: 'Sentinel Alert: New Ledger Entry',
-              message: `Detected invoice to ${newInvoice.client_name} of $${Number(newInvoice.amount).toLocaleString()}. Integrity verified.`,
-            });
           } else if (payload.eventType === 'UPDATE') {
             const updatedInvoice = payload.new as any;
             if (updatedInvoice && updatedInvoice.email === userEmail) {

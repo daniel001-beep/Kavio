@@ -34,3 +34,18 @@ CREATE POLICY "tenant_isolation" ON "user" FOR ALL TO authenticated USING (tenan
 
 DROP POLICY IF EXISTS "tenant_isolation" ON "product";
 CREATE POLICY "tenant_isolation" ON "product" FOR ALL TO authenticated USING (tenant_id = auth.uid()) WITH CHECK (tenant_id = auth.uid());
+
+-- ENABLE REALTIME FOR TRANSACTIONS SAFELY (Error-Proof)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_publication_rel pr
+        JOIN pg_publication p ON p.oid = pr.prpubid
+        JOIN pg_class c ON c.oid = pr.prrelid
+        WHERE p.pubname = 'supabase_realtime' 
+          AND c.relname = 'transaction'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE "transaction";
+    END IF;
+END $$;

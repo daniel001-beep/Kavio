@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/components/DashboardLayout';
 import { useSession } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/src/lib/supabase-client';
 import { 
   ShieldAlert, 
   Users, 
@@ -94,10 +95,63 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const loadAdminDataSilently = async () => {
+    try {
+      const res = await fetch('/api/admin/dashboard?_t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setUsersList(data.users || []);
+        setTransactionsList(data.transactions || []);
+        setAuditLogsList(data.auditLogs || []);
+        setTotalUsers(data.totalUsers || 0);
+        setTotalTransactions(data.totalTransactions || 0);
+      }
+    } catch (err) {
+      console.error('Admin Dashboard background sync failed:', err);
+    }
+  };
+
   useEffect(() => {
     if (session?.user?.isAdmin) {
       loadAdminData();
     }
+  }, [session]);
+
+  // Real-time subscription to audit_log, transaction, and user tables
+  useEffect(() => {
+    if (!supabase || !session?.user?.isAdmin) return;
+
+    const channel = supabase
+      .channel('admin-dashboard-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'audit_log' },
+        async (payload) => {
+          console.log('[Admin Realtime] Audit log changed:', payload.eventType, payload.new);
+          loadAdminDataSilently();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transaction' },
+        async (payload) => {
+          console.log('[Admin Realtime] Transaction changed:', payload.eventType, payload.new);
+          loadAdminDataSilently();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user' },
+        async (payload) => {
+          console.log('[Admin Realtime] User registration changed:', payload.eventType, payload.new);
+          loadAdminDataSilently();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [session]);
 
   // Delete User handler

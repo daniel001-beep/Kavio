@@ -3,63 +3,77 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import DashboardLayout from '@/app/components/DashboardLayout';
 import { Calculator, TrendingDown, TrendingUp, Users, Megaphone, ShieldCheck, Activity, Landmark } from 'lucide-react';
+import { useSession } from '@/app/context/AuthContext';
 
 interface RunwayClientProps {
   initialTransactions?: any[];
 }
 
 export default function RunwayClient({ initialTransactions = [] }: RunwayClientProps) {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+  
   const [transactions, setTransactions] = useState<any[]>(initialTransactions);
 
   // Load from cache on mount and fetch fresh data from API
+  // STRICT TENANT ISOLATION: Reset states on user change and do not bleed generic cached history
   useEffect(() => {
-    // 1. First, if initialTransactions has data, seed state
+    setTransactions([]); // Reset state first to prevent brief cross-tenant bleed
+
     if (initialTransactions && initialTransactions.length > 0) {
       setTransactions(initialTransactions);
     }
 
-    // 2. Load from localStorage cache
-    let targetEmail = typeof window !== 'undefined' ? localStorage.getItem('velox_last_active_user_email') : null;
-    if (targetEmail) {
-      const cached = localStorage.getItem(`velox_cached_api_transactions_${targetEmail}`) || 
-                     localStorage.getItem(`velox_last_active_cached_api_transactions`);
+    if (userEmail) {
+      const cached = localStorage.getItem(`velox_cached_api_transactions_${userEmail}`);
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed.length > 0) {
+          if (Array.isArray(parsed)) {
             setTransactions(parsed);
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn('RunwayClient: Failed to parse cached transactions:', e);
+        }
       }
     }
 
-    // 3. Fetch fresh transactions from API in background to ensure correct balance
+    // Fetch fresh transactions from API in background to ensure correct balance
     const fetchTransactions = async () => {
       try {
         const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            const mapped = data.map((tx: any) => {
-              const amountInDollars = Number(tx.amount || 0) / 100;
-              return {
-                id: tx.id?.toString(),
-                type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
-                amount: amountInDollars,
-                description: tx.metadata?.description || tx.description || 'Transaction',
-                date: tx.createdAt ? new Date(tx.createdAt).toLocaleString() : new Date().toLocaleString(),
-                status: tx.status?.toUpperCase() || 'COMPLETED',
-              };
-            });
-            setTransactions(mapped);
+          
+          // Map data successfully. If data is an empty array [], mapped is [] (fully correct for new accounts)
+          const mapped = Array.isArray(data)
+            ? data.map((tx: any) => {
+                const amountInDollars = Number(tx.amount || 0) / 100;
+                return {
+                  id: tx.id?.toString(),
+                  type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
+                  amount: amountInDollars,
+                  description: tx.metadata?.description || tx.description || 'Transaction',
+                  date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
+                  status: tx.status?.toUpperCase() || 'COMPLETED',
+                };
+              })
+            : [];
+            
+          setTransactions(mapped);
+
+          // Update cache strictly per-user
+          if (userEmail) {
+            localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(mapped));
           }
         }
       } catch (err) {
         console.error('RunwayClient: Failed to fetch transactions in background:', err);
       }
     };
+    
     fetchTransactions();
-  }, [initialTransactions]);
+  }, [userEmail, initialTransactions]);
 
   // Calculate actual live ledger financials
   const liveCashBalance = useMemo(() => {
