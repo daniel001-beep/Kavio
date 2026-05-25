@@ -4,17 +4,15 @@ import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "@/src/lib/supabase-client";
 import { 
   Shield, 
-  Activity, 
-  Wifi, 
-  WifiOff, 
   Globe, 
   Laptop, 
   Clock, 
   User, 
-  AlertTriangle 
+  Activity, 
+  RefreshCw 
 } from "lucide-react";
 
-// Define strict TypeScript types matching the database schema
+// Strict type-safe AuditLog interface matching layout specifications
 export interface AuditLog {
   id: string;
   user_tenant: string;
@@ -28,213 +26,33 @@ export default function AuditLogsTable() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [realtimeStatus, setRealtimeStatus] = useState<"SUBSCRIBED" | "SUBSCRIBE_IN_PROGRESS" | "TIMED_OUT" | "CHANNEL_ERROR" | "DISCONNECTED">("SUBSCRIBE_IN_PROGRESS");
   const [latestRowId, setLatestRowId] = useState<string | null>(null);
   const subscriptionRef = useRef<any>(null);
 
-  // 1. Fetch initial historical logs on mount and subscribe to WebSockets
-  useEffect(() => {
-    async function fetchHistoricalLogs() {
-      try {
-        setError(null);
-        // Query the resilient Next.js internal API instead of direct client-side Supabase REST
-        const res = await fetch("/api/admin/dashboard?_t=" + Date.now(), { cache: "no-store" });
-        
-        if (!res.ok) {
-          throw new Error(`Failed to load administrative logs (Status ${res.status})`);
-        }
-
-        const data = await res.json();
-        
-        // Map Drizzle-backed database schemas to uniform AuditLog types
-        const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
-          id: log.id,
-          user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
-          action_event: log.eventType,
-          location_ip: log.ipAddress || "unknown",
-          device_info: log.userAgent || "unknown",
-          created_at: log.timestamp || new Date().toISOString()
-        }));
-
-        setLogs(mappedLogs.slice(0, 20));
-      } catch (err: any) {
-        console.error("Error loading historical audit logs:", err);
-        setError(err.message || "Failed to fetch audit logs.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchHistoricalLogs();
-
-    // 2. Establish a persistent Supabase Realtime WebSocket subscription (targeting public.audit_log table)
-    try {
-      setRealtimeStatus("connecting");
-      
-      const channel = supabase
-        .channel("audit_logs_realtime_feed")
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "audit_log", // Map to the singular system logging table
-          },
-          (payload) => {
-            const newRecord = payload.new as any;
-            if (newRecord && newRecord.id) {
-              const uiLog: AuditLog = {
-                id: newRecord.id,
-                user_tenant: newRecord.metadata?.email || newRecord.changes?.email || "System Agent",
-                action_event: newRecord.event_type || newRecord.eventType || "SYSTEM_EVENT",
-                location_ip: newRecord.ip_address || newRecord.ipAddress || "unknown",
-                device_info: newRecord.user_agent || newRecord.userAgent || "unknown",
-                created_at: newRecord.timestamp || newRecord.createdAt || new Date().toISOString()
-              };
-
-              // Optimistic UI state update: Prepend the event to the top of the array instantly
-              setLogs((prevLogs) => {
-                const updated = [uiLog, ...prevLogs];
-                return updated.slice(0, 20);
-              });
-
-              // Set the ID of the new row to trigger the CSS flash effect
-              setLatestRowId(uiLog.id);
-
-              // Reset flash effect target after animation finishes
-              setTimeout(() => {
-                setLatestRowId((curr) => (curr === uiLog.id ? null : curr));
-              }, 3000);
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === "SUBSCRIBED") {
-            setRealtimeStatus("connected");
-          } else {
-            setRealtimeStatus("disconnected");
-          }
-        });
-
-      subscriptionRef.current = channel;
-    } catch (realtimeErr) {
-      console.error("Failed to establish Supabase Realtime subscription:", realtimeErr);
-      setRealtimeStatus("disconnected");
-    }
-
-    return () => {
-      if (subscriptionRef.current) {
-        supabase.removeChannel(subscriptionRef.current);
-      }
-    };
-  }, []);
-
-  // 3. Hybrid Background Polling: fallback loop to sync records if WebSocket remains offline
-  useEffect(() => {
-    let active = true;
-    const interval = setInterval(async () => {
-      // Only poll when the WebSocket is not active/connected, saving server overhead
-      if (realtimeStatus !== "connected") {
-        try {
-          const res = await fetch("/api/admin/dashboard?_t=" + Date.now(), { cache: "no-store" });
-          if (res.ok && active) {
-            const data = await res.json();
-            const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
-              id: log.id,
-              user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
-              action_event: log.eventType,
-              location_ip: log.ipAddress || "unknown",
-              device_info: log.userAgent || "unknown",
-              created_at: log.timestamp || new Date().toISOString()
-            }));
-            
-            setLogs((prev) => {
-              // Only update state if count or content has actually changed to prevent dynamic rendering flicker
-              if (JSON.stringify(prev.slice(0, 10)) !== JSON.stringify(mappedLogs.slice(0, 10))) {
-                return mappedLogs.slice(0, 20);
-              }
-              return prev;
-            });
-          }
-        } catch (e) {
-          console.warn("Background audit log polling fallback failed:", e);
-        }
-      }
-    }, 5000);
-
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [realtimeStatus]);
-
-  // Helper: Format datetime strings into a premium readable local string
+  // Helper: Format datetime strings into a premium readable local format
   const formatTimestamp = (dateString: string) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
       return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + 
-        " " + date.toLocaleDateString([], { month: "short", day: "numeric" });
+        " - " + date.toLocaleDateString([], { month: "short", day: "numeric" });
     } catch {
       return dateString;
     }
   };
 
-  // Helper: Truncate long UUIDs or User Agents gracefully
-  const truncateString = (str: string, maxLen: number = 30) => {
-    if (!str) return "Unknown";
-    return str.length > maxLen ? `${str.slice(0, maxLen)}...` : str;
-  };
-
-  // Helper: Render visually harmonious pill badges for event categories
-  const renderEventBadge = (event: string) => {
-    const evUpper = event.toUpperCase();
-    if (evUpper.includes("LOGIN") || evUpper.includes("SIGNIN") || evUpper.includes("AUTH_SUCCESS") || evUpper.includes("REGISTER")) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          {event}
-        </span>
-      );
-    }
-    if (evUpper.includes("LOGOUT") || evUpper.includes("SIGNOUT") || evUpper.includes("SESSION_EXPIRED")) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-          {event}
-        </span>
-      );
-    }
-    if (evUpper.includes("BLOCKED") || evUpper.includes("LOCKDOWN") || evUpper.includes("UNAUTHORIZED") || evUpper.includes("FAIL") || evUpper.includes("DENIED")) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
-          {event}
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-        {event}
-      </span>
-    );
-  };
-
-  // Helper: Try parsing User Agent for sleek UI displays (Chrome/Windows etc.)
+  // Helper: Format raw User Agent strings into clean human-readable descriptions
   const parseUserAgent = (ua: string) => {
-    if (!ua) return "Unknown Browser";
-    
+    if (!ua || ua === "unknown") return "System Agent";
     let browser = "Other Browser";
     let os = "Unknown OS";
 
-    // Basic Browser parsing
     if (ua.includes("Firefox/")) browser = "Firefox";
     else if (ua.includes("Edg/")) browser = "Edge";
     else if (ua.includes("Chrome/")) browser = "Chrome";
     else if (ua.includes("Safari/")) browser = "Safari";
 
-    // Basic OS parsing
     if (ua.includes("Windows NT")) os = "Windows";
     else if (ua.includes("Macintosh")) os = "macOS";
     else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
@@ -244,16 +62,147 @@ export default function AuditLogsTable() {
     return `${browser} on ${os}`;
   };
 
+  useEffect(() => {
+    // 1. Initial Ingestion - Fetch last 20 historical log records asynchronously
+    async function fetchHistoricalLogs() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch from public.audit_log (singular active table in Supabase)
+        const { data, error: sbError } = await supabase
+          .from("audit_log")
+          .select("*")
+          .order("timestamp", { ascending: false })
+          .limit(20);
+
+        if (sbError) {
+          throw sbError;
+        }
+
+        if (data && Array.isArray(data)) {
+          const mapped: AuditLog[] = data.map((log: any) => ({
+            id: log.id,
+            user_tenant: log.metadata?.email || log.user_id || "System Agent",
+            action_event: log.event_type || "SYSTEM_EVENT",
+            location_ip: log.ip_address || "127.0.0.1",
+            device_info: log.user_agent || "System Client",
+            created_at: log.timestamp || new Date().toISOString()
+          }));
+          setLogs(mapped);
+        }
+      } catch (err: any) {
+        console.warn("⚠️ Client-side direct fetch failed/restricted. Triggering secure resilient API fallback:", err.message);
+        
+        // Fallback: Query Next.js internal secure api which bypasses client-side RLS limits
+        try {
+          const res = await fetch("/api/admin/dashboard?_t=" + Date.now(), { cache: "no-store" });
+          if (res.ok) {
+            const fallbackData = await res.json();
+            const mapped: AuditLog[] = (fallbackData.auditLogs || []).map((log: any) => ({
+              id: log.id,
+              user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
+              action_event: log.eventType,
+              location_ip: log.ipAddress || "127.0.0.1",
+              device_info: log.userAgent || "System Client",
+              created_at: log.timestamp || new Date().toISOString()
+            }));
+            setLogs(mapped.slice(0, 20));
+          } else {
+            setError("Failed to fetch historical audit logs.");
+          }
+        } catch (fetchErr) {
+          setError("Network error fetching historical audit logs.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchHistoricalLogs();
+
+    // 2. Persistent Real-Time Subscription with Native Connection Status Badge
+    let channel: any;
+    try {
+      channel = supabase
+        .channel("audit_logs_realtime_feed")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "audit_log" // Target active singular Postgres audit table
+          },
+          (payload) => {
+            const newRecord = payload.new as any;
+            if (newRecord && newRecord.id) {
+              // Map the raw payload perfectly to layout interface
+              const uiLog: AuditLog = {
+                id: newRecord.id,
+                user_tenant: newRecord.metadata?.email || newRecord.user_id || "System Agent",
+                action_event: newRecord.event_type || "SYSTEM_EVENT",
+                location_ip: newRecord.ip_address || "127.0.0.1",
+                device_info: newRecord.user_agent || "System Client",
+                created_at: newRecord.timestamp || new Date().toISOString()
+              };
+
+              // 3. Zero-Lag Optimistic Prepend to State Array
+              setLogs((prevLogs) => {
+                const updated = [uiLog, ...prevLogs];
+                return updated.slice(0, 20); // Keep exact viewport of 20 elements
+              });
+
+              // Trigger emerald highlight CSS flash effect on the new row
+              setLatestRowId(uiLog.id);
+              setTimeout(() => {
+                setLatestRowId((curr) => (curr === uiLog.id ? null : curr));
+              }, 3000);
+            }
+          }
+        );
+
+      // Track raw WebSocket state transitions using supabase built-in event listener
+      channel.on("status", (status: string) => {
+        console.log(`[Supabase WebSocket Connection Status]: ${status}`);
+        if (status === "SUBSCRIBED") {
+          setRealtimeStatus("SUBSCRIBED");
+        } else if (status === "SUBSCRIBE_IN_PROGRESS") {
+          setRealtimeStatus("SUBSCRIBE_IN_PROGRESS");
+        } else if (status === "TIMED_OUT") {
+          setRealtimeStatus("TIMED_OUT");
+        } else if (status === "CHANNEL_ERROR") {
+          setRealtimeStatus("CHANNEL_ERROR");
+        } else {
+          setRealtimeStatus("DISCONNECTED");
+        }
+      });
+
+      channel.subscribe();
+      subscriptionRef.current = channel;
+    } catch (subErr) {
+      console.error("Failed to establish real-time subscription:", subErr);
+      setRealtimeStatus("CHANNEL_ERROR");
+    }
+
+    // 5. Cleanup Lifecycle: Tear down WebSocket listener to prevent severe client-side leaks
+    return () => {
+      if (subscriptionRef.current) {
+        console.log("[Supabase WebSocket] Tearing down connection channel");
+        supabase.removeChannel(subscriptionRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="w-full bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden relative">
       
-      {/* 1. Embed the Self-Contained Keyframe Animations for Instant Highlighting */}
+      {/* Visual Flash Animation style */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes row-flash-in {
           0% {
             background-color: rgba(16, 185, 129, 0.12);
             border-color: rgba(16, 185, 129, 0.3);
-            transform: scale(1.002);
+            transform: scale(1.001);
           }
           100% {
             background-color: transparent;
@@ -276,49 +225,37 @@ export default function AuditLogsTable() {
             <h2 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
               Platform Access & Real-Time Event Audit Logs
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 font-semibold mt-0.5">
               Securely capturing and auditing incoming security authentication & network activity logs.
             </p>
           </div>
         </div>
 
-        {/* WebSocket Pulse Indicator */}
+        {/* 1. Native Connection Status Badge */}
         <div className="flex items-center self-start sm:self-center">
-          {realtimeStatus === "connected" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+          {realtimeStatus === "SUBSCRIBED" ? (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <Wifi className="w-3.5 h-3.5" />
-              LIVE Realtime Active
+              🟢 WebSocket Online
             </div>
-          )}
-          {realtimeStatus === "connecting" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-              <span className="relative flex h-2 w-2">
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 animate-pulse"></span>
-              </span>
-              <Activity className="w-3.5 h-3.5 animate-spin" />
-              Establishing Feed...
-            </div>
-          )}
-          {realtimeStatus === "disconnected" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
-              <span className="relative flex h-2 w-2">
+          ) : (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm transition-all duration-300">
+              <span className="relative flex h-2 w-2 animate-pulse">
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
               </span>
-              <WifiOff className="w-3.5 h-3.5" />
-              WebSocket Offline
+              🔴 WebSocket Offline
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Table Grid / Content View */}
       <div className="w-full overflow-x-auto">
         {loading ? (
-          /* Premium Skeleton State */
+          /* Premium Shimmer Skeleton State */
           <div className="w-full divide-y divide-slate-100">
             <div className="bg-slate-50/50 px-6 py-4 flex justify-between gap-4 animate-pulse">
               <div className="h-5 w-1/4 bg-slate-200 rounded"></div>
@@ -338,46 +275,33 @@ export default function AuditLogsTable() {
               </div>
             ))}
           </div>
-        ) : error ? (
-          /* Error State Card with developer diagnostic guidance */
+        ) : error && logs.length === 0 ? (
+          /* Error state */
           <div className="p-12 text-center flex flex-col items-center justify-center max-w-xl mx-auto">
-            <div className="p-3 bg-rose-500/10 rounded-full border border-rose-500/20 text-rose-500 mb-4 animate-bounce">
-              <AlertTriangle className="w-8 h-8" />
-            </div>
-            <h3 className="text-slate-800 font-semibold text-base">Audit logs fetch interrupted</h3>
-            <p className="text-slate-500 text-xs mt-2 leading-relaxed">
-              {error}
-            </p>
-            <div className="mt-6 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-left w-full">
-              <span className="text-[10px] text-slate-400 font-mono block uppercase mb-1">Developer Solution:</span>
-              <code className="text-xs text-slate-600 font-mono block select-all overflow-x-auto whitespace-nowrap p-1 bg-slate-100 rounded">
-                supabase/migrations/20260525_audit_logs.sql
-              </code>
-              <span className="text-[10px] text-slate-400 block mt-2">
-                Make sure you run the migrations inside your Supabase SQL editor to create the `audit_logs` table!
-              </span>
-            </div>
+            <RefreshCw className="w-8 h-8 text-rose-500 animate-spin mb-4" />
+            <h3 className="text-slate-800 font-bold text-sm">Failed to connect to ledger</h3>
+            <p className="text-slate-500 text-xs mt-1 leading-relaxed">{error}</p>
           </div>
         ) : logs.length === 0 ? (
-          /* Empty Database State */
+          /* 4. Layout Fallback Empty State Message */
           <div className="p-16 text-center flex flex-col items-center justify-center">
-            <div className="p-4 bg-slate-50 rounded-full border border-slate-150 text-slate-400 mb-4">
-              <Activity className="w-8 h-8 text-slate-300" />
+            <div className="p-4 bg-slate-50 rounded-full border border-slate-150 text-slate-400 mb-4 shadow-inner">
+              <Activity className="w-8 h-8 text-slate-400 animate-pulse" />
             </div>
-            <h3 className="text-slate-700 font-medium text-sm">No events logged yet</h3>
-            <p className="text-slate-400 text-xs mt-1 max-w-sm">
-              Incoming security activities, sign-ins, and user actions will stream directly to this feed in real-time.
+            <h3 className="text-slate-800 font-bold text-sm">No events logged yet</h3>
+            <p className="text-slate-500 text-xs mt-2 max-w-lg leading-relaxed font-semibold">
+              No events logged yet. Incoming security activities, sign-ins, and user actions will stream directly to this feed in real-time.
             </p>
           </div>
         ) : (
-          /* Premium Table Rendering */
+          /* 4. Table Layout Grid */
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                <th className="px-6 py-4">Tenant / User</th>
+              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                <th className="px-6 py-4">User / Tenant</th>
                 <th className="px-6 py-4">Action / Event</th>
-                <th className="px-6 py-4">Location IP</th>
-                <th className="px-6 py-4">Device & OS</th>
+                <th className="px-6 py-4">Location (IP)</th>
+                <th className="px-6 py-4">Device Info (UA)</th>
                 <th className="px-6 py-4 text-right">Timestamp</th>
               </tr>
             </thead>
@@ -392,16 +316,16 @@ export default function AuditLogsTable() {
                     }`}
                   >
                     {/* User / Tenant */}
-                    <td className="px-6 py-4.5">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 transition-all">
-                          <User className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                          <User className="w-4 h-4 text-slate-500 group-hover:text-blue-600 transition-colors" />
                         </div>
                         <div>
                           <div className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">
-                            {truncateString(log.user_tenant, 24)}
+                            {log.user_tenant}
                           </div>
-                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                          <div className="text-[9px] font-mono text-slate-500 mt-0.5">
                             ID: {log.id.slice(0, 8)}...
                           </div>
                         </div>
@@ -409,26 +333,28 @@ export default function AuditLogsTable() {
                     </td>
 
                     {/* Action / Event */}
-                    <td className="px-6 py-4.5">
-                      {renderEventBadge(log.action_event)}
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+                        {log.action_event}
+                      </span>
                     </td>
 
-                    {/* Location IP */}
-                    <td className="px-6 py-4.5">
+                    {/* Location (IP) */}
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-mono text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                        <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
                           {log.location_ip}
                         </span>
                       </div>
                     </td>
 
-                    {/* Device / OS User Agent */}
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-2 group/ua">
+                    {/* Device Info (UA) */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
                         <Laptop className="w-3.5 h-3.5 text-slate-400" />
                         <span 
-                          className="text-xs text-slate-600 cursor-help hover:text-slate-800"
+                          className="text-xs font-semibold text-slate-600 cursor-help"
                           title={log.device_info}
                         >
                           {parseUserAgent(log.device_info)}
@@ -437,8 +363,8 @@ export default function AuditLogsTable() {
                     </td>
 
                     {/* Timestamp */}
-                    <td className="px-6 py-4.5 text-right">
-                      <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
                         {formatTimestamp(log.created_at)}
                       </div>
@@ -451,8 +377,8 @@ export default function AuditLogsTable() {
         )}
       </div>
 
-      {/* Footer statistics counter bar */}
-      <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
+      {/* Footer bar */}
+      <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-500 font-semibold">
         <span className="flex items-center gap-1.5">
           <Activity className="w-3.5 h-3.5 text-emerald-600" />
           Showing last {logs.length} tracked events.
