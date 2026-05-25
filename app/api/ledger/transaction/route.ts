@@ -6,7 +6,7 @@ import { createClient } from '@/src/lib/supabase-server';
 import { eq, desc } from 'drizzle-orm';
 import { transactionRateLimiter } from '@/src/lib/ratelimit';
 import { dispatchWebhook } from '@/src/lib/webhooks';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { getResilientSession } from "@/src/lib/auth-session";
 
 
@@ -22,6 +22,11 @@ export async function POST(req: Request) {
     }
 
     const user = { id: userId, email: userEmail || '' };
+
+    const headersList = await headers();
+    const xForwardedFor = headersList.get("x-forwarded-for") || "";
+    const locationIp = xForwardedFor ? xForwardedFor.split(",")[0].trim() : "127.0.0.1";
+    const userAgent = headersList.get("user-agent") || "Velox Core";
 
     // 0. Rate Limiting Check
     if (!transactionRateLimiter.isAllowed(userId)) {
@@ -126,8 +131,8 @@ export async function POST(req: Request) {
               entityType: 'transaction',
               entityId: newTx.id,
               changes: { amount: amountBigInt.toString(), idempotencyKey },
-              ipAddress: 'API Gateway',
-              userAgent: 'Velox Core',
+              ipAddress: locationIp,
+              userAgent: userAgent,
               metadata: { description: description || 'Ledger transaction', amount: Number(amountBigInt) / 100 }
             });
           } catch (auditErr) {
