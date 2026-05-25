@@ -1,5 +1,6 @@
 {
   "/api/ledger/transaction/route": "app/api/ledger/transaction/route.js",
   "/page": "app/page.js",
-  "/fintech/dashboard/page": "app/fintech/dashboard/page.js"
+  "/fintech/dashboard/page": "app/fintech/dashboard/page.js",
+  "/fintech/master-data/page": "app/fintech/master-data/page.js"
 }
