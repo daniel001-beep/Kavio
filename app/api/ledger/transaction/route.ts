@@ -117,6 +117,23 @@ export async function POST(req: Request) {
             createdAt: timestamp,
           });
 
+          // Log transaction created in audits
+          try {
+            const { auditLogs } = await import('@/src/db/schema');
+            await tx.insert(auditLogs).values({
+              userId,
+              eventType: 'TRANSACTION_CREATED',
+              entityType: 'transaction',
+              entityId: newTx.id,
+              changes: { amount: amountBigInt.toString(), idempotencyKey },
+              ipAddress: 'API Gateway',
+              userAgent: 'Velox Core',
+              metadata: { description: description || 'Ledger transaction', amount: Number(amountBigInt) / 100 }
+            });
+          } catch (auditErr) {
+            console.warn('[Audit Log Bypass] Non-blocking: Failed to log TRANSACTION_CREATED event:', auditErr);
+          }
+
           return { success: true, transaction: newTx, idempotent: false };
         });
         

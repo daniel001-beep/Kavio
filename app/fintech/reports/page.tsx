@@ -221,27 +221,27 @@ export default function ReportsPage() {
 
         {/* --- REPORT A: INCOME STATEMENT --- */}
         {activeReport === 'income' && (
-          <div className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm p-4 xs:p-6 sm:p-8 md:p-10">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <div className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm p-3 xs:p-4 sm:p-6 md:p-8">
+            <div className="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-base font-bold text-slate-800">Income Statement (Profit & Loss)</h2>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Accrual Basis • USD in absolute figures</p>
+                <h2 className="text-sm sm:text-base font-bold text-slate-800">Income Statement (Profit & Loss)</h2>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Accrual Basis • USD in absolute figures</p>
               </div>
-              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100 flex items-center gap-1.5 animate-pulse">
+              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] sm:text-[10px] font-bold rounded-full border border-emerald-100 flex items-center gap-1.5 animate-pulse w-fit">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Certified Ledger Match
               </span>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
               
               {/* Revenue Section */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm font-bold text-blue-600 border-b border-blue-100 pb-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-blue-600 border-b border-blue-100 pb-2">
                   <span>Revenue</span>
                   <span>${revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="pl-4 flex justify-between items-center text-xs font-semibold text-slate-600">
+                <div className="pl-2 sm:pl-4 flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-600">
                   <span>Gross Product & Inbound Sales</span>
                   <span>${revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
@@ -249,12 +249,12 @@ export default function ReportsPage() {
 
               {/* Expenses Section */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
                   <span>Operating Expenses</span>
                   <span>-${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
                 
-                <div className="pl-4 space-y-2.5 text-xs font-semibold text-slate-500">
+                <div className="pl-2 sm:pl-4 space-y-2.5 text-[10px] sm:text-xs font-semibold text-slate-500">
                   <div className="flex justify-between items-center">
                     <span>Salaries & Wages</span>
                     <span>-${salaries.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
@@ -271,13 +271,13 @@ export default function ReportsPage() {
               </div>
 
               {/* Summary Bottom Line */}
-              <div className="bg-slate-50 border border-slate-200/50 p-6 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
+              <div className="bg-slate-50 border border-slate-200/50 p-4 sm:p-6 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">Net Operating Income</h3>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Pre-tax consolidated profit margin</p>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-800">Net Operating Income</h3>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold mt-0.5">Pre-tax consolidated profit margin</p>
                 </div>
                 <div className="text-left sm:text-right w-full sm:w-auto">
-                  <span className="text-xl sm:text-2xl font-black text-blue-600 font-mono break-all block">
+                  <span className="text-base sm:text-2xl font-black text-blue-600 font-mono break-all block">
                     ${netIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -289,27 +289,27 @@ export default function ReportsPage() {
 
         {/* --- REPORT B: BALANCE SHEET --- */}
         {activeReport === 'balance' && (
-          <div className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm p-4 xs:p-6 sm:p-8 md:p-10">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <div className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm p-3 xs:p-4 sm:p-6 md:p-8">
+            <div className="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-base font-bold text-slate-800">Consolidated Balance Sheet</h2>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">GAAP Standard Format</p>
+                <h2 className="text-sm sm:text-base font-bold text-slate-800">Consolidated Balance Sheet</h2>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase mt-0.5">GAAP Standard Format</p>
               </div>
-              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100 flex items-center gap-1.5">
+              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] sm:text-[10px] font-bold rounded-full border border-emerald-100 flex items-center gap-1.5 w-fit">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Balanced: A = L + E
               </span>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
               
               {/* Assets Section */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
                   <span>Current Assets</span>
                   <span>${(cash + accountsReceivable).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="pl-4 space-y-2 text-xs font-semibold text-slate-500">
+                <div className="pl-2 sm:pl-4 space-y-2 text-[10px] sm:text-xs font-semibold text-slate-500">
                   <div className="flex justify-between items-center">
                     <span>Cash and Cash Equivalents</span>
                     <span>${cash.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
@@ -323,11 +323,11 @@ export default function ReportsPage() {
 
               {/* Liabilities Section */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
                   <span>Liabilities</span>
                   <span>${accountsPayable.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="pl-4 space-y-2 text-xs font-semibold text-slate-500">
+                <div className="pl-2 sm:pl-4 space-y-2 text-[10px] sm:text-xs font-semibold text-slate-500">
                   <div className="flex justify-between items-center">
                     <span>Accounts Payable</span>
                     <span>${accountsPayable.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
@@ -337,11 +337,11 @@ export default function ReportsPage() {
 
               {/* Equity Section */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
                   <span>Shareholders' Equity</span>
                   <span>${retainedEarnings.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="pl-4 space-y-2 text-xs font-semibold text-slate-500">
+                <div className="pl-2 sm:pl-4 space-y-2 text-[10px] sm:text-xs font-semibold text-slate-500">
                   <div className="flex justify-between items-center">
                     <span>Retained Earnings</span>
                     <span>${retainedEarnings.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
@@ -354,13 +354,13 @@ export default function ReportsPage() {
               </div>
 
               {/* Statement Reconciliation Match */}
-              <div className="bg-slate-50 border border-slate-200/50 p-6 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
+              <div className="bg-slate-50 border border-slate-200/50 p-4 sm:p-6 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">Total Liabilities & Equity Balance</h3>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Fully reconciled ledger ledger assets match</p>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-800">Total Liabilities & Equity Balance</h3>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold mt-0.5">Fully reconciled ledger assets match</p>
                 </div>
                 <div className="text-left sm:text-right w-full sm:w-auto">
-                  <span className="text-xl sm:text-2xl font-black text-blue-600 font-mono break-all block">
+                  <span className="text-base sm:text-2xl font-black text-blue-600 font-mono break-all block">
                     ${(accountsPayable + retainedEarnings).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </span>
                 </div>

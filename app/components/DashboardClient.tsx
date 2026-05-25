@@ -58,8 +58,15 @@ export default function DashboardClient({
       setApiTransactions(initialTransactions);
     }
 
-    if (userEmail) {
-      const cached = localStorage.getItem(`velox_cached_api_transactions_${userEmail}`);
+    // Determine target email for cache - fall back to last active user's cache to support logout persistence
+    let targetEmail = userEmail;
+    if (!targetEmail && typeof window !== 'undefined') {
+      targetEmail = localStorage.getItem('velox_last_active_user_email');
+    }
+
+    if (targetEmail) {
+      const cached = localStorage.getItem(`velox_cached_api_transactions_${targetEmail}`) || 
+                     localStorage.getItem(`velox_last_active_cached_api_transactions`);
       if (cached) {
         try {
           const parsedCache = JSON.parse(cached);
@@ -76,7 +83,8 @@ export default function DashboardClient({
         }
       }
 
-      const cachedInvoices = localStorage.getItem(`velox_cached_invoices_${userEmail}`);
+      const cachedInvoices = localStorage.getItem(`velox_cached_invoices_${targetEmail}`) ||
+                             localStorage.getItem(`velox_last_active_cached_invoices`);
       if (cachedInvoices) {
         try {
           setInvoices(JSON.parse(cachedInvoices));
@@ -84,8 +92,48 @@ export default function DashboardClient({
           console.warn('Failed to parse cached dashboard invoices:', e);
         }
       }
+    } else if (typeof window !== 'undefined') {
+      // If absolutely no email, check for any key matching velox_cached_api_transactions_
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('velox_cached_api_transactions_')) {
+          const val = localStorage.getItem(key);
+          if (val) {
+            try {
+              const parsed = JSON.parse(val);
+              if (parsed && parsed.length > 0) {
+                setApiTransactions(parsed);
+                break;
+              }
+            } catch (e) {}
+          }
+        }
+      }
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('velox_cached_invoices_')) {
+          const val = localStorage.getItem(key);
+          if (val) {
+            try {
+              const parsed = JSON.parse(val);
+              if (parsed && parsed.length > 0) {
+                setInvoices(parsed);
+                break;
+              }
+            } catch (e) {}
+          }
+        }
+      }
     }
   }, [userEmail, initialTransactions]);
+
+  // Track the last active email for instant recovery after logout
+  useEffect(() => {
+    if (userEmail && typeof window !== 'undefined') {
+      localStorage.setItem('velox_last_active_user_email', userEmail);
+    }
+  }, [userEmail]);
 
   // Fetch fresh transactions from the API on mount and after any change
   // CRITICAL: Only overwrite state if the API returns ACTUAL data.
@@ -132,6 +180,9 @@ export default function DashboardClient({
       // Cache the newly retrieved list
       if (userEmail) {
         localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(mapped));
+        localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(mapped));
+      } else {
+        localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(mapped));
       }
     } catch (err) {
       // Network error — preserve cached data, don't wipe it
@@ -160,6 +211,12 @@ export default function DashboardClient({
 
         if (data && !error) {
           setInvoices(data);
+          if (userEmail) {
+            localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(data));
+            localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
+          } else {
+            localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
+          }
         }
       } catch (err) {
         console.error('Error fetching invoices on dashboard:', err);
@@ -168,39 +225,122 @@ export default function DashboardClient({
     fetchInvoices();
   }, [userEmail]);
 
-  // Real-time subscription: re-fetch API transactions whenever an invoice changes
+  // Real-time subscription: open a persistent WebSocket channel for instant lag-free updates
   useEffect(() => {
-    if (!supabase || !userEmail) return;
+    if (!supabase || !userEmail || !userId) return;
 
     const channel = supabase
-      .channel('dashboard-invoices')
+      .channel('dashboard-realtime')
+      // 1. Subscribe to transactions table (insertions & updates)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transaction' },
+        async (payload) => {
+          console.log('[Realtime] Transaction change:', payload.eventType, payload.new);
+          
+          // Re-fetch in background to ensure final backend consistency
+          fetchLatestTransactions();
+
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newTx = payload.new as any;
+            
+            // Only update local React state if this belongs to the active tenant
+            if (newTx && (newTx.user_id === userId || newTx.userId === userId)) {
+              const amountInCents = Number(newTx.amount || 0);
+              const amountInDollars = amountInCents / 100;
+              
+              let meta = newTx.metadata;
+              if (typeof meta === 'string') {
+                try {
+                  meta = JSON.parse(meta);
+                } catch (e) {}
+              }
+
+              const uiTx: UITransaction = {
+                id: newTx.id?.toString(),
+                type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
+                description: meta?.description || newTx.description || 'Transaction via Webhook',
+                date: newTx.created_at ? new Date(newTx.created_at).toLocaleString() : new Date().toLocaleString(),
+                amount: amountInDollars,
+                status: newTx.status?.toUpperCase() || 'COMPLETED',
+              };
+
+              setApiTransactions((prev) => {
+                const index = prev.findIndex((tx) => tx.id === uiTx.id);
+                let updated = [...prev];
+                if (index >= 0) {
+                  updated[index] = uiTx;
+                } else {
+                  updated = [uiTx, ...updated];
+                }
+
+                // Update cache
+                localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(updated));
+                localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(updated));
+                return updated;
+              });
+
+              if (payload.eventType === 'INSERT') {
+                addNotification({
+                  type: 'SUCCESS',
+                  title: 'New Ledger Entry',
+                  message: `Transaction processed: $${Math.abs(amountInDollars).toLocaleString()} (${uiTx.description})`,
+                });
+              }
+            }
+          }
+        }
+      )
+      // 2. Subscribe to invoices table
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'invoices' },
         async (payload) => {
-          // Re-fetch fresh transactions from our API (most reliable source)
-          await fetchLatestTransactions();
-
-          // Also re-fetch Supabase invoices directly
+          console.log('[Realtime] Invoice change:', payload.eventType, payload.new);
+          
+          // Re-fetch transactions and invoices in background
+          fetchLatestTransactions();
           try {
             const { data } = await supabase
               .from('invoices')
               .select('*')
               .eq('email', userEmail)
               .order('created_at', { ascending: false });
-            if (data) setInvoices(data);
+            if (data) {
+              setInvoices(data);
+              localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(data));
+              localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
+            }
           } catch (err) {
             console.error('Error re-fetching invoices on dashboard:', err);
           }
 
-          // Push a Sentinel alert notification if an invoice is created
+          // Optimistically update invoice list in UI and push notification
           if (payload.eventType === 'INSERT') {
             const newInvoice = payload.new as any;
+            if (newInvoice && newInvoice.email === userEmail) {
+              setInvoices(prev => {
+                const updated = [newInvoice, ...prev.filter(x => x.id !== newInvoice.id)];
+                localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(updated));
+                localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(updated));
+                return updated;
+              });
+            }
             addNotification({
               type: 'SENTINEL',
               title: 'Sentinel Alert: New Ledger Entry',
               message: `Detected invoice to ${newInvoice.client_name} of $${Number(newInvoice.amount).toLocaleString()}. Integrity verified.`,
             });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedInvoice = payload.new as any;
+            if (updatedInvoice && updatedInvoice.email === userEmail) {
+              setInvoices(prev => {
+                const updated = prev.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv);
+                localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(updated));
+                localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(updated));
+                return updated;
+              });
+            }
           }
         }
       )
@@ -209,7 +349,7 @@ export default function DashboardClient({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [addNotification, userEmail, fetchLatestTransactions]);
+  }, [addNotification, userEmail, userId, fetchLatestTransactions]);
 
   // Compute live visual states: merge API transactions (primary) with Supabase invoices (secondary)
   const transactions = useMemo<UITransaction[]>(() => {

@@ -17,15 +17,20 @@
       "static/css/app/fintech/layout.css",
       "static/chunks/app/fintech/layout.js"
     ],
+    "/fintech/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/fintech/loading.js"
+    ],
     "/fintech/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/fintech/dashboard/page.js"
     ],
-    "/api/auth/[...nextauth]/route": [
+    "/api/ledger/transaction/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
+      "static/chunks/app/api/ledger/transaction/route.js"
     ]
   }
 }

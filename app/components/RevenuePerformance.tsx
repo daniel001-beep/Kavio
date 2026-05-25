@@ -79,7 +79,7 @@ export default function RevenuePerformance({ transactions = [] }: RevenuePerform
       </div>
 
       {/* Bar Chart */}
-      <div className="h-[280px] w-full">
+      <div className="h-[280px] w-full min-h-[280px] min-w-0 relative">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 10 }} barGap={8}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />

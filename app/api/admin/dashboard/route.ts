@@ -112,6 +112,30 @@ export async function GET() {
       console.error("Error fetching transactions for admin:", txErr);
     }
 
+    // 3. Fetch all system audit logs with associated user details
+    let allAuditLogs: any[] = [];
+    try {
+      const { auditLogs } = await import("@/src/db/schema");
+      allAuditLogs = await db
+        .select({
+          id: auditLogs.id,
+          userId: auditLogs.userId,
+          eventType: auditLogs.eventType,
+          ipAddress: auditLogs.ipAddress,
+          userAgent: auditLogs.userAgent,
+          timestamp: auditLogs.timestamp,
+          metadata: auditLogs.metadata,
+          userName: users.name,
+          userEmail: users.email,
+        })
+        .from(auditLogs)
+        .leftJoin(users, eq(auditLogs.userId, users.id))
+        .orderBy(desc(auditLogs.timestamp))
+        .limit(100);
+    } catch (auditErr) {
+      console.error("Error fetching audit logs for admin:", auditErr);
+    }
+
     // Safely serialize BigInt values to JSON-friendly structures
     const serializedTransactions = JSON.parse(
       JSON.stringify(allTransactions, (key, value) =>
@@ -122,6 +146,7 @@ export async function GET() {
     return NextResponse.json({
       users: allUsers,
       transactions: serializedTransactions,
+      auditLogs: allAuditLogs,
       totalUsers: allUsers.length,
       totalTransactions: allTransactions.length,
     });

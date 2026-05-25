@@ -1,5 +1,60 @@
 {
-  "node": {},
+  "node": {
+    "00759ac48a3923ec81a9597a836d70213197e34cec": {
+      "workers": {
+        "app/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/fintech/dashboard/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/fintech/dashboard/page": "action-browser"
+      },
+      "filename": "../C:\\Users\\USER\\OneDrive\\Desktop\\Velox-Fintech-main\\app\\actions\\auth.ts",
+      "exportedName": "signOutAction"
+    },
+    "4066a33b8938c6eeef34abe31f6ba490d5ee1e1728": {
+      "workers": {
+        "app/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/fintech/dashboard/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/fintech/dashboard/page": "action-browser"
+      },
+      "filename": "../C:\\Users\\USER\\OneDrive\\Desktop\\Velox-Fintech-main\\app\\actions\\auth.ts",
+      "exportedName": "signUpAction"
+    },
+    "40f64fce23d52e448a9970ae79de893c4247777805": {
+      "workers": {
+        "app/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/fintech/dashboard/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%2C%5B%7B%22id%22%3A%2200759ac48a3923ec81a9597a836d70213197e34cec%22%2C%22exportedName%22%3A%22signOutAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%224066a33b8938c6eeef34abe31f6ba490d5ee1e1728%22%2C%22exportedName%22%3A%22signUpAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%2C%7B%22id%22%3A%2240f64fce23d52e448a9970ae79de893c4247777805%22%2C%22exportedName%22%3A%22signInAction%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5CUSER%5C%5COneDrive%5C%5CDesktop%5C%5CVelox-Fintech-main%5C%5Capp%5C%5Cactions%5C%5Cauth.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/fintech/dashboard/page": "action-browser"
+      },
+      "filename": "../C:\\Users\\USER\\OneDrive\\Desktop\\Velox-Fintech-main\\app\\actions\\auth.ts",
+      "exportedName": "signInAction"
+    }
+  },
   "edge": {},
-  "encryptionKey": "zVIVffJB2i08XWajk/KHgaRRwv1wFLhP1+OnL3Qa5lw="
+  "encryptionKey": "bpGH2bvNFIBptxJQshjV6wejADlaC20HuRDKhgVDhmA="
 }
