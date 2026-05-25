@@ -5,6 +5,7 @@ import DashboardLayout from '@/app/components/DashboardLayout';
 import { useSession } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/src/lib/supabase-client';
+import AuditLogsTable from '@/app/components/AuditLogsTable';
 import { 
   ShieldAlert, 
   Users, 
@@ -389,90 +390,8 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* LIVE SYSTEM AUDIT & EVENTS TRACKER (LOGINS, SIGNUPS, AND TRANSACTIONS) */}
-        <div className="bg-white border border-slate-200 rounded-[24px] shadow-sm overflow-hidden flex flex-col mt-8">
-          <div className="p-6 border-b border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <span className="text-blue-600 font-bold">🛡️</span>
-                Platform Access & Real-Time Event Audit Logs
-              </h2>
-              <p className="text-slate-400 text-xs mt-1">Live tracking of who logs in, registers accounts, or processes ledger transactions</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Live Security Monitor</span>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-100">
-                  <th className="py-3 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">User/Tenant</th>
-                  <th className="py-3 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action / Event</th>
-                  <th className="py-3 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location (IP)</th>
-                  <th className="py-3 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Device Info (UA)</th>
-                  <th className="py-3 px-6 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timestamp</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {auditLogsList.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-12 text-center text-slate-400 text-sm">
-                      No system security audit events registered yet.
-                    </td>
-                  </tr>
-                ) : (
-                  auditLogsList.map((log) => {
-                    // Friendly formatting for action badge
-                    let badgeClass = 'bg-slate-50 text-slate-600 border-slate-100';
-                    let label = log.eventType;
-                    if (log.eventType === 'USER_LOGIN') {
-                      badgeClass = 'bg-blue-50 text-blue-600 border-blue-100';
-                      label = '🔑 User Login';
-                    } else if (log.eventType === 'USER_SIGNUP') {
-                      badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-100';
-                      label = '✨ Account Created';
-                    } else if (log.eventType === 'USER_SIGNOUT') {
-                      badgeClass = 'bg-orange-50 text-orange-600 border-orange-100';
-                      label = '🚪 User Logout';
-                    } else if (log.eventType === 'TRANSACTION_CREATED') {
-                      badgeClass = 'bg-indigo-50 text-indigo-600 border-indigo-100';
-                      label = '💸 Transaction Made';
-                    } else if (log.eventType === 'admin_action' || log.eventType === 'admin_access') {
-                      badgeClass = 'bg-purple-50 text-purple-600 border-purple-100';
-                      label = `🛡️ Admin Action`;
-                    }
-
-                    return (
-                      <tr key={log.id} className="hover:bg-slate-50/30 transition-colors">
-                        <td className="py-3.5 px-6 min-w-[200px]">
-                          <div className="font-bold text-slate-700">
-                            {log.userName || 'System Agent'}
-                          </div>
-                          <div className="text-[10px] text-slate-400">{log.userEmail || 'system@velox.com'}</div>
-                        </td>
-                        <td className="py-3.5 px-6">
-                          <span className={`px-2.5 py-1 text-[9px] font-bold rounded-full border ${badgeClass} uppercase tracking-wider`}>
-                            {label}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-6 font-mono text-[10px] text-slate-500">
-                          {log.ipAddress || 'unknown'}
-                        </td>
-                        <td className="py-3.5 px-6 max-w-[200px] truncate text-[10px] text-slate-400 font-medium" title={log.userAgent || 'unknown'}>
-                          {log.userAgent || 'unknown'}
-                        </td>
-                        <td className="py-3.5 px-6 text-right font-mono text-[10px] text-slate-400 font-bold">
-                          {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Just now'}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="mt-8">
+          <AuditLogsTable />
         </div>
 
       </div>
