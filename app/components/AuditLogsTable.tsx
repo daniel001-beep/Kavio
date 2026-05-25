@@ -245,19 +245,19 @@ export default function AuditLogsTable() {
   };
 
   return (
-    <div className="w-full bg-zinc-950/80 backdrop-blur-md rounded-xl border border-zinc-800/60 shadow-2xl overflow-hidden relative">
+    <div className="w-full bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden relative">
       
       {/* 1. Embed the Self-Contained Keyframe Animations for Instant Highlighting */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes row-flash-in {
           0% {
-            background-color: rgba(16, 185, 129, 0.22);
-            border-color: rgba(16, 185, 129, 0.4);
-            transform: scale(1.003);
+            background-color: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.3);
+            transform: scale(1.002);
           }
           100% {
             background-color: transparent;
-            border-color: rgba(39, 39, 42, 0.6);
+            border-color: rgba(241, 245, 249, 1);
             transform: scale(1);
           }
         }
@@ -267,16 +267,16 @@ export default function AuditLogsTable() {
       `}} />
 
       {/* Header Bar */}
-      <div className="px-6 py-5 border-b border-zinc-800/60 bg-zinc-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 text-zinc-400">
-            <Shield className="w-5 h-5 text-emerald-500" />
+          <div className="p-2 bg-slate-100 rounded-xl border border-slate-200 text-slate-500">
+            <Shield className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
+            <h2 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
               Platform Access & Real-Time Event Audit Logs
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Securely capturing and auditing incoming security authentication & network activity logs.
             </p>
           </div>
@@ -285,7 +285,7 @@ export default function AuditLogsTable() {
         {/* WebSocket Pulse Indicator */}
         <div className="flex items-center self-start sm:self-center">
           {realtimeStatus === "connected" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -295,7 +295,7 @@ export default function AuditLogsTable() {
             </div>
           )}
           {realtimeStatus === "connecting" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
               <span className="relative flex h-2 w-2">
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 animate-pulse"></span>
               </span>
@@ -304,7 +304,7 @@ export default function AuditLogsTable() {
             </div>
           )}
           {realtimeStatus === "disconnected" && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
               <span className="relative flex h-2 w-2">
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
               </span>
@@ -319,22 +319,22 @@ export default function AuditLogsTable() {
       <div className="w-full overflow-x-auto">
         {loading ? (
           /* Premium Skeleton State */
-          <div className="w-full divide-y divide-zinc-900">
-            <div className="bg-zinc-900/10 px-6 py-4 flex justify-between gap-4 animate-pulse">
-              <div className="h-5 w-1/4 bg-zinc-800 rounded"></div>
-              <div className="h-5 w-1/6 bg-zinc-800 rounded"></div>
-              <div className="h-5 w-1/5 bg-zinc-800 rounded"></div>
-              <div className="h-5 w-1/6 bg-zinc-800 rounded"></div>
+          <div className="w-full divide-y divide-slate-100">
+            <div className="bg-slate-50/50 px-6 py-4 flex justify-between gap-4 animate-pulse">
+              <div className="h-5 w-1/4 bg-slate-200 rounded"></div>
+              <div className="h-5 w-1/6 bg-slate-200 rounded"></div>
+              <div className="h-5 w-1/5 bg-slate-200 rounded"></div>
+              <div className="h-5 w-1/6 bg-slate-200 rounded"></div>
             </div>
             {[...Array(5)].map((_, idx) => (
               <div key={idx} className="px-6 py-5 flex items-center justify-between gap-6 animate-pulse">
                 <div className="flex items-center gap-3 w-1/4">
-                  <div className="w-8 h-8 bg-zinc-800 rounded-full"></div>
-                  <div className="h-4 bg-zinc-800 rounded w-2/3"></div>
+                  <div className="w-8 h-8 bg-slate-200 rounded-full"></div>
+                  <div className="h-4 bg-slate-200 rounded w-2/3"></div>
                 </div>
-                <div className="h-4 bg-zinc-800 rounded w-1/6"></div>
-                <div className="h-4 bg-zinc-800 rounded w-1/4"></div>
-                <div className="h-4 bg-zinc-800 rounded w-1/12"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/12"></div>
               </div>
             ))}
           </div>
@@ -344,16 +344,16 @@ export default function AuditLogsTable() {
             <div className="p-3 bg-rose-500/10 rounded-full border border-rose-500/20 text-rose-500 mb-4 animate-bounce">
               <AlertTriangle className="w-8 h-8" />
             </div>
-            <h3 className="text-zinc-200 font-semibold text-base">Audit logs fetch interrupted</h3>
-            <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
+            <h3 className="text-slate-800 font-semibold text-base">Audit logs fetch interrupted</h3>
+            <p className="text-slate-500 text-xs mt-2 leading-relaxed">
               {error}
             </p>
-            <div className="mt-6 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-left w-full">
-              <span className="text-[10px] text-zinc-500 font-mono block uppercase mb-1">Developer Solution:</span>
-              <code className="text-xs text-zinc-300 font-mono block select-all overflow-x-auto whitespace-nowrap p-1 bg-black/40 rounded">
+            <div className="mt-6 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-left w-full">
+              <span className="text-[10px] text-slate-400 font-mono block uppercase mb-1">Developer Solution:</span>
+              <code className="text-xs text-slate-600 font-mono block select-all overflow-x-auto whitespace-nowrap p-1 bg-slate-100 rounded">
                 supabase/migrations/20260525_audit_logs.sql
               </code>
-              <span className="text-[10px] text-zinc-400 block mt-2">
+              <span className="text-[10px] text-slate-400 block mt-2">
                 Make sure you run the migrations inside your Supabase SQL editor to create the `audit_logs` table!
               </span>
             </div>
@@ -361,11 +361,11 @@ export default function AuditLogsTable() {
         ) : logs.length === 0 ? (
           /* Empty Database State */
           <div className="p-16 text-center flex flex-col items-center justify-center">
-            <div className="p-4 bg-zinc-900 rounded-full border border-zinc-800 text-zinc-400 mb-4">
-              <Activity className="w-8 h-8 text-zinc-500" />
+            <div className="p-4 bg-slate-50 rounded-full border border-slate-150 text-slate-400 mb-4">
+              <Activity className="w-8 h-8 text-slate-300" />
             </div>
-            <h3 className="text-zinc-300 font-medium">No events logged yet</h3>
-            <p className="text-zinc-500 text-xs mt-1 max-w-sm">
+            <h3 className="text-slate-700 font-medium text-sm">No events logged yet</h3>
+            <p className="text-slate-400 text-xs mt-1 max-w-sm">
               Incoming security activities, sign-ins, and user actions will stream directly to this feed in real-time.
             </p>
           </div>
@@ -373,7 +373,7 @@ export default function AuditLogsTable() {
           /* Premium Table Rendering */
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-zinc-800/80 bg-zinc-900/10 text-zinc-400 text-[11px] font-semibold uppercase tracking-wider">
+              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                 <th className="px-6 py-4">Tenant / User</th>
                 <th className="px-6 py-4">Action / Event</th>
                 <th className="px-6 py-4">Location IP</th>
@@ -381,27 +381,27 @@ export default function AuditLogsTable() {
                 <th className="px-6 py-4 text-right">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900">
+            <tbody className="divide-y divide-slate-100">
               {logs.map((log) => {
                 const isNew = log.id === latestRowId;
                 return (
                   <tr
                     key={log.id}
-                    className={`transition-all duration-300 hover:bg-zinc-900/30 group ${
-                      isNew ? "animate-row-flash" : "border-zinc-850"
+                    className={`transition-all duration-300 hover:bg-slate-50/50 group ${
+                      isNew ? "animate-row-flash" : "border-slate-100"
                     }`}
                   >
                     {/* User / Tenant */}
                     <td className="px-6 py-4.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:border-zinc-700/80 transition-colors">
-                          <User className="w-4 h-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 transition-all">
+                          <User className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-zinc-200 group-hover:text-zinc-100 transition-colors">
+                          <div className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">
                             {truncateString(log.user_tenant, 24)}
                           </div>
-                          <div className="text-[10px] font-mono text-zinc-500 mt-0.5">
+                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">
                             ID: {log.id.slice(0, 8)}...
                           </div>
                         </div>
@@ -416,8 +416,8 @@ export default function AuditLogsTable() {
                     {/* Location IP */}
                     <td className="px-6 py-4.5">
                       <div className="flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-zinc-500" />
-                        <span className="text-xs font-mono text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800/80">
+                        <Globe className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-xs font-mono text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
                           {log.location_ip}
                         </span>
                       </div>
@@ -426,9 +426,9 @@ export default function AuditLogsTable() {
                     {/* Device / OS User Agent */}
                     <td className="px-6 py-4.5">
                       <div className="flex items-center gap-2 group/ua">
-                        <Laptop className="w-3.5 h-3.5 text-zinc-500" />
+                        <Laptop className="w-3.5 h-3.5 text-slate-400" />
                         <span 
-                          className="text-xs text-zinc-300 cursor-help"
+                          className="text-xs text-slate-600 cursor-help hover:text-slate-800"
                           title={log.device_info}
                         >
                           {parseUserAgent(log.device_info)}
@@ -438,8 +438,8 @@ export default function AuditLogsTable() {
 
                     {/* Timestamp */}
                     <td className="px-6 py-4.5 text-right">
-                      <div className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-medium">
-                        <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                      <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
                         {formatTimestamp(log.created_at)}
                       </div>
                     </td>
@@ -452,9 +452,9 @@ export default function AuditLogsTable() {
       </div>
 
       {/* Footer statistics counter bar */}
-      <div className="px-6 py-4 border-t border-zinc-800/60 bg-zinc-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-zinc-400">
+      <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-400">
         <span className="flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5 text-emerald-500" />
+          <Activity className="w-3.5 h-3.5 text-emerald-600" />
           Showing last {logs.length} tracked events.
         </span>
         <span>
