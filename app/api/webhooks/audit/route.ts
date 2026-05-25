@@ -54,15 +54,16 @@ export async function POST(req: NextRequest) {
     
     const device_info = headersList.get("user-agent") || req.headers.get("user-agent") || "Unknown Device/Browser";
 
-    // 3. Asynchronously insert the event into Supabase audit_logs table
+    // 3. Asynchronously insert the event into Supabase audit_log table
     const { data, error } = await supabase
-      .from("audit_logs")
+      .from("audit_log")
       .insert([
         {
-          user_tenant: user_tenant.trim().toLowerCase(),
-          action_event: action_event.trim(),
-          location_ip: locationIp,
-          device_info: device_info,
+          event_type: action_event.trim(),
+          entity_type: "security",
+          ip_address: locationIp,
+          user_agent: device_info,
+          metadata: { email: user_tenant.trim().toLowerCase() },
         },
       ])
       .select();

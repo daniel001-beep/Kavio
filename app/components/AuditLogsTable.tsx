@@ -49,7 +49,7 @@ export default function AuditLogsTable() {
         // Map Drizzle-backed database schemas to uniform AuditLog types
         const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
           id: log.id,
-          user_tenant: log.userEmail || log.userName || "System Agent",
+          user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
           action_event: log.eventType,
           location_ip: log.ipAddress || "unknown",
           device_info: log.userAgent || "unknown",
@@ -141,7 +141,7 @@ export default function AuditLogsTable() {
             const data = await res.json();
             const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
               id: log.id,
-              user_tenant: log.userEmail || log.userName || "System Agent",
+              user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
               action_event: log.eventType,
               location_ip: log.ipAddress || "unknown",
               device_info: log.userAgent || "unknown",
