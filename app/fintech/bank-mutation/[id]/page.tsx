@@ -228,7 +228,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         {/* Back Button */}
         <button 
           onClick={() => router.push('/fintech/bank-mutation')}
-          className="flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors mb-4 font-bold text-xs uppercase tracking-wider"
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors mb-4 font-bold text-xs uppercase tracking-wider"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm font-semibold">Back to Bank Mutation</span>
@@ -249,7 +249,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 tracking-tight leading-none mb-1">{product.title}</h1>
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{product.category}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{product.category}</p>
               </div>
             </div>
             <p className="text-slate-600 text-sm sm:text-base font-medium leading-relaxed max-w-3xl">
@@ -373,7 +373,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 pt-2">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 pt-2">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   <span>Redirecting to Dashboard...</span>
                 </div>
@@ -384,7 +384,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                 {/* Available Balance card */}
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Capital</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Available Capital</p>
                     <p className="text-xl font-bold font-mono text-slate-800 mt-1">
                       ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </p>
@@ -395,11 +395,11 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                     Allocation Amount (USD)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-lg font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-lg font-bold">$</span>
                     <input
                       type="number"
                       required
