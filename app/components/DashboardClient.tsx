@@ -170,7 +170,7 @@ export default function DashboardClient({
           id: tx.id?.toString(),
           type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
           description: meta?.description || tx.description || 'Transaction',
-          date: tx.createdAt ? new Date(tx.createdAt).toLocaleString() : new Date().toLocaleString(),
+          date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
           amount: amountInDollars,
           status: tx.status?.toUpperCase() || 'COMPLETED',
         };
@@ -260,7 +260,7 @@ export default function DashboardClient({
                 id: newTx.id?.toString(),
                 type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
                 description: meta?.description || newTx.description || 'Transaction via Webhook',
-                date: newTx.created_at ? new Date(newTx.created_at).toLocaleString() : new Date().toLocaleString(),
+                date: newTx.created_at ? new Date(newTx.created_at).toISOString() : new Date().toISOString(),
                 amount: amountInDollars,
                 status: newTx.status?.toUpperCase() || 'COMPLETED',
               };
@@ -374,7 +374,7 @@ export default function DashboardClient({
             id: idStr,
             type: inv.amount > 0 ? 'CREDIT' : 'DEBIT',
             description: inv.description || `Invoice to ${inv.client_name}`,
-            date: inv.created_at ? new Date(inv.created_at).toLocaleString() : new Date().toLocaleString(),
+            date: inv.created_at ? new Date(inv.created_at).toISOString() : new Date().toISOString(),
             amount: inv.amount || 0,
             status: inv.status === 'Paid' ? 'COMPLETED' : 'PENDING'
           });
@@ -453,7 +453,7 @@ export default function DashboardClient({
     const csvContent = [
       headers.join(','),
       ...transactions.map(tx => [
-        `"${tx.date}"`,
+        `"${tx.date ? new Date(tx.date).toLocaleString() : ''}"`,
         `"${tx.description}"`,
         tx.type,
         tx.amount,
@@ -677,7 +677,7 @@ export default function DashboardClient({
                         </td>
                         <td className="py-3 px-3 min-w-0">
                           <p className="text-slate-700 text-xs font-bold truncate max-w-[120px]">{tx.description}</p>
-                          <p className="text-slate-400 text-[10px] font-semibold mt-0.5">{tx.date?.split(',')[0]}</p>
+                          <p className="text-slate-400 text-[10px] font-semibold mt-0.5">{tx.date ? new Date(tx.date).toLocaleDateString() : ''}</p>
                         </td>
                         <td className="py-3 px-3 text-right font-mono text-xs font-bold text-slate-800">
                            <span className={tx.amount > 0 ? 'text-emerald-600' : 'text-slate-800'}>

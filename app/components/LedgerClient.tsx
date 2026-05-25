@@ -290,7 +290,7 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
       id: newInvoice.id,
       type: newInvoice.amount > 0 ? 'CREDIT' : 'DEBIT',
       description: newInvoice.description || `Invoice to ${newInvoice.client_name}`,
-      date: new Date().toLocaleString(),
+      date: new Date().toISOString(),
       amount: newInvoice.amount,
       status: newInvoice.status === 'Paid' ? 'COMPLETED' : 'PENDING'
     };

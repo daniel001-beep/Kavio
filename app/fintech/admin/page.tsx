@@ -379,6 +379,9 @@ export default function AdminDashboardPage() {
                     } else if (log.eventType === 'USER_SIGNUP') {
                       badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-100';
                       label = '✨ Account Created';
+                    } else if (log.eventType === 'USER_SIGNOUT') {
+                      badgeClass = 'bg-orange-50 text-orange-600 border-orange-100';
+                      label = '🚪 User Logout';
                     } else if (log.eventType === 'TRANSACTION_CREATED') {
                       badgeClass = 'bg-indigo-50 text-indigo-600 border-indigo-100';
                       label = '💸 Transaction Made';

@@ -32,11 +32,13 @@ export default function PortfolioPerformance({ transactions = [], totalBalance }
   transactions.forEach(tx => {
     if (tx.date) {
       const d = new Date(tx.date);
-      const dayName = daysOfWeek[d.getDay()];
-      const target = weeklyData.find(w => w.name === dayName);
-      if (target) {
-        // Sum the absolute value of transactions (GMV movement!)
-        target.value += Math.abs(tx.amount);
+      if (!isNaN(d.getTime())) {
+        const dayName = daysOfWeek[d.getDay()];
+        const target = weeklyData.find(w => w.name === dayName);
+        if (target) {
+          // Sum the absolute value of transactions (GMV movement!)
+          target.value += Math.abs(tx.amount);
+        }
       }
     }
   });

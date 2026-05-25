@@ -350,11 +350,23 @@ export async function signUpAction(formData: FormData) {
 }
 
 export async function signOutAction() {
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get('velox-local-user')?.value;
+  if (userCookie) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(userCookie));
+      if (parsed && parsed.id && parsed.email) {
+        await logAuditEvent(parsed.id, 'USER_SIGNOUT', parsed.email);
+      }
+    } catch (e) {
+      console.warn('Failed to parse user cookie for signout audit:', e);
+    }
+  }
+
   const supabase = await createClient();
   if (supabase) {
     await supabase.auth.signOut().catch(() => {});
   }
-  const cookieStore = await cookies();
   cookieStore.set('velox-local-user', '', { path: '/', maxAge: 0 });
   cookieStore.set('sb-access-token', '', { path: '/', maxAge: 0 });
   return { success: true };

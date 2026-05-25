@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import DashboardLayout from '@/app/components/DashboardLayout';
 import { Calculator, TrendingDown, TrendingUp, Users, Megaphone, ShieldCheck, Activity, Landmark } from 'lucide-react';
 
@@ -9,16 +9,68 @@ interface RunwayClientProps {
 }
 
 export default function RunwayClient({ initialTransactions = [] }: RunwayClientProps) {
+  const [transactions, setTransactions] = useState<any[]>(initialTransactions);
+
+  // Load from cache on mount and fetch fresh data from API
+  useEffect(() => {
+    // 1. First, if initialTransactions has data, seed state
+    if (initialTransactions && initialTransactions.length > 0) {
+      setTransactions(initialTransactions);
+    }
+
+    // 2. Load from localStorage cache
+    let targetEmail = typeof window !== 'undefined' ? localStorage.getItem('velox_last_active_user_email') : null;
+    if (targetEmail) {
+      const cached = localStorage.getItem(`velox_cached_api_transactions_${targetEmail}`) || 
+                     localStorage.getItem(`velox_last_active_cached_api_transactions`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.length > 0) {
+            setTransactions(parsed);
+          }
+        } catch (e) {}
+      }
+    }
+
+    // 3. Fetch fresh transactions from API in background to ensure correct balance
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const mapped = data.map((tx: any) => {
+              const amountInDollars = Number(tx.amount || 0) / 100;
+              return {
+                id: tx.id?.toString(),
+                type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
+                amount: amountInDollars,
+                description: tx.metadata?.description || tx.description || 'Transaction',
+                date: tx.createdAt ? new Date(tx.createdAt).toLocaleString() : new Date().toLocaleString(),
+                status: tx.status?.toUpperCase() || 'COMPLETED',
+              };
+            });
+            setTransactions(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('RunwayClient: Failed to fetch transactions in background:', err);
+      }
+    };
+    fetchTransactions();
+  }, [initialTransactions]);
+
   // Calculate actual live ledger financials
   const liveCashBalance = useMemo(() => {
-    return initialTransactions.reduce((acc, tx) => acc + tx.amount, 0);
-  }, [initialTransactions]);
+    return transactions.reduce((acc, tx) => acc + (tx.amount || 0), 0);
+  }, [transactions]);
 
   const liveBurnRate = useMemo(() => {
     // Find absolute sum of all outflows (debits) in the ledger
-    const outflows = initialTransactions.filter(tx => tx.amount < 0);
-    return outflows.reduce((acc, tx) => acc + Math.abs(tx.amount), 0);
-  }, [initialTransactions]);
+    const outflows = transactions.filter(tx => tx.amount < 0);
+    return outflows.reduce((acc, tx) => acc + Math.abs(tx.amount || 0), 0);
+  }, [transactions]);
 
   // Set simulation states, defaulting to live database ledger values!
   // If database ledger is empty, fallback to clean baseline defaults ($150,000.00 cash, $16,600.00 burn)

@@ -28,14 +28,16 @@ export default function RevenuePerformance({ transactions = [] }: RevenuePerform
   transactions.forEach(tx => {
     if (tx.date) {
       const d = new Date(tx.date);
-      const monthName = d.toLocaleString('en-US', { month: 'long' });
-      const year = d.getFullYear();
-      const target = monthlyData.find(m => m.name.startsWith(monthName) && m.name.endsWith(year.toString()));
-      if (target) {
-        if (tx.amount > 0) {
-          target.Revenue += tx.amount;
-        } else {
-          target.Budget += Math.abs(tx.amount);
+      if (!isNaN(d.getTime())) {
+        const monthName = d.toLocaleString('en-US', { month: 'long' });
+        const year = d.getFullYear();
+        const target = monthlyData.find(m => m.name.startsWith(monthName) && m.name.endsWith(year.toString()));
+        if (target) {
+          if (tx.amount > 0) {
+            target.Revenue += tx.amount;
+          } else {
+            target.Budget += Math.abs(tx.amount);
+          }
         }
       }
     }
