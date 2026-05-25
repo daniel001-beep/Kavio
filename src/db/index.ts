@@ -4,10 +4,14 @@ import * as schema from "./schema";
 import * as fs from "fs";
 import * as path from "path";
 
-let connectionString = process.env.POSTGRES_URL;
+const cleanEnvVar = (val: string | undefined): string => {
+  if (!val) return "";
+  return val.trim().replace(/^["'()]+|["'()]+$/g, "").trim();
+};
+
+let connectionString = cleanEnvVar(process.env.POSTGRES_URL);
 
 if (connectionString) {
-  connectionString = connectionString.replace(/^["'()]+|["'()]+$/g, '').trim();
   if (connectionString.includes("44.216.29.125")) {
     connectionString = connectionString.replace("44.216.29.125:6543", "aws-0-us-east-1.pooler.supabase.com:6543");
     connectionString = connectionString.replace("44.216.29.125:5432", "aws-0-us-east-1.pooler.supabase.com:5432");
@@ -718,8 +722,8 @@ function normalizeRowKeys(row: any) {
 }
 
 async function fetchSupabaseTable(table: string, urlParams: string = ""): Promise<any[]> {
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co").trim();
-  const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
+  const supabaseUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co");
+  const supabaseKey = cleanEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   const url = `${supabaseUrl}/rest/v1/${table}?${urlParams}`;
   const response = await fetch(url, {
@@ -739,8 +743,8 @@ async function fetchSupabaseTable(table: string, urlParams: string = ""): Promis
 }
 
 async function executeSupabaseRest(sql: string, params: any[]): Promise<any[]> {
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co").trim();
-  const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
+  const supabaseUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co");
+  const supabaseKey = cleanEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error("Supabase URL or Key environment variables are missing");
@@ -1065,8 +1069,8 @@ const originalQuery = Pool.prototype.query;
 Pool.prototype.query = function (text, values, callback) {
   const { queryText, queryValues, callbackFn } = normalizeQueryArgs(text, values, callback);
 
-  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const supabaseUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseKey = cleanEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (supabaseUrl && supabaseKey) {
     const promise = executeSupabaseRest(queryText, queryValues)
