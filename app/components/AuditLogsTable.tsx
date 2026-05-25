@@ -32,29 +32,33 @@ export default function AuditLogsTable() {
   const [latestRowId, setLatestRowId] = useState<string | null>(null);
   const subscriptionRef = useRef<any>(null);
 
-  // 1. Fetch initial 20 historical logs on mount and subscribe to WebSockets
+  // 1. Fetch initial historical logs on mount and subscribe to WebSockets
   useEffect(() => {
     async function fetchHistoricalLogs() {
       try {
         setError(null);
-        // Fetch the last 20 audit logs sorted by newest first
-        const { data, error: dbError } = await supabase
-          .from("audit_logs")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(20);
-
-        if (dbError) {
-          // If table doesn't exist yet, we capture that specifically to aid developers
-          if (dbError.code === "P0001" || dbError.message.includes("does not exist")) {
-            throw new Error("The 'audit_logs' table does not exist in your Supabase database. Please apply the SQL schema first.");
-          }
-          throw dbError;
+        // Query the resilient Next.js internal API instead of direct client-side Supabase REST
+        const res = await fetch("/api/admin/dashboard?_t=" + Date.now(), { cache: "no-store" });
+        
+        if (!res.ok) {
+          throw new Error(`Failed to load administrative logs (Status ${res.status})`);
         }
 
-        setLogs(data || []);
+        const data = await res.json();
+        
+        // Map Drizzle-backed database schemas to uniform AuditLog types
+        const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
+          id: log.id,
+          user_tenant: log.userEmail || log.userName || "System Agent",
+          action_event: log.eventType,
+          location_ip: log.ipAddress || "unknown",
+          device_info: log.userAgent || "unknown",
+          created_at: log.timestamp || new Date().toISOString()
+        }));
+
+        setLogs(mappedLogs.slice(0, 20));
       } catch (err: any) {
-        console.error("Error loading audit logs:", err);
+        console.error("Error loading historical audit logs:", err);
         setError(err.message || "Failed to fetch audit logs.");
       } finally {
         setLoading(false);
@@ -63,7 +67,7 @@ export default function AuditLogsTable() {
 
     fetchHistoricalLogs();
 
-    // 2. Establish a persistent Supabase Realtime WebSocket subscription
+    // 2. Establish a persistent Supabase Realtime WebSocket subscription (targeting public.audit_log table)
     try {
       setRealtimeStatus("connecting");
       
@@ -74,24 +78,32 @@ export default function AuditLogsTable() {
           {
             event: "INSERT",
             schema: "public",
-            table: "audit_logs",
+            table: "audit_log", // Map to the singular system logging table
           },
           (payload) => {
-            const newRecord = payload.new as AuditLog;
+            const newRecord = payload.new as any;
             if (newRecord && newRecord.id) {
+              const uiLog: AuditLog = {
+                id: newRecord.id,
+                user_tenant: newRecord.metadata?.email || newRecord.changes?.email || "System Agent",
+                action_event: newRecord.event_type || newRecord.eventType || "SYSTEM_EVENT",
+                location_ip: newRecord.ip_address || newRecord.ipAddress || "unknown",
+                device_info: newRecord.user_agent || newRecord.userAgent || "unknown",
+                created_at: newRecord.timestamp || newRecord.createdAt || new Date().toISOString()
+              };
+
               // Optimistic UI state update: Prepend the event to the top of the array instantly
               setLogs((prevLogs) => {
-                const updated = [newRecord, ...prevLogs];
-                // Keep the list capped at the 20 most recent logs
+                const updated = [uiLog, ...prevLogs];
                 return updated.slice(0, 20);
               });
 
               // Set the ID of the new row to trigger the CSS flash effect
-              setLatestRowId(newRecord.id);
+              setLatestRowId(uiLog.id);
 
               // Reset flash effect target after animation finishes
               setTimeout(() => {
-                setLatestRowId((curr) => (curr === newRecord.id ? null : curr));
+                setLatestRowId((curr) => (curr === uiLog.id ? null : curr));
               }, 3000);
             }
           }
@@ -99,7 +111,7 @@ export default function AuditLogsTable() {
         .subscribe((status) => {
           if (status === "SUBSCRIBED") {
             setRealtimeStatus("connected");
-          } else if (status === "CLOSED" || status === "CHANNEL_ERROR") {
+          } else {
             setRealtimeStatus("disconnected");
           }
         });
@@ -110,13 +122,51 @@ export default function AuditLogsTable() {
       setRealtimeStatus("disconnected");
     }
 
-    // Cleanup subscription on component unmount
     return () => {
       if (subscriptionRef.current) {
         supabase.removeChannel(subscriptionRef.current);
       }
     };
   }, []);
+
+  // 3. Hybrid Background Polling: fallback loop to sync records if WebSocket remains offline
+  useEffect(() => {
+    let active = true;
+    const interval = setInterval(async () => {
+      // Only poll when the WebSocket is not active/connected, saving server overhead
+      if (realtimeStatus !== "connected") {
+        try {
+          const res = await fetch("/api/admin/dashboard?_t=" + Date.now(), { cache: "no-store" });
+          if (res.ok && active) {
+            const data = await res.json();
+            const mappedLogs: AuditLog[] = (data.auditLogs || []).map((log: any) => ({
+              id: log.id,
+              user_tenant: log.userEmail || log.userName || "System Agent",
+              action_event: log.eventType,
+              location_ip: log.ipAddress || "unknown",
+              device_info: log.userAgent || "unknown",
+              created_at: log.timestamp || new Date().toISOString()
+            }));
+            
+            setLogs((prev) => {
+              // Only update state if count or content has actually changed to prevent dynamic rendering flicker
+              if (JSON.stringify(prev.slice(0, 10)) !== JSON.stringify(mappedLogs.slice(0, 10))) {
+                return mappedLogs.slice(0, 20);
+              }
+              return prev;
+            });
+          }
+        } catch (e) {
+          console.warn("Background audit log polling fallback failed:", e);
+        }
+      }
+    }, 5000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [realtimeStatus]);
 
   // Helper: Format datetime strings into a premium readable local string
   const formatTimestamp = (dateString: string) => {
