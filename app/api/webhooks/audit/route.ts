@@ -2,23 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize a dedicated server-side Supabase client using the secure service role key to bypass RLS.
-// This allows writing security logs from stateless webhook invocations.
-const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-
-// Fallback to anon key if service role key is not defined, ensuring dev environment works safely
-const supabaseKey = supabaseServiceKey || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
-
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
-
 export async function POST(req: NextRequest) {
   try {
+    // Lazily instantiate Supabase client inside the handler body.
+    // This prevents module-level execution crashes during Next.js build-time page collection on Vercel.
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co").trim();
+    const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+    const supabaseKey = supabaseServiceKey || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key").trim();
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+
     // 1. Parse request body and validate types
     let body;
     try {
