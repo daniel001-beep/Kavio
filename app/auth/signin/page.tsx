@@ -103,7 +103,7 @@ export default function SignIn() {
               style={{ color: '#64748b' }} 
               className="text-[11px] leading-relaxed max-w-[280px] mx-auto"
             >
-              Enter credentials or use Google OAuth to securely sync node logs.
+              Enter credentials to securely sync node logs.
             </p>
           </div>
 

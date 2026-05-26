@@ -93,7 +93,7 @@ export default function SignUp() {
               style={{ color: '#64748b' }} 
               className="text-[11px] leading-relaxed max-w-[280px] mx-auto"
             >
-              Register credentials or authenticate with Google to activate your node.
+              Register credentials to activate your node.
             </p>
           </div>
 
