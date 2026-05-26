@@ -334,9 +334,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Footer */}
-      <footer className="mt-auto border-t border-slate-200/60 py-8 text-center text-xs text-slate-500 font-medium bg-white">
-        <p>&copy; {new Date().getFullYear()} Velox Fintech. All rights reserved. Platform-wide secure SSL endpoints.</p>
+      {/* 6. Premium Multi-Column Footer */}
+      <footer className="mt-auto border-t border-slate-205 bg-white pt-16 pb-12 w-full">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
+          {/* Brand Column */}
+          <div className="md:col-span-4 flex flex-col gap-4">
+            <Link href="/" className="flex items-center gap-2 group no-underline">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/10">
+                <Cpu className="w-4 h-4" />
+              </div>
+              <span className="text-lg font-black text-slate-950 tracking-tight">
+                Velox <span className="font-semibold text-slate-500">Fintech</span>
+              </span>
+            </Link>
+            <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm mt-2">
+              High-frequency, double-entry ledger engine and cryptographically isolated multi-tenant wallet systems built for B2B financial operators.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-600 tracking-wide uppercase">
+                <Lock className="w-3 h-3 text-slate-400" /> SOC-2 Compliant
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-600 tracking-wide uppercase">
+                <ShieldCheck className="w-3 h-3 text-slate-400" /> PCI-DSS Lvl 1
+              </span>
+            </div>
+          </div>
+
+          {/* Product Links */}
+          <div className="md:col-span-2 flex flex-col gap-4">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Product</span>
+            <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
+              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Ledger Engine</Link></li>
+              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Wallet Nesting</Link></li>
+              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Real-Time Streams</Link></li>
+              <li><Link href="#telemetry" className="hover:text-blue-600 transition-colors no-underline">System Performance</Link></li>
+            </ul>
+          </div>
+
+          {/* Resources Links */}
+          <div className="md:col-span-3 flex flex-col gap-4">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resources</span>
+            <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
+              <li><Link href="#api" className="hover:text-blue-600 transition-colors no-underline">API Specification</Link></li>
+              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Developer Console</Link></li>
+              <li><Link href="#api" className="hover:text-blue-600 transition-colors no-underline">Integration Guide</Link></li>
+              <li><Link href="#telemetry" className="hover:text-blue-600 transition-colors no-underline">Status Sandbox</Link></li>
+            </ul>
+          </div>
+
+          {/* Security & Legal Links */}
+          <div className="md:col-span-3 flex flex-col gap-4">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security & Compliance</span>
+            <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
+              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Audit Timelines</Link></li>
+              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Identity Verification (KYC)</Link></li>
+              <li><Link href="/" className="hover:text-blue-600 transition-colors no-underline">Security Policy</Link></li>
+              <li><Link href="/" className="hover:text-blue-600 transition-colors no-underline">Terms of Service</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[11px] text-slate-505 font-medium m-0">
+            &copy; {new Date().getFullYear()} Velox Fintech Inc. All rights reserved. Platform-wide secure SSL endpoints.
+          </p>
+          <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Platform Status: Fully Operational
+          </div>
+        </div>
       </footer>
     </div>
   );

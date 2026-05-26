@@ -37,7 +37,7 @@ export default function DashboardClient({
   transactions: initialTransactions = [],
   isDemoData = false
 }: DashboardClientProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
   const userId = session?.user?.id;
 
@@ -49,6 +49,18 @@ export default function DashboardClient({
   // Fresh API transactions fetched client-side — always up-to-date
   // Initialize empty — we load from cache immediately in the first useEffect
   const [apiTransactions, setApiTransactions] = useState<UITransaction[]>([]);
+
+  // Render a clean loading shell during session validation to prevent brief cache flashes of other users
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Securing Ledger Session...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Load from localStorage cache on mount for instant sub-0.1s loading
   // This runs BEFORE any API fetch, so cached data is always visible first
