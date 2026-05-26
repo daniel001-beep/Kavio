@@ -6,6 +6,18 @@ import * as path from "path";
 
 const cleanEnvVar = (val: string | undefined): string => {
   if (!val) return "";
+  const parts = val.split(/["'\s]/);
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (
+      trimmed.startsWith("postgres://") ||
+      trimmed.startsWith("postgresql://") ||
+      trimmed.startsWith("http://") ||
+      trimmed.startsWith("https://")
+    ) {
+      return trimmed.replace(/[()]+$/g, "").trim();
+    }
+  }
   return val.trim().replace(/^["'()]+|["'()]+$/g, "").trim();
 };
 

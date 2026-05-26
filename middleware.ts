@@ -1,17 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { cleanEnvVar } from './src/lib/env-cleaner';
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // Strip quotes and whitespace that could be introduced during build/parsing
-  const supabaseUrl = rawUrl?.replace(/['"]/g, "").trim();
-  const supabaseAnonKey = rawKey?.replace(/['"]/g, "").trim();
+  const supabaseUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseAnonKey = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   let isValidUrl = false;
   if (supabaseUrl && (supabaseUrl.startsWith("http://") || supabaseUrl.startsWith("https://"))) {
@@ -83,13 +80,15 @@ export async function middleware(request: NextRequest) {
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
   const isFintechRoute = request.nextUrl.pathname.startsWith('/fintech');
+  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname === '/dashboard';
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/fintech/admin');
 
   // Any logged-in user is authorized to access general fintech routes
   const isAuthorized = !!user;
+  const isProtectedRoute = isFintechRoute || isAdminRoute || isDashboardRoute;
 
   // 1. If not logged in and requesting a protected route, redirect to sign-in
-  if (!user && (isFintechRoute || isAdminRoute)) {
+  if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/signin';
     url.search = '';
@@ -97,7 +96,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. If logged in but not authorized, redirect to sign-in with error and clear cookies
-  if (user && !isAuthorized && (isFintechRoute || isAdminRoute)) {
+  if (user && !isAuthorized && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/signin';
     url.searchParams.set('error', 'registration_disabled');
@@ -107,14 +106,21 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // 3. If logged in, authorized, and requesting an auth route, redirect to dashboard
+  // 3. If logged in, authorized, and requesting an auth route, redirect to /dashboard
   if (user && isAuthorized && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/fintech/dashboard';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
-  // 4. Strict Admin RBAC
+  // 4. If logged in and hitting the legacy /fintech/dashboard, redirect to unified /dashboard
+  if (user && isAuthorized && request.nextUrl.pathname === '/fintech/dashboard') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
+
+  // 5. Strict Admin RBAC
   if (isAdminRoute) {
     const normalizedEmail = user?.email ? user.email.toLowerCase().trim() : "";
     const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
@@ -124,7 +130,7 @@ export async function middleware(request: NextRequest) {
                         normalizedEmail === 'daniel@velox.com';
     if (!isUserAdmin) {
       const url = request.nextUrl.clone();
-      url.pathname = '/fintech/dashboard';
+      url.pathname = '/dashboard';
       url.searchParams.set('error', 'unauthorized_admin');
       return NextResponse.redirect(url);
     }

@@ -50,7 +50,7 @@ export default function SignIn() {
         setIsLoading(false);
       } else if (res?.success) {
         // Force hard redirect to reload app context fully
-        window.location.href = '/fintech/dashboard';
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError('Connection refused.');

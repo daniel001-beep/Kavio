@@ -6,9 +6,38 @@ export async function POST(req: NextRequest) {
   try {
     // Lazily instantiate Supabase client inside the handler body.
     // This prevents module-level execution crashes during Next.js build-time page collection on Vercel.
-    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co").trim();
-    const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-    const supabaseKey = supabaseServiceKey || (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key").trim();
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co";
+    const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
+
+    let supabaseUrl = "";
+    if (rawUrl) {
+      const parts = rawUrl.split(/["'\s]/);
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+          supabaseUrl = trimmed.replace(/[()]+$/g, "").trim();
+          break;
+        }
+      }
+      if (!supabaseUrl) {
+        supabaseUrl = rawUrl.trim().replace(/^["'()]+|["'()]+$/g, "").trim();
+      }
+    }
+
+    let supabaseKey = "";
+    if (rawKey) {
+      const parts = rawKey.split(/["'\s]/);
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (trimmed && trimmed.length > 20 && !trimmed.includes("key") && !trimmed.includes("production")) {
+          supabaseKey = trimmed.replace(/[()]+$/g, "").trim();
+          break;
+        }
+      }
+      if (!supabaseKey) {
+        supabaseKey = rawKey.trim().replace(/^["'()]+|["'()]+$/g, "").trim();
+      }
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {

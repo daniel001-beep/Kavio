@@ -41,7 +41,7 @@ export default function SignUp() {
         setError(res.error);
         setIsLoading(false);
       } else if (res?.success) {
-        window.location.href = '/fintech/dashboard';
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError('Connection refused.');

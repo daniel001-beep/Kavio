@@ -25,7 +25,7 @@ const Navbar = () => {
 
   // Links mapped exactly to the sure+ sidebar, using working fintech routes
   const navLinks = [
-    { href: '/fintech/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/fintech/master-data', label: 'Master Data', icon: Database },
     { href: '/fintech/bank-mutation', label: 'Bank Mutation', icon: ArrowLeftRight },
     { href: '/fintech/financial-documents', label: 'Financial Documents', icon: FileSpreadsheet },
@@ -54,7 +54,7 @@ const Navbar = () => {
         {/* Header with blue sure+ Logo */}
         <div className="flex items-center justify-between px-6 pt-7 pb-5">
           <Link
-            href="/fintech/dashboard"
+            href="/dashboard"
             className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
           >
             <span className="text-[22px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Velox</span>
@@ -116,7 +116,7 @@ const Navbar = () => {
             {/* Header Area */}
             <div className="flex items-center justify-between px-6 pt-7 pb-5">
               <Link
-                href="/fintech/dashboard"
+                href="/dashboard"
                 onClick={() => setIsMobileOpen(false)}
                 className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
               >

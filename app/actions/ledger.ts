@@ -53,7 +53,7 @@ export async function createTransaction(formData: FormData) {
   }
 
   // 4. Invalidate cache for relevant tenant pages
-  revalidatePath('/fintech/dashboard');
+  revalidatePath('/dashboard');
   revalidatePath('/fintech/ledger');
 
   return { success: true, data };

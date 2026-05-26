@@ -170,12 +170,10 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         title: 'Capital Allocated',
         message: `Successfully allocated $${amt.toLocaleString()} to ${product?.title || 'Treasury'}.`,
       });
-
-      // Redirect to dashboard after a delay so they see the result
       setTimeout(() => {
         setIsAllocationModalOpen(false);
         setAllocationSuccess(false);
-        router.push('/fintech/dashboard');
+        router.push('/dashboard');
       }, 2500);
 
     } catch (err) {
