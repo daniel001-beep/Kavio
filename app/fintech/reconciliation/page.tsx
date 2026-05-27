@@ -336,9 +336,9 @@ export default function ReconciliationPage() {
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             
                             {/* Bank Details */}
-                            <div className="space-y-1.5 flex-1">
+                            <div className="space-y-1.5 flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className={`px-2 py-0.5 text-[9px] font-bold tracking-wider rounded uppercase ${
+                                <span className={`px-2 py-0.5 text-[9px] font-bold tracking-wider rounded uppercase shrink-0 ${
                                   isCleared 
                                     ? 'bg-slate-200 text-slate-600' 
                                     : isUnmatched 
@@ -349,10 +349,10 @@ export default function ReconciliationPage() {
                                 }`}>
                                   {isCleared ? 'CLEARED' : item.status}
                                 </span>
-                                <span className="text-[10px] font-mono text-slate-400">{item.bankItem.date}</span>
+                                <span className="text-[10px] font-mono text-slate-400 truncate">{item.bankItem.date}</span>
                               </div>
-                              <h4 className="text-xs font-bold text-slate-700">{item.bankItem.description}</h4>
-                              <p className="text-xs font-mono font-black text-slate-800">
+                              <h4 className="text-xs font-bold text-slate-700 truncate">{item.bankItem.description}</h4>
+                              <p className="text-xs font-mono font-black text-slate-800 truncate">
                                 ${Math.abs(item.bankItem.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </p>
                             </div>
@@ -363,22 +363,22 @@ export default function ReconciliationPage() {
                             </div>
 
                             {/* Ledger Match details */}
-                            <div className="flex-1 space-y-1.5 p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                            <div className="flex-1 min-w-0 space-y-1.5 p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
                               {isUnmatched ? (
                                 <div className="flex items-start gap-2 text-amber-700">
                                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                                  <div>
-                                    <p className="text-[11px] font-bold">No ledger entry found</p>
-                                    <p className="text-[9px] text-slate-400 leading-normal mt-0.5">Requires adjusting entries to book account fees or merchant deduction.</p>
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-bold truncate">No ledger entry found</p>
+                                    <p className="text-[9px] text-slate-400 leading-normal mt-0.5 break-words">Requires adjusting entries to book account fees or merchant deduction.</p>
                                   </div>
                                 </div>
                               ) : (
-                                <div>
-                                  <p className="text-[10px] font-bold text-slate-400">Closest Match In Ledger</p>
-                                  <p className="text-xs font-bold text-slate-700 mt-1">{item.match?.description}</p>
+                                <div className="min-w-0">
+                                  <p className="text-[10px] font-bold text-slate-400 truncate">Closest Match In Ledger</p>
+                                  <p className="text-xs font-bold text-slate-700 mt-1 truncate">{item.match?.description}</p>
                                   <div className="flex items-center justify-between gap-2 mt-1">
-                                    <span className="text-[9px] font-mono font-black text-emerald-600">${item.match?.amount.toFixed(2)}</span>
-                                    <span className="text-[8px] font-mono text-slate-400">{item.match?.id}</span>
+                                    <span className="text-[9px] font-mono font-black text-emerald-600 truncate">${item.match?.amount.toFixed(2)}</span>
+                                    <span className="text-[8px] font-mono text-slate-400 truncate">{item.match?.id}</span>
                                   </div>
                                 </div>
                               )}
