@@ -162,12 +162,22 @@ export default function DashboardClient({
             };
           });
 
-      setApiTransactions(mapped);
-      
-      // Cache the newly retrieved list strictly per-user
-      if (userEmail) {
-        localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(mapped));
-      }
+      setApiTransactions(prev => {
+        const now = Date.now();
+        const optimisticTxs = prev.filter(pTx => {
+          const isMissing = !mapped.find(m => m.id === pTx.id);
+          const isRecent = now - new Date(pTx.date).getTime() < 15000; // 15 seconds grace period for DB propagation
+          return isMissing && isRecent;
+        });
+
+        const finalMerged = [...optimisticTxs, ...mapped];
+
+        // Cache the newly retrieved list strictly per-user
+        if (userEmail) {
+          localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(finalMerged));
+        }
+        return finalMerged;
+      });
     } catch (err) {
       // Network error — preserve cached data, don't wipe it
       console.error('Dashboard: Failed to fetch transactions from API:', err);
