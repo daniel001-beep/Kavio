@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import * as schema from "./schema";
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 
 const cleanEnvVar = (val: string | undefined): string => {
   if (!val) return "";
@@ -507,6 +508,26 @@ function emulateSqlQuery(sql: string, params: any[]) {
       }
     });
 
+    const lastTx = db.transactions[db.transactions.length - 1];
+    const prevHash = lastTx ? (lastTx.hash || lastTx.metadata?.hash || "GENESIS_BLOCK") : "GENESIS_BLOCK";
+
+    newTx.previousHash = prevHash;
+    newTx.previous_hash = prevHash;
+    if (!newTx.metadata) newTx.metadata = {};
+    if (typeof newTx.metadata === 'string') {
+      try {
+        newTx.metadata = JSON.parse(newTx.metadata);
+      } catch (e) {
+        newTx.metadata = {};
+      }
+    }
+    newTx.metadata.previous_hash = prevHash;
+
+    const dataToHash = `${newTx.id}-${newTx.amount}-${newTx.userId}-${newTx.createdAt || newTx.created_at || new Date().toISOString()}-${prevHash}`;
+    const hash = crypto.createHash("sha256").update(dataToHash).digest("hex");
+    newTx.hash = hash;
+    newTx.metadata.hash = hash;
+
     db.transactions.push(newTx);
     saveLocalDb(db);
     return [newTx];
@@ -971,6 +992,40 @@ async function executeSupabaseRest(sql: string, params: any[]): Promise<any[]> {
           insertRecords.push(record);
         });
       }
+      if (table === 'transaction') {
+        let prevHash = "GENESIS_BLOCK";
+        try {
+          const lastTxArray = await fetchSupabaseTable("transaction", "select=metadata&order=created_at.desc&limit=1");
+          if (lastTxArray && lastTxArray.length > 0) {
+            prevHash = lastTxArray[0].metadata?.hash || "GENESIS_BLOCK";
+          }
+        } catch (err) {
+          console.warn("[Cryptographic Chain] Could not fetch last transaction for hash chain:", err);
+        }
+
+        insertRecords.forEach((record: any) => {
+          const txId = record.id || `tx_${Math.random().toString(36).substring(2, 11)}`;
+          const amount = record.amount || "0";
+          const userId = record.user_id || record.userId || "";
+          const createdAt = record.created_at || record.createdAt || new Date().toISOString();
+          
+          const dataToHash = `${txId}-${amount}-${userId}-${createdAt}-${prevHash}`;
+          const hash = crypto.createHash("sha256").update(dataToHash).digest("hex");
+          
+          if (!record.metadata) record.metadata = {};
+          if (typeof record.metadata === 'string') {
+            try {
+              record.metadata = JSON.parse(record.metadata);
+            } catch (e) {
+              record.metadata = {};
+            }
+          }
+          record.metadata.hash = hash;
+          record.metadata.previous_hash = prevHash;
+          
+          prevHash = hash;
+        });
+      }
       
       body = insertRecords.length === 1 ? insertRecords[0] : insertRecords;
     } else {
@@ -1184,21 +1239,21 @@ Pool.prototype.connect = async function (callback) {
   return mockClient as any;
 };
 
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+if (!dbUrl) {
+  throw new Error("DATABASE_URL or POSTGRES_URL is missing from environment variables.");
+}
+
 const globalForDb = global as unknown as { pool: Pool | undefined };
 
 if (!globalForDb.pool) {
   globalForDb.pool = new Pool({
-    connectionString,
-    ssl: connectionString?.includes("localhost") || connectionString?.includes("127.0.0.1") 
-      ? false 
-      : { rejectUnauthorized: false }, 
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 1000,
-  });
-
-  globalForDb.pool.on("error", (err) => {
-    console.error("Unexpected database pool connection drop error:", err);
+    connectionString: dbUrl,
+    ssl: { rejectUnauthorized: false },
+    max: 1,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
   });
 }
 

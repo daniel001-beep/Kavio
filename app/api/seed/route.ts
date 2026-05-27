@@ -1,6 +1,6 @@
 import { db } from "@/src/db";
-import { products, reviews } from "@/src/db/schema";
-import { sql } from "drizzle-orm";
+import { products, reviews, transactions, ledgerEntries } from "@/src/db/schema";
+import { sql, eq, asc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getResilientSession } from "@/src/lib/auth-session";
 
@@ -218,6 +218,100 @@ export async function GET() {
     });
   } catch (error: any) {
     console.error("Seeding failed:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await getResilientSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized access blocked by Zero-Trust gateway" }, { status: 401 });
+    }
+    const userId = session.user.id;
+
+    const { action } = await req.json();
+    console.log(`[Seed API] Received request with action: ${action}`);
+
+    if (action === "TAMPER_LEDGER") {
+      // 1. Fetch all transactions for this user
+      let txList = await db.select().from(transactions).where(eq(transactions.userId, userId)).orderBy(asc(transactions.createdAt));
+
+      // 2. If no transactions exist, do NOT auto-seed mock transactions. Return a clean error.
+      if (txList.length === 0) {
+        return NextResponse.json({ 
+          success: false, 
+          error: "No transactions found in your ledger. Please create some transactions in the Manual Journals page first before simulating a hacker attack." 
+        }, { status: 400 });
+      }
+
+      // 3. Pick the latest transaction to tamper
+      const targetTx = txList[txList.length - 1];
+      const originalAmount = targetTx.amount;
+      const tamperedAmount = originalAmount * 2n;
+
+      let meta = targetTx.metadata as any || {};
+      if (typeof meta === "string") {
+        try { meta = JSON.parse(meta); } catch (e) { meta = {}; }
+      }
+      meta.original_amount = originalAmount.toString();
+
+      console.log(`[Seed API] Tampering transaction ${targetTx.id}. Changing amount from ${originalAmount} to ${tamperedAmount}. Storing original in metadata.`);
+
+      // Update in DB without altering hashes!
+      await db.update(transactions)
+        .set({
+          amount: tamperedAmount,
+          metadata: meta
+        })
+        .where(eq(transactions.id, targetTx.id));
+
+      return NextResponse.json({
+        success: true,
+        message: `Simulated hacker attack! Transaction ${targetTx.id} amount modified from $${Number(originalAmount)/100} to $${Number(tamperedAmount)/100} directly in database. Cryptographic signature chain broken!`,
+        tamperedId: targetTx.id
+      });
+    }
+
+    if (action === "REPAIR_LEDGER") {
+      console.log("[Seed API] Initiating ledger repair. Reverting all tampered entries...");
+      
+      const txList = await db.select().from(transactions).where(eq(transactions.userId, userId)).orderBy(asc(transactions.createdAt));
+      let repairCount = 0;
+
+      for (const tx of txList) {
+        let meta = tx.metadata as any;
+        if (typeof meta === "string") {
+          try { meta = JSON.parse(meta); } catch (e) { meta = {}; }
+        }
+
+        if (meta && meta.original_amount) {
+          const originalAmt = BigInt(meta.original_amount);
+          delete meta.original_amount;
+
+          console.log(`[Seed API] Repairing transaction ${tx.id}. Restoring amount to original: ${originalAmt}`);
+
+          await db.update(transactions)
+            .set({
+              amount: originalAmt,
+              metadata: meta
+            })
+            .where(eq(transactions.id, tx.id));
+          
+          repairCount++;
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully verified and repaired ${repairCount} tampered ledger blocks. Cryptographic chain validity restored to 100%!`,
+        repairCount
+      });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (error: any) {
+    console.error("Hacker simulator action failed:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

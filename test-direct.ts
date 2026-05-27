@@ -1,8 +1,8 @@
 import { Pool } from "pg";
 
 async function testDirect() {
-  const connectionString = "postgres://postgres.lyhgfezubrbgikuxhcug:Z9QZIS6lXSIBNBdR@aws-0-us-east-1.pooler.supabase.com:5432/postgres";
-  console.log("Connecting directly to aws-0-us-east-1.pooler.supabase.com:5432...");
+  const connectionString = "postgres://postgres.lyhgfezubrbgikuxhcug:Z9QZIS6lXSIBNBdR@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
+  console.log("Connecting to pooler aws-0-us-east-1.pooler.supabase.com:6543...");
 
   const pool = new Pool({
     connectionString,

@@ -66,12 +66,12 @@ export default function Home() {
         {/* Centered Glowing Title (Guaranteed Sharp Visible Slate/Black Text) */}
         <ScrollReveal3D delay={150} duration={0.9} direction="tilt-up">
           <h1 
-            className="text-4xl sm:text-5xl md:text-7.5xl font-black tracking-tight leading-[1.08] max-w-4xl"
+            className="text-4xl sm:text-5xl md:text-7.5xl font-black tracking-tight leading-snug sm:leading-[1.1] md:leading-[1.08] max-w-4xl"
             style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none", WebkitBackgroundClip: "unset", backgroundClip: "unset" }}
           >
             Production-Ready Fintech Infrastructure.<br />
             <span 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm block sm:inline mt-2 sm:mt-0"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm block sm:inline mt-3.5 sm:mt-0"
               style={{ WebkitTextFillColor: "transparent" }}
             >
               Launched in Milliseconds.
@@ -140,7 +140,7 @@ export default function Home() {
                 >
                   Double-Entry Engine
                 </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-600">
+                <p className="text-sm font-medium leading-relaxed text-slate-700">
                   Velox enforces standard mathematical double-entry balance constraints natively at the database schema level. Utilizes atomic transaction isolation so credit and debit events never drift out of sync.
                 </p>
               </div>
@@ -156,7 +156,7 @@ export default function Home() {
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-indigo-500/10 transition-all" />
               <div>
                 <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                  <Layers className="w-5 h-5" />
+                  <GitBranch className="w-5 h-5" />
                 </div>
                 {/* Guaranteed Sharp Visible Black header */}
                 <h3 
@@ -165,7 +165,7 @@ export default function Home() {
                 >
                   Multi-Tenant Wallets
                 </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-600">
+                <p className="text-sm font-medium leading-relaxed text-slate-700">
                   Enables dynamic relational database mapping for multi-currency wallets, sub-ledger cards, and isolated tenant schemes. Safely isolate user ledger states while maintaining instant cross-currency conversion capabilities.
                 </p>
               </div>
@@ -190,7 +190,7 @@ export default function Home() {
                 >
                   Real-Time Streams
                 </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-600">
+                <p className="text-sm font-medium leading-relaxed text-slate-700">
                   Streams balance mutations and security events natively over persistent, secure WebSocket connections. Eliminate UI polling, layout stutter, and state synchronization lag across global consumer applications.
                 </p>
               </div>
@@ -219,37 +219,37 @@ export default function Home() {
           </ScrollReveal3D>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {/* Metric 1 */}
+            {/* Metric 1 - CDN */}
             <ScrollReveal3D delay={0} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full p-8 border border-slate-200/80 bg-slate-50/50 rounded-2xl shadow-inner card-3d-premium card-3d-telemetry">
-                <span className="text-5xl font-mono font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  2ms
-                </span>
-                <p className="mt-3 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                  Time to First Byte (p90 Edge Response)
-                </p>
+              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
+                <img 
+                  src="/cdn.png" 
+                  alt="CDN Performance" 
+                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
+                  style={{ imageRendering: "-webkit-optimize-contrast" }}
+                />
               </div>
             </ScrollReveal3D>
-            {/* Metric 2 */}
+            {/* Metric 2 - 2ms */}
             <ScrollReveal3D delay={150} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full p-8 border border-slate-200/80 bg-slate-50/50 rounded-2xl shadow-inner card-3d-premium card-3d-telemetry">
-                <span className="text-5xl font-mono font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  99.4%
-                </span>
-                <p className="mt-3 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                  Serverless Function Success Rate
-                </p>
+              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
+                <img 
+                  src="/2ms.png" 
+                  alt="2ms Response Time" 
+                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
+                  style={{ imageRendering: "-webkit-optimize-contrast" }}
+                />
               </div>
             </ScrollReveal3D>
-            {/* Metric 3 */}
+            {/* Metric 3 - ISR */}
             <ScrollReveal3D delay={300} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full p-8 border border-slate-200/80 bg-slate-50/50 rounded-2xl shadow-inner card-3d-premium card-3d-telemetry">
-                <span className="text-5xl font-mono font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  67.7%
-                </span>
-                <p className="mt-3 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                  Advanced ISR Caching Hit Ratio
-                </p>
+              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
+                <img 
+                  src="/isr.png" 
+                  alt="ISR Caching" 
+                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
+                  style={{ imageRendering: "-webkit-optimize-contrast" }}
+                />
               </div>
             </ScrollReveal3D>
           </div>

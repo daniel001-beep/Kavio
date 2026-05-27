@@ -50,17 +50,6 @@ export default function DashboardClient({
   // Initialize empty — we load from cache immediately in the first useEffect
   const [apiTransactions, setApiTransactions] = useState<UITransaction[]>([]);
 
-  // Render a clean loading shell during session validation to prevent brief cache flashes of other users
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Securing Ledger Session...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Load from localStorage cache on mount for instant sub-0.1s loading
   // This runs BEFORE any API fetch, so cached data is always visible first
@@ -319,6 +308,38 @@ export default function DashboardClient({
     };
   }, [addNotification, userEmail, userId, fetchLatestTransactions]);
 
+  // Supabase Presence: Track user online status in real-time
+  useEffect(() => {
+    if (!supabase || !userEmail) return;
+
+    const channel = supabase.channel('online-users', {
+      config: {
+        presence: {
+          key: userEmail,
+        },
+      },
+    });
+
+    channel
+      .on('presence', { event: 'sync' }, () => {})
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          try {
+            await channel.track({
+              online_at: new Date().toISOString(),
+              email: userEmail,
+            });
+          } catch (trackErr) {
+            console.warn('Failed to track user presence:', trackErr);
+          }
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userEmail]);
+
   // Compute live visual states: merge API transactions (primary) with Supabase invoices (secondary)
   const transactions = useMemo<UITransaction[]>(() => {
     const mergedMap = new Map<string, UITransaction>();
@@ -512,6 +533,19 @@ export default function DashboardClient({
     if (amount < 0) return <ArrowUpRight className="w-4 h-4 text-rose-500" />;
     return <RefreshCw className="w-4 h-4 text-blue-500" />;
   };
+
+  // Render a clean loading shell during session validation to prevent brief cache flashes of other users
+  // NOTE: Must be AFTER all hooks to comply with React's Rules of Hooks
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Securing Ledger Session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout>

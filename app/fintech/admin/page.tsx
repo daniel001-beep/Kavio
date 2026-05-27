@@ -64,6 +64,7 @@ export default function AdminDashboardPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   // Authentication protection
   useEffect(() => {
@@ -116,6 +117,43 @@ export default function AdminDashboardPage() {
     if (session?.user?.isAdmin) {
       loadAdminData();
     }
+  }, [session]);
+
+  // Supabase Presence: Track all online users in real-time
+  useEffect(() => {
+    if (!supabase || !session?.user?.email) return;
+
+    const channel = supabase.channel('online-users', {
+      config: {
+        presence: {
+          key: session.user.email,
+        },
+      },
+    });
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const onlineEmails = Object.keys(state).map(email => email.toLowerCase().trim());
+        console.log('[Presence] Sync - Online users:', onlineEmails);
+        setOnlineUsers(onlineEmails);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          try {
+            await channel.track({
+              online_at: new Date().toISOString(),
+              email: session.user.email,
+            });
+          } catch (trackErr) {
+            console.warn('Failed to track admin presence:', trackErr);
+          }
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [session]);
 
   // Real-time subscription to audit_log, transaction, and user tables
@@ -301,35 +339,69 @@ export default function AdminDashboardPage() {
             </div>
             
             <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
-              {usersList.map((user) => (
-                <div key={user.id} className="p-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0 uppercase">
-                      {user.email.substring(0, 2)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-800 truncate">
-                        {user.name || 'Anonymous Tenant'}
-                        {user.isAdmin && (
-                          <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-black text-blue-700 bg-blue-50 border border-blue-100 rounded-sm">
-                            ADMIN
+              {usersList.map((user) => {
+                const isCurrentUser = user.email.toLowerCase().trim() === session?.user?.email?.toLowerCase().trim();
+                const isOnline = isCurrentUser || onlineUsers.includes(user.email.toLowerCase().trim());
+
+                return (
+                  <div 
+                    key={user.id} 
+                    className={`p-4 transition-colors flex items-center justify-between gap-4 ${
+                      isCurrentUser 
+                        ? 'bg-emerald-50/20 hover:bg-emerald-50/30 border-l-4 border-emerald-500' 
+                        : 'hover:bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="relative shrink-0">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 uppercase ${
+                          isOnline 
+                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {user.email.substring(0, 2)}
+                        </div>
+                        {isOnline && (
+                          <span className="absolute bottom-0 right-0 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
                           </span>
                         )}
-                      </p>
-                      <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5 truncate">
+                          {user.name || 'Anonymous Tenant'}
+                          {user.isAdmin && (
+                            <span className="px-1.5 py-0.5 text-[9px] font-black text-blue-700 bg-blue-50 border border-blue-100 rounded-sm">
+                              ADMIN
+                            </span>
+                          )}
+                          {isCurrentUser && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm uppercase tracking-wide">
+                              Online (You)
+                            </span>
+                          )}
+                          {!isCurrentUser && isOnline && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-sm uppercase tracking-wide">
+                              Online
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => handleDeleteUser(user.id, user.email)}
-                    disabled={user.email === session?.user?.email}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                    title={user.email === session?.user?.email ? "Cannot delete yourself" : "Delete Account and purge transactions"}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={() => handleDeleteUser(user.id, user.email)}
+                      disabled={user.email === session?.user?.email}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={user.email === session?.user?.email ? "Cannot delete yourself" : "Delete Account and purge transactions"}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

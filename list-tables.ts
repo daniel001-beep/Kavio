@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 async function listTables() {
-  let connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
+  let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
   if (connectionString) {
     connectionString = connectionString.trim().replace(/^["'()]+|["'()]+$/g, "").trim();
   }

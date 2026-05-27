@@ -30,6 +30,9 @@ const Navbar = () => {
     { href: '/fintech/bank-mutation', label: 'Bank Mutation', icon: ArrowLeftRight },
     { href: '/fintech/financial-documents', label: 'Financial Documents', icon: FileSpreadsheet },
     { href: '/fintech/journals', label: 'Journals', icon: BookOpen },
+    { href: '/fintech/reconciliation', label: 'Reconciliation Feed', icon: ArrowLeftRight },
+    { href: '/fintech/ar-aging', label: 'AR Aging Schedule', icon: FileSpreadsheet },
+    { href: '/fintech/security', label: 'Audit Vault Security', icon: ShieldCheck },
     { href: '/fintech/reports', label: 'Reports', icon: BarChart3 },
   ];
 
