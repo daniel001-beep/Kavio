@@ -132,6 +132,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account }: any) {
+      if (user && user.email) {
+        try {
+          const { db } = await import("@/src/db");
+          const { auditLogs } = await import("@/src/db/schema");
+          const { headers } = await import("next/headers");
+          
+          let locationIp = "127.0.0.1";
+          let userAgent = "Velox Auth";
+          try {
+            const headersList = await headers();
+            const xForwardedFor = headersList.get("x-forwarded-for") || "";
+            locationIp = xForwardedFor ? xForwardedFor.split(",")[0].trim() : "127.0.0.1";
+            userAgent = headersList.get("user-agent") || "Velox Auth";
+          } catch (headerErr) {}
+
+          await db.insert(auditLogs).values({
+            userId: user.id || null,
+            eventType: "AUTH_SUCCESS",
+            entityType: "user",
+            entityId: user.id || "unknown",
+            ipAddress: locationIp,
+            userAgent: userAgent,
+            metadata: { email: user.email, provider: account?.provider || "credentials" }
+          });
+        } catch (e) {
+          console.error("[Auth Callback] Failed to insert AUTH_SUCCESS audit log:", e);
+        }
+      }
+      return true;
+    },
     jwt: ({ token, user }: any) => {
       if (user) {
         token.id = user.id;

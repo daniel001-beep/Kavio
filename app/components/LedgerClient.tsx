@@ -41,7 +41,7 @@ interface LedgerClientProps {
 const fallbackInvoices: DbInvoice[] = [];
 
 export default function LedgerClient({ initialTransactions = [] }: LedgerClientProps) {
-  const [activeTab, setActiveTab] = useState<'list' | 'create'>('create'); // Start on the uploaded Create Invoice screen by default!
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list'); // Show invoice list first — create is secondary action
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
@@ -50,37 +50,52 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
   const [loading, setLoading] = useState(false);
 
   // Form Fields state wired directly to local variables
-  const [clientName, setClientName] = useState('ABC Ltd');
+  const [clientName, setClientName] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('0.00');
   const [status, setStatus] = useState<'Paid' | 'Pending'>('Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Generate dynamic invoice numbers based on today's date
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  const todayStr = `${dd}/${mm}/${yyyy}`;
+  const dueDateObj = new Date(today);
+  dueDateObj.setDate(dueDateObj.getDate() + 30);
+  const dueDateStr = `${String(dueDateObj.getDate()).padStart(2, '0')}/${String(dueDateObj.getMonth() + 1).padStart(2, '0')}/${dueDateObj.getFullYear()}`;
+  const seqId = String(Math.floor(Math.random() * 9000) + 1000);
+
   const [formFields, setFormFields] = useState({
-    reqNumber: 'REQ/SLS/INV/06112025/0005',
-    invNumber: 'INV/SLS/112025/0142',
+    reqNumber: `REQ/SLS/INV/${dd}${mm}${yyyy}/${seqId}`,
+    invNumber: `INV/SLS/${mm}${yyyy}/${seqId}`,
     docType: 'Invoice',
-    invDate: '21/11/2025',
-    dueDate: '25/11/2025',
+    invDate: todayStr,
+    dueDate: dueDateStr,
   });
 
-  // Table items list with VAT 12% calculation replicating Image 3
+  // Start with an empty line item — user fills it in
   const [items, setItems] = useState([
-    { id: 1, desc: 'Consulting Services (Q4)', qty: 80, price: 120.00 },
-    { id: 2, desc: 'Software License - Pro (Annual)', qty: 1, price: 4500.00 },
-    { id: 3, desc: 'Hardware Supply (50 units)', qty: 50, price: 50.00 }
+    { id: 1, desc: '', qty: 1, price: 0.00 },
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
   // --- DATA FETCH FROM BOTH DRIZZLE AND SUPABASE ---
   // Load initial invoices from localStorage cache for instant 0.1s navigation
+  // Load initial invoices from localStorage cache for instant 0.1s navigation
+  // STRICT TENANT ISOLATION: Always reset state on email change and never leak other users' cache
   useEffect(() => {
+    setInvoices([]); // Reset to clean state to prevent data bleed
     if (userEmail) {
       const cached = localStorage.getItem(`velox_cached_invoices_${userEmail}`);
       if (cached) {
         try {
-          setInvoices(JSON.parse(cached));
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            setInvoices(parsed);
+          }
         } catch (e) {
           console.warn('Failed to parse cached invoices:', e);
         }
@@ -92,7 +107,6 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
     let active = true;
     const fetchInvoicesAndTransactions = async () => {
       setLoading(true);
-      // Safety timeout: if fetching takes > 1.5 seconds, unblock UI so cached invoices are immediately interactive
       const safetyTimeout = setTimeout(() => {
         if (active) {
           setLoading(false);
@@ -100,28 +114,34 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
       }, 1500);
 
       try {
+        let drizzleSucceeded = false;
+        let supabaseSucceeded = false;
+
         // 1. Fetch from Drizzle API
         let drizzleMapped: DbInvoice[] = [];
         try {
           const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
           if (res.ok) {
+            drizzleSucceeded = true;
             const data = await res.json();
-            drizzleMapped = data.map((tx: any) => {
-              let meta = tx.metadata;
-              if (typeof meta === 'string') {
-                try {
-                  meta = JSON.parse(meta);
-                } catch (e) {}
-              }
-              return {
-                id: tx.id?.toString(),
-                client_name: meta?.client_name || 'Client',
-                description: meta?.description || tx.description || 'Transaction',
-                amount: Number(tx.amount) / 100, // Convert from cents
-                status: tx.status === 'completed' ? 'Paid' : 'Pending',
-                created_at: tx.createdAt
-              };
-            });
+            drizzleMapped = Array.isArray(data) 
+              ? data.map((tx: any) => {
+                  let meta = tx.metadata;
+                  if (typeof meta === 'string') {
+                    try {
+                      meta = JSON.parse(meta);
+                    } catch (e) {}
+                  }
+                  return {
+                    id: tx.id?.toString(),
+                    client_name: meta?.client_name || 'Client',
+                    description: meta?.description || tx.description || 'Transaction',
+                    amount: Number(tx.amount) / 100, // Convert from cents
+                    status: tx.status === 'completed' ? 'Paid' : 'Pending',
+                    created_at: tx.createdAt
+                  };
+                })
+              : [];
           }
         } catch (drizzleErr) {
           console.error('Error fetching drizzle transactions:', drizzleErr);
@@ -136,19 +156,26 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
               .select('*')
               .eq('email', userEmail)
               .order('created_at', { ascending: false });
-            if (data && !error) {
-              supabaseMapped = data.map((inv: any) => ({
-                id: inv.id?.toString(),
-                client_name: inv.client_name || 'Client',
-                description: inv.description || `Invoice to ${inv.client_name}`,
-                amount: Number(inv.amount || 0),
-                status: inv.status === 'Paid' ? 'Paid' : 'Pending',
-                created_at: inv.created_at
-              }));
+            
+            if (!error) {
+              supabaseSucceeded = true;
+              supabaseMapped = Array.isArray(data)
+                ? data.map((inv: any) => ({
+                    id: inv.id?.toString(),
+                    client_name: inv.client_name || 'Client',
+                    description: inv.description || `Invoice to ${inv.client_name}`,
+                    amount: Number(inv.amount || 0),
+                    status: inv.status === 'Paid' ? 'Paid' : 'Pending',
+                    created_at: inv.created_at
+                  }))
+                : [];
             }
           } catch (sbErr) {
             console.error('Error fetching supabase invoices:', sbErr);
           }
+        } else {
+          // If no supabase or no email, mark as succeeded to allow local dev fallback
+          supabaseSucceeded = true;
         }
 
         // 3. Merge them using Map to prevent duplicates
@@ -167,17 +194,17 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
         });
 
         if (active) {
-          // CRITICAL: Only overwrite state if we got actual data.
-          // If merged is empty, preserve cached invoices so they never disappear.
-          if (mergedList.length > 0) {
+          // CRITICAL: Overwrite state if at least one database source query succeeded.
+          // This allows new accounts to correctly display 0 invoices and resets cache.
+          if (drizzleSucceeded || supabaseSucceeded) {
             setInvoices(mergedList);
             
-            // Cache the newly retrieved list
+            // Cache the newly retrieved list strictly per-user
             if (userEmail) {
               localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(mergedList));
             }
           } else {
-            console.warn('LedgerClient: Both sources returned empty — preserving cached invoices');
+            console.warn('LedgerClient: Both query sources failed — preserving cached invoices');
           }
         }
       } catch (err) {
@@ -290,7 +317,7 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
       id: newInvoice.id,
       type: newInvoice.amount > 0 ? 'CREDIT' : 'DEBIT',
       description: newInvoice.description || `Invoice to ${newInvoice.client_name}`,
-      date: new Date().toLocaleString(),
+      date: new Date().toISOString(),
       amount: newInvoice.amount,
       status: newInvoice.status === 'Paid' ? 'COMPLETED' : 'PENDING'
     };

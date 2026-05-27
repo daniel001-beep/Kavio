@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     cookieStore.set('sb-access-token', 'mock-token', { path: '/' });
 
     // Redirect to dashboard
-    return NextResponse.redirect(new URL("/fintech/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   } catch (err: any) {
     console.error("Auto-login error:", err);
     return NextResponse.json({ error: err.message || "Failed to auto-login" }, { status: 500 });

@@ -195,19 +195,57 @@ export default function JournalsPage() {
     setCoaItems(coaItems.filter(item => item.id !== id));
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  const [submittingJournal, setSubmittingJournal] = useState(false);
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEntry = {
-      date: formData.date,
-      category: formData.type,
-      gl: 'GL/' + Math.floor(1000 + Math.random() * 9000),
-      title: formData.title,
-      created: new Date().toLocaleDateString(),
-      by: currentUser?.name || currentUser?.email || 'User',
-      status: 'Waiting'
-    };
-    setLocalJournals([newEntry, ...localJournals]);
-    setActiveTab('list');
+    try {
+      setSubmittingJournal(true);
+      
+      // Extract amount in cents from the Accounts Receivable (1101) or other rows
+      const arItem = coaItems.find(item => item.coa.includes('Accounts Receivable') || item.coa.includes('1101') || item.coa.includes('1010'));
+      const amountVal = arItem ? parseFloat(arItem.debit) || parseFloat(arItem.credit) || 0 : 0;
+      const amountCents = Math.floor(amountVal * 100);
+
+      // Create transaction in real database as "Pending" (Unpaid Invoice)
+      const response = await fetch('/api/ledger/transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: formData.type === 'Expense' ? -amountCents : amountCents,
+          idempotencyKey: `journal_${Date.now()}_${Math.random()}`,
+          description: formData.title,
+          metadata: {
+            client_name: formData.customer || 'Client',
+            type: formData.type,
+            gl_number: 'GL/' + Math.floor(1000 + Math.random() * 9000),
+            tax_number: formData.taxNumber,
+            doc_number: formData.docNumber,
+          },
+          status: "Pending" // Unpaid invoice by default to test the AR aging schedule!
+        })
+      });
+
+      if (response.ok) {
+        const newEntry = {
+          date: formData.date,
+          category: formData.type,
+          gl: 'GL/' + Math.floor(1000 + Math.random() * 9000),
+          title: formData.title,
+          created: new Date().toLocaleDateString(),
+          by: currentUser?.name || currentUser?.email || 'User',
+          status: 'Waiting'
+        };
+        setLocalJournals([newEntry, ...localJournals]);
+        setActiveTab('list');
+      } else {
+        alert("Failed to save journal entry to database.");
+      }
+    } catch (err) {
+      console.error("Failed to post manual journal transaction:", err);
+    } finally {
+      setSubmittingJournal(false);
+    }
   };
 
   if (status === 'loading') {
@@ -577,9 +615,10 @@ export default function JournalsPage() {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-md transition-all"
+                disabled={submittingJournal}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-md transition-all disabled:opacity-50"
               >
-                Save Journal Entry
+                {submittingJournal ? 'Saving Entry...' : 'Save Journal Entry'}
               </button>
             </div>
 

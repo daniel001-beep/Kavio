@@ -83,33 +83,65 @@ export async function GET() {
       );
     }
 
-    // 1. Fetch all registered users
-    let allUsers = [];
+    // 1. Fetch all registered users (platform-wide visibility for admin console)
+    let allUsers: any[] = [];
     try {
       allUsers = await db.select().from(users);
     } catch (usersErr) {
       console.error("Error fetching users for admin:", usersErr);
     }
 
-    // 2. Fetch all system transactions with associated user details
-    let allTransactions = [];
+    // 2. Fetch all system transactions with associated user details (manually joined in-memory)
+    let allTransactions: any[] = [];
     try {
-      allTransactions = await db
-        .select({
-          id: transactions.id,
-          amount: transactions.amount,
-          status: transactions.status,
-          createdAt: transactions.createdAt,
-          metadata: transactions.metadata,
-          userId: transactions.userId,
-          userName: users.name,
-          userEmail: users.email,
-        })
+      const rawTx = await db
+        .select()
         .from(transactions)
-        .leftJoin(users, eq(transactions.userId, users.id))
         .orderBy(desc(transactions.createdAt));
+      
+      allTransactions = rawTx.map(tx => {
+        const matchingUser = allUsers.find(u => u.id === tx.userId);
+        return {
+          id: tx.id,
+          amount: tx.amount,
+          status: tx.status,
+          createdAt: tx.createdAt,
+          metadata: tx.metadata,
+          userId: tx.userId,
+          userName: matchingUser ? matchingUser.name : (tx.metadata as any)?.email?.split('@')[0] || "Unknown User",
+          userEmail: matchingUser ? matchingUser.email : (tx.metadata as any)?.email || "",
+        };
+      });
     } catch (txErr) {
       console.error("Error fetching transactions for admin:", txErr);
+    }
+
+    // 3. Fetch all system audit logs with associated user details (manually joined in-memory)
+    let allAuditLogs: any[] = [];
+    try {
+      const { auditLogs } = await import("@/src/db/schema");
+      const rawLogs = await db
+        .select()
+        .from(auditLogs)
+        .orderBy(desc(auditLogs.timestamp))
+        .limit(100);
+      
+      allAuditLogs = rawLogs.map(log => {
+        const matchingUser = allUsers.find(u => u.id === log.userId);
+        return {
+          id: log.id,
+          userId: log.userId,
+          eventType: log.eventType,
+          ipAddress: log.ipAddress,
+          userAgent: log.userAgent,
+          timestamp: log.timestamp,
+          metadata: log.metadata,
+          userName: matchingUser ? matchingUser.name : (log.metadata as any)?.email?.split('@')[0] || "System Agent",
+          userEmail: matchingUser ? matchingUser.email : (log.metadata as any)?.email || "",
+        };
+      });
+    } catch (auditErr) {
+      console.error("Error fetching audit logs for admin:", auditErr);
     }
 
     // Safely serialize BigInt values to JSON-friendly structures
@@ -122,6 +154,7 @@ export async function GET() {
     return NextResponse.json({
       users: allUsers,
       transactions: serializedTransactions,
+      auditLogs: allAuditLogs,
       totalUsers: allUsers.length,
       totalTransactions: allTransactions.length,
     });

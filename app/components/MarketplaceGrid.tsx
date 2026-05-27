@@ -136,7 +136,7 @@ export default function MarketplaceGrid({ onSelectProduct }: MarketplaceGridProp
                   <h3 className="text-base font-bold text-slate-800 mb-1">
                     {product.title}
                   </h3>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                     {product.category}
                   </p>
                 </div>
@@ -162,11 +162,11 @@ export default function MarketplaceGrid({ onSelectProduct }: MarketplaceGridProp
 
               <div className="grid grid-cols-2 gap-4 mb-6 relative z-10">
                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Target Yield</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">Target Yield</p>
                   <p className="text-xs font-bold text-emerald-600 font-mono">{product.yieldRate}</p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Liquidity</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">Liquidity</p>
                   <p className="text-xs font-bold text-slate-700 font-mono">{product.liquidity}</p>
                 </div>
               </div>

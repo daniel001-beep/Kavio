@@ -28,14 +28,16 @@ export default function RevenuePerformance({ transactions = [] }: RevenuePerform
   transactions.forEach(tx => {
     if (tx.date) {
       const d = new Date(tx.date);
-      const monthName = d.toLocaleString('en-US', { month: 'long' });
-      const year = d.getFullYear();
-      const target = monthlyData.find(m => m.name.startsWith(monthName) && m.name.endsWith(year.toString()));
-      if (target) {
-        if (tx.amount > 0) {
-          target.Revenue += tx.amount;
-        } else {
-          target.Budget += Math.abs(tx.amount);
+      if (!isNaN(d.getTime())) {
+        const monthName = d.toLocaleString('en-US', { month: 'long' });
+        const year = d.getFullYear();
+        const target = monthlyData.find(m => m.name.startsWith(monthName) && m.name.endsWith(year.toString()));
+        if (target) {
+          if (tx.amount > 0) {
+            target.Revenue += tx.amount;
+          } else {
+            target.Budget += Math.abs(tx.amount);
+          }
         }
       }
     }
@@ -79,7 +81,7 @@ export default function RevenuePerformance({ transactions = [] }: RevenuePerform
       </div>
 
       {/* Bar Chart */}
-      <div className="h-[280px] w-full">
+      <div className="h-[280px] w-full min-h-[280px] min-w-0 relative">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 10 }} barGap={8}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />

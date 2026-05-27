@@ -42,7 +42,7 @@ export default function MarketplacePage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200">
           <div>
             <h1 className="text-3xl font-black text-blue-600 tracking-tight">Treasury Marketplace</h1>
-            <p className="text-slate-400 text-sm mt-1 font-medium">Discover institutional-grade financial instruments to extend your runway.</p>
+            <p className="text-slate-500 text-sm mt-1 font-semibold">Discover institutional-grade financial instruments to extend your runway.</p>
           </div>
         </div>
 
@@ -73,50 +73,50 @@ export default function MarketplacePage() {
                 <div className="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mb-4 border border-emerald-200">
                   <ArrowRightLeft className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-850 mb-2">Transfer Initiated</h3>
-                <p className="text-slate-450 text-sm">Your funds are being moved securely.</p>
+                <h3 className="text-2xl font-bold text-slate-800 mb-2">Transfer Initiated</h3>
+                <p className="text-slate-600 text-sm font-semibold">Your funds are being moved securely.</p>
               </div>
             ) : (
               <form onSubmit={handleTransfer} className="p-6 space-y-6">
                 
                 <div className="flex items-center gap-4 relative">
                   <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">From</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">From</p>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center border border-blue-200">
                         <Building2 className="w-4 h-4" />
                       </div>
                       <div>
                         <p className="text-xs font-bold text-slate-700">Operating</p>
-                        <p className="text-[10px] text-slate-400 font-mono">...8492</p>
+                        <p className="text-[10px] text-slate-500 font-semibold font-mono">...8492</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center z-10 shadow-md">
-                    <ArrowRightLeft className="w-3 h-3 text-slate-400" />
+                    <ArrowRightLeft className="w-3 h-3 text-slate-500" />
                   </div>
 
                   <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">To</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">To</p>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-200">
                         <Wallet className="w-4 h-4" />
                       </div>
                       <div>
                         <p className="text-xs font-bold text-slate-700">Vault</p>
-                        <p className="text-[10px] text-slate-400 font-mono">...1104</p>
+                        <p className="text-[10px] text-slate-500 font-semibold font-mono">...1104</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
                     Amount (USD)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xl">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-xl">$</span>
                     <input
                       type="number"
                       required
@@ -128,7 +128,7 @@ export default function MarketplacePage() {
                     />
                   </div>
                   <div className="flex justify-between mt-2">
-                    <p className="text-xs text-slate-400 font-semibold">Available: <span className="font-mono text-slate-600">$4,250,000.00</span></p>
+                    <p className="text-xs text-slate-500 font-semibold">Available: <span className="font-mono text-slate-600">$4,250,000.00</span></p>
                     <button type="button" onClick={() => setTransferAmount('4250000')} className="text-xs font-bold text-blue-600 hover:text-blue-700">Max</button>
                   </div>
                 </div>

@@ -32,11 +32,13 @@ export default function PortfolioPerformance({ transactions = [], totalBalance }
   transactions.forEach(tx => {
     if (tx.date) {
       const d = new Date(tx.date);
-      const dayName = daysOfWeek[d.getDay()];
-      const target = weeklyData.find(w => w.name === dayName);
-      if (target) {
-        // Sum the absolute value of transactions (GMV movement!)
-        target.value += Math.abs(tx.amount);
+      if (!isNaN(d.getTime())) {
+        const dayName = daysOfWeek[d.getDay()];
+        const target = weeklyData.find(w => w.name === dayName);
+        if (target) {
+          // Sum the absolute value of transactions (GMV movement!)
+          target.value += Math.abs(tx.amount);
+        }
       }
     }
   });
@@ -74,7 +76,7 @@ export default function PortfolioPerformance({ transactions = [], totalBalance }
       </div>
 
       {/* Chart container */}
-      <div className="h-[280px] w-full">
+      <div className="h-[280px] w-full min-h-[280px] min-w-0 relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
             <defs>

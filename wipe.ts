@@ -5,12 +5,11 @@ import * as path from "path";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-// Supabase details
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5aGdmZXp1YnJiZ2lrdXhoY3VnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDY1MDkzNSwiZXhwIjoyMDkwMjI2OTM1fQ.oHz29g9IEh6yQpm1nlzaJo1Ov6JutcUiJ-5A3HBCMqo";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 // Postgres connection using Direct Database Host (Port 5432)
-const connectionString = "postgres://postgres:Z9QZIS6lXSIBNBdR@db.lyhgfezubrbgikuxhcug.supabase.co:5432/postgres?sslmode=require";
+const connectionString = process.env.POSTGRES_URL_NON_POOLING || "";
 
 async function wipeData() {
   console.log("Starting data wipe procedure via Supabase HTTP REST SDK to bypass local DNS constraints...");

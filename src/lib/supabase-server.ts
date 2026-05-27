@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+import { cleanEnvVar } from './env-cleaner';
+
 /**
  * Creates a Supabase client for use in Server Actions and Server Components.
  * This client automatically handles authentication state via cookies.
@@ -8,12 +10,8 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // Strip quotes, parentheses, and whitespace that could be introduced during build/parsing
-  const supabaseUrl = rawUrl?.replace(/^["'()]+|["'()]+$/g, "").trim();
-  const supabaseAnonKey = rawKey?.replace(/^["'()]+|["'()]+$/g, "").trim();
+  const supabaseUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseAnonKey = cleanEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   let isValidUrl = false;
   if (supabaseUrl && (supabaseUrl.startsWith("http://") || supabaseUrl.startsWith("https://"))) {

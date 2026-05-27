@@ -5,7 +5,7 @@ import VeloxLogo from './VeloxLogo';
 
 const Footer = () => {
   const footerLinks = [
-    { href: '/fintech/dashboard', label: 'Dashboard' },
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/fintech/marketplace', label: 'Marketplace' },
     { href: '/fintech/ledger', label: 'Ledger' },
     { href: '/fintech/security', label: 'Security' },
@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* About Velox */}
           <div className="col-span-1">
-            <Link href="/fintech/dashboard" className="inline-block mb-4 no-underline">
+            <Link href="/dashboard" className="inline-block mb-4 no-underline">
               <VeloxLogo size={28} variant="full" />
             </Link>
             <p className="text-xs text-slate-500 leading-relaxed font-medium">Enterprise-grade financial platform with real-time portfolio management and AI-powered insights.</p>

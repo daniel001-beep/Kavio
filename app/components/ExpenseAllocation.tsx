@@ -60,7 +60,7 @@ export default function ExpenseAllocation({ transactions = [] }: ExpenseAllocati
       {/* Main Content Layout (Vertical stacking for premium dashboard layouts) */}
       <div className="flex flex-col gap-5 grow py-2">
         {/* Donut Chart Container */}
-        <div className="w-full h-[180px] relative flex items-center justify-center">
+        <div className="w-full h-[180px] min-h-[180px] min-w-0 relative flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

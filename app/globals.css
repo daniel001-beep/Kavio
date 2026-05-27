@@ -98,7 +98,50 @@
     color: #0f172a !important;
     margin-bottom: 0.5rem !important;
   }
+
+  /* 3D Hardware-Accelerated Animation Styles */
+  .card-3d-premium {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0);
+    will-change: transform, box-shadow, border-color;
+  }
+
+  .card-3d-premium:hover {
+    transform: perspective(1200px) rotateX(3.5deg) rotateY(-1.5deg) translateY(-8px) translateZ(15px) !important;
+  }
+
+  .card-3d-blue:hover {
+    border-color: rgba(37, 99, 235, 0.35) !important;
+    box-shadow: 
+      0 22px 45px -15px rgba(37, 99, 235, 0.12),
+      0 0 30px rgba(37, 99, 235, 0.04) !important;
+  }
+
+  .card-3d-indigo:hover {
+    border-color: rgba(99, 102, 241, 0.35) !important;
+    box-shadow: 
+      0 22px 45px -15px rgba(99, 102, 241, 0.12),
+      0 0 30px rgba(99, 102, 241, 0.04) !important;
+  }
+
+  .card-3d-emerald:hover {
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    box-shadow: 
+      0 22px 45px -15px rgba(16, 185, 129, 0.12),
+      0 0 30px rgba(16, 185, 129, 0.04) !important;
+  }
+
+  .card-3d-telemetry:hover {
+    transform: perspective(1200px) rotateX(3deg) rotateY(1deg) translateY(-6px) translateZ(10px) !important;
+    border-color: rgba(37, 99, 235, 0.3) !important;
+    box-shadow: 
+      0 18px 36px -12px rgba(37, 99, 235, 0.08),
+      0 0 25px rgba(37, 99, 235, 0.03) !important;
+  }
 }
+
 
 @layer base {
   * {

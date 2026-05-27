@@ -3,11 +3,55 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/components/DashboardLayout';
 import { Calculator, TrendingDown, TrendingUp, Users, Megaphone, ShieldCheck, Activity } from 'lucide-react';
+import { useSession } from '@/app/context/AuthContext';
 
 export default function RunwaySimulatorPage() {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
   const [baseCapital, setBaseCapital] = useState(4250000);
   const [baseBurn, setBaseBurn] = useState(200000);
-  
+  const [isUsingRealData, setIsUsingRealData] = useState(false);
+
+  // On mount: fetch real ledger data and pre-populate the sliders
+  useEffect(() => {
+    const fetchRealFinancials = async () => {
+      try {
+        const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) return;
+
+        // Compute total cash position from all completed credits (in dollars)
+        const totalCash = data
+          .filter((tx: any) => Number(tx.amount) > 0 && tx.status === 'completed')
+          .reduce((sum: number, tx: any) => sum + Number(tx.amount) / 100, 0);
+
+        // Compute average monthly outflows over the last 3 months
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const recentDebits = data
+          .filter((tx: any) => {
+            const d = tx.createdAt ? new Date(tx.createdAt) : null;
+            return d && d >= threeMonthsAgo && Number(tx.amount) < 0;
+          })
+          .reduce((sum: number, tx: any) => sum + Math.abs(Number(tx.amount)) / 100, 0);
+        const avgMonthlyBurn = recentDebits / 3;
+
+        if (totalCash > 0) {
+          setBaseCapital(Math.round(totalCash));
+          setIsUsingRealData(true);
+        }
+        if (avgMonthlyBurn > 0) {
+          setBaseBurn(Math.round(avgMonthlyBurn));
+        }
+      } catch (err) {
+        // Keep defaults on error — no disruption
+      }
+    };
+    if (userEmail) fetchRealFinancials();
+  }, [userEmail]);
+
   // Scenarios
   const [hireEngineers, setHireEngineers] = useState(false);
   const [marketingPush, setMarketingPush] = useState(false);
@@ -39,6 +83,12 @@ export default function RunwaySimulatorPage() {
               Runway & Burn Simulator
             </h1>
             <p className="text-slate-400 mt-2">Dynamically model your startup's survival based on hiring, marketing, and Velox yield.</p>
+            {isUsingRealData && (
+              <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/50 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Based on your actual ledger data
+              </span>
+            )}
           </div>
           
           <div className="bg-slate-900 border border-slate-700 px-6 py-4 rounded-sm shadow-xl flex items-center gap-4">
