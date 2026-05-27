@@ -106,34 +106,7 @@ export default function Home() {
         </ScrollReveal3D>
       </section>
 
-      {/* 2.5 — Animated Platform Metrics Strip (Stripe/Plaid style) */}
-      <section className="w-full border-y border-slate-200/80 bg-white/60 backdrop-blur-sm py-6">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x md:divide-slate-200">
-            {[
-              { value: '99.97%', label: 'Platform Uptime', live: true },
-              { value: '< 2ms', label: 'Ledger Write Latency', live: false },
-              { value: '2x Entry', label: 'Double-Entry Enforced', live: false },
-              { value: 'SOC 2', label: 'Security Standard Ready', live: false },
-            ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center gap-1 px-4 text-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black text-slate-900 tracking-tight tabular-nums">
-                    {stat.value}
-                  </span>
-                  {stat.live && (
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Live</span>
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* 3. Features Bento Grid */}
       <section id="features" className="py-24 px-6 max-w-7xl mx-auto w-full">
@@ -379,14 +352,6 @@ export default function Home() {
             <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm mt-2">
               High-frequency, double-entry ledger engine and cryptographically isolated multi-tenant wallet systems built for B2B financial operators.
             </p>
-            <div className="mt-4 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-600 tracking-wide uppercase">
-                <Lock className="w-3 h-3 text-slate-400" /> SOC-2 Compliant
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-600 tracking-wide uppercase">
-                <ShieldCheck className="w-3 h-3 text-slate-400" /> PCI-DSS Lvl 1
-              </span>
-            </div>
           </div>
 
           {/* Product Links */}
