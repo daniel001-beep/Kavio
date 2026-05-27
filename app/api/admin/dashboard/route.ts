@@ -5,6 +5,8 @@ import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
   const localUserCookie = cookieStore.get('velox-local-user')?.value;
