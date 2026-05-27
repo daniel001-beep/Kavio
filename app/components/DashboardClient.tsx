@@ -35,124 +35,6 @@ interface DashboardClientProps {
   isDemoData?: boolean;
 }
 
-// --- Velox AI Insights Panel ---
-// Computes real financial insights from the user's actual ledger data.
-// No external API — all logic runs locally in-browser for instant results.
-function VeloxInsightsPanel({
-  transactions,
-  formatCurrency,
-}: {
-  transactions: UITransaction[];
-  formatCurrency: (v: number) => string;
-}) {
-  const insights = useMemo(() => {
-    if (transactions.length === 0) return [];
-
-    const thisMonth = new Date().getMonth();
-    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
-
-    const thisMonthTxs = transactions.filter((tx) => {
-      const d = tx.date ? new Date(tx.date) : null;
-      return d && d.getMonth() === thisMonth;
-    });
-    const lastMonthTxs = transactions.filter((tx) => {
-      const d = tx.date ? new Date(tx.date) : null;
-      return d && d.getMonth() === lastMonth;
-    });
-
-    const thisCredits = thisMonthTxs
-      .filter((tx) => tx.amount > 0)
-      .reduce((s, tx) => s + tx.amount, 0);
-    const lastCredits = lastMonthTxs
-      .filter((tx) => tx.amount > 0)
-      .reduce((s, tx) => s + tx.amount, 0);
-
-    const thisDebits = Math.abs(
-      thisMonthTxs.filter((tx) => tx.amount < 0).reduce((s, tx) => s + tx.amount, 0)
-    );
-
-    const pendingAR = transactions
-      .filter((tx) => tx.status === 'PENDING' && tx.amount > 0)
-      .reduce((s, tx) => s + tx.amount, 0);
-
-    const topCredit = [...transactions]
-      .filter((tx) => tx.amount > 0)
-      .sort((a, b) => b.amount - a.amount)[0];
-
-    const result: { icon: 'up' | 'down' | 'warn' | 'star'; text: string }[] = [];
-
-    if (thisCredits > 0 && lastCredits > 0) {
-      const pct = (((thisCredits - lastCredits) / lastCredits) * 100).toFixed(1);
-      const dir = thisCredits >= lastCredits ? 'up' : 'down';
-      result.push({
-        icon: dir,
-        text: `Revenue is ${dir === 'up' ? '▲' : '▼'} ${Math.abs(Number(pct))}% vs last month (${formatCurrency(thisCredits)} this month)`,
-      });
-    }
-
-    if (thisDebits > 0) {
-      result.push({
-        icon: 'warn',
-        text: `Spend this month: ${formatCurrency(thisDebits)} — ${thisMonthTxs.filter(tx => tx.amount < 0).length} outgoing transactions`,
-      });
-    }
-
-    if (topCredit) {
-      result.push({
-        icon: 'star',
-        text: `Largest credit: ${formatCurrency(topCredit.amount)} — "${topCredit.description}"`,
-      });
-    }
-
-    if (pendingAR > 0) {
-      result.push({
-        icon: 'warn',
-        text: `${formatCurrency(pendingAR)} in pending receivables — follow up to accelerate cash flow`,
-      });
-    }
-
-    return result;
-  }, [transactions, formatCurrency]);
-
-  if (insights.length === 0) return null;
-
-  const iconMap = {
-    up: <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />,
-    down: <TrendingDown className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />,
-    warn: <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />,
-    star: <Sparkles className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />,
-  };
-
-  return (
-    <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/40 rounded-[24px] overflow-hidden shadow-sm p-5 sm:p-8 mt-8">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-          <Sparkles className="w-4 h-4 text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-sm font-bold text-white tracking-tight">Velox Intelligence</h2>
-          <p className="text-[10px] text-blue-300/70 font-medium">Computed from your live ledger data</p>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Live</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {insights.map((insight, i) => (
-          <div
-            key={i}
-            className="flex items-start gap-3 bg-white/5 hover:bg-white/8 transition-colors border border-white/8 rounded-xl p-4"
-          >
-            {iconMap[insight.icon]}
-            <p className="text-xs text-slate-300 leading-relaxed font-medium">{insight.text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function DashboardClient({ 
   totalBalanceUsd: initialBalance, 
@@ -169,10 +51,29 @@ export default function DashboardClient({
   const [isExporting, setIsExporting] = useState(false);
   const { addNotification } = useNotifications();
   const [invoices, setInvoices] = useState<any[]>([]);
-  // Fresh API transactions fetched client-side — always up-to-date
-  // Initialize empty — we load from cache immediately in the first useEffect
   const [apiTransactions, setApiTransactions] = useState<UITransaction[]>([]);
+  const [serverBalance, setServerBalance] = useState(initialBalance);
+  const [serverDayChange, setServerDayChange] = useState(initialChange);
+  const [exchangeRates, setExchangeRates] = useState({
+    USD: 1,
+    EUR: 0.92,
+    NGN: 1450.50,
+  });
 
+  useEffect(() => {
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.rates) {
+          setExchangeRates({
+            USD: 1,
+            EUR: d.rates.EUR || 0.92,
+            NGN: d.rates.NGN || 1450.50,
+          });
+        }
+      })
+      .catch(e => console.warn('Failed to fetch live exchange rates', e));
+  }, []);
 
   // Load from localStorage cache on mount for instant sub-0.1s loading
   // This runs BEFORE any API fetch, so cached data is always visible first
@@ -236,9 +137,14 @@ export default function DashboardClient({
       
       const data = await res.json();
       
-      // Map data successfully. If data is an empty array [], mapped is [] (fully correct for new accounts)
-      const mapped: UITransaction[] = Array.isArray(data)
-        ? data.map((tx: any) => {
+      const transactionsPayload = Array.isArray(data) ? data : data.transactions || [];
+      if (!Array.isArray(data)) {
+        setServerBalance(data.totalBalanceUsd !== undefined ? data.totalBalanceUsd : initialBalance);
+        setServerDayChange(data.dayChangeUsd !== undefined ? data.dayChangeUsd : initialChange);
+      }
+
+      // Map data successfully.
+      const mapped: UITransaction[] = transactionsPayload.map((tx: any) => {
             const amountInDollars = Number(tx.amount) / 100;
             let meta = tx.metadata;
             if (typeof meta === 'string') {
@@ -254,8 +160,7 @@ export default function DashboardClient({
               amount: amountInDollars,
               status: tx.status?.toUpperCase() || 'COMPLETED',
             };
-          })
-        : [];
+          });
 
       setApiTransactions(mapped);
       
@@ -276,33 +181,6 @@ export default function DashboardClient({
     const interval = setInterval(fetchLatestTransactions, 90000);
     return () => clearInterval(interval);
   }, [fetchLatestTransactions]);
-
-  // Fetch invoices dynamically from Supabase (secondary source for real-time updates)
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      if (!supabase || !userEmail) return;
-      try {
-        const { data, error } = await supabase
-          .from('invoices')
-          .select('*')
-          .eq('email', userEmail)
-          .order('created_at', { ascending: false });
-
-        if (data && !error) {
-          setInvoices(data);
-          if (userEmail) {
-            localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(data));
-            localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
-          } else {
-            localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching invoices on dashboard:', err);
-      }
-    };
-    fetchInvoices();
-  }, [userEmail]);
 
   // Real-time subscription: open a persistent WebSocket channel for instant lag-free updates
   useEffect(() => {
@@ -365,61 +243,12 @@ export default function DashboardClient({
                   title: 'New Ledger Entry',
                   message: `Transaction processed: $${Math.abs(amountInDollars).toLocaleString()} (${uiTx.description})`,
                 });
+                addNotification({
+                  type: 'SENTINEL',
+                  title: 'Sentinel Alert: New Ledger Entry',
+                  message: `Detected transaction: $${Math.abs(amountInDollars).toLocaleString()}. Integrity verified.`,
+                });
               }
-            }
-          }
-        }
-      )
-      // 2. Subscribe to invoices table
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'invoices' },
-        async (payload) => {
-          console.log('[Realtime] Invoice change:', payload.eventType, payload.new);
-          
-          // Re-fetch transactions and invoices in background
-          fetchLatestTransactions();
-          try {
-            const { data } = await supabase
-              .from('invoices')
-              .select('*')
-              .eq('email', userEmail)
-              .order('created_at', { ascending: false });
-            if (data) {
-              setInvoices(data);
-              localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(data));
-              localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(data));
-            }
-          } catch (err) {
-            console.error('Error re-fetching invoices on dashboard:', err);
-          }
-
-          // Optimistically update invoice list in UI and push notification
-          if (payload.eventType === 'INSERT') {
-            const newInvoice = payload.new as any;
-            if (newInvoice && newInvoice.email === userEmail) {
-              setInvoices(prev => {
-                const updated = [newInvoice, ...prev.filter(x => x.id !== newInvoice.id)];
-                localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(updated));
-                localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(updated));
-                return updated;
-              });
-              
-              addNotification({
-                type: 'SENTINEL',
-                title: 'Sentinel Alert: New Ledger Entry',
-                message: `Detected invoice to ${newInvoice.client_name} of $${Number(newInvoice.amount).toLocaleString()}. Integrity verified.`,
-              });
-            }
-          } else if (payload.eventType === 'UPDATE') {
-            const updatedInvoice = payload.new as any;
-            if (updatedInvoice && updatedInvoice.email === userEmail) {
-              setInvoices(prev => {
-                const updated = prev.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv);
-                localStorage.setItem(`velox_cached_invoices_${userEmail}`, JSON.stringify(updated));
-                localStorage.setItem(`velox_last_active_cached_invoices`, JSON.stringify(updated));
-                return updated;
-              });
             }
           }
         }
@@ -463,72 +292,17 @@ export default function DashboardClient({
     };
   }, [userEmail]);
 
-  // Compute live visual states: merge API transactions (primary) with Supabase invoices (secondary)
+  // Compute live visual states: just sort API transactions
   const transactions = useMemo<UITransaction[]>(() => {
-    const mergedMap = new Map<string, UITransaction>();
-
-    // 1. Seed with fresh API transactions (Drizzle + Supabase fallback)
-    apiTransactions.forEach((tx) => {
-      if (tx && tx.id) {
-        mergedMap.set(tx.id.toString(), {
-          ...tx,
-          id: tx.id.toString(),
-        });
-      }
-    });
-
-    // 2. Merge Supabase invoices, adding any entries not already in the map
-    invoices.forEach((inv) => {
-      if (inv && inv.id) {
-        const idStr = inv.id.toString();
-        if (!mergedMap.has(idStr)) {
-          mergedMap.set(idStr, {
-            id: idStr,
-            type: inv.amount > 0 ? 'CREDIT' : 'DEBIT',
-            description: inv.description || `Invoice to ${inv.client_name}`,
-            date: inv.created_at ? new Date(inv.created_at).toISOString() : new Date().toISOString(),
-            amount: inv.amount || 0,
-            status: inv.status === 'Paid' ? 'COMPLETED' : 'PENDING'
-          });
-        }
-      }
-    });
-
-    const list = Array.from(mergedMap.values());
-
-    // Sort chronologically by date descending
-    return list.sort((a, b) => {
+    return [...apiTransactions].sort((a, b) => {
       const timeA = a.date ? new Date(a.date).getTime() : 0;
       const timeB = b.date ? new Date(b.date).getTime() : 0;
       return timeB - timeA;
     });
-  }, [initialTransactions, apiTransactions, invoices]);
+  }, [apiTransactions]);
 
-  const balance = useMemo(() => {
-    // Fall back to server-rendered initialBalance when there are no transactions
-    if (transactions.length === 0) return initialBalance;
-    return transactions
-      .filter((tx) => tx.status?.toUpperCase() === 'COMPLETED' || !tx.status)
-      .reduce((acc, tx) => acc + (tx.amount || 0), 0);
-  }, [transactions, initialBalance]);
-
-  const dayChange = useMemo(() => {
-    if (transactions.length === 0) return initialChange;
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    return transactions
-      .filter((tx) => {
-        const txDate = tx.date ? new Date(tx.date) : new Date();
-        return txDate >= todayStart && (tx.status?.toUpperCase() === 'COMPLETED' || !tx.status);
-      })
-      .reduce((acc, tx) => acc + (tx.amount || 0), 0);
-  }, [transactions, initialChange]);
-
-  const exchangeRates = {
-    USD: 1,
-    EUR: 0.92,
-    NGN: 1450.50,
-  };
+  const balance = serverBalance;
+  const dayChange = serverDayChange;
 
   const formatCurrency = (usdValue: number) => {
     const rate = exchangeRates[currency];

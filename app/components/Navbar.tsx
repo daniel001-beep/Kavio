@@ -23,6 +23,16 @@ const Navbar = () => {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileOpen]);
   // Links grouped by category for mobile
   const navGroups = [
     {
