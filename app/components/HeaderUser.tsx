@@ -2,15 +2,17 @@
 
 import { useSession } from "@/app/context/AuthContext";
 
+/**
+ * HeaderUser — displays the logged-in user's name, email, and a
+ * live green pulse dot indicating the Supabase WebSocket is connected.
+ */
 export default function HeaderUser() {
   const { data: session } = useSession();
 
   const name = session?.user?.name || session?.user?.email?.split("@")[0] || "User";
-  let firstName = name.trim().split(" ")[0];
-  if (firstName.toLowerCase().startsWith("idowuisdaniel")) {
-    firstName = "Daniel";
-  }
-  const initials = firstName === "Daniel" ? "D" : name
+  const firstName = name.trim().split(" ")[0];
+  const initials = name
+    .trim()
     .split(" ")
     .map((w: string) => w[0])
     .join("")
@@ -20,9 +22,17 @@ export default function HeaderUser() {
 
   return (
     <div className="flex items-center gap-3 h-8">
-      <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0">
-        {initials}
+      {/* Avatar with live pulse indicator */}
+      <div className="relative">
+        <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0">
+          {initials}
+        </div>
+        {/* Live WebSocket indicator */}
+        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm">
+          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+        </span>
       </div>
+
       <div className="text-left hidden sm:block">
         <p className="text-[13px] font-semibold text-slate-800 leading-tight capitalize">{firstName}</p>
         <p className="text-[11px] text-slate-400 font-medium leading-none truncate max-w-[140px]">{email}</p>

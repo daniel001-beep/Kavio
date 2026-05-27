@@ -41,7 +41,7 @@ interface LedgerClientProps {
 const fallbackInvoices: DbInvoice[] = [];
 
 export default function LedgerClient({ initialTransactions = [] }: LedgerClientProps) {
-  const [activeTab, setActiveTab] = useState<'list' | 'create'>('create'); // Start on the uploaded Create Invoice screen by default!
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list'); // Show invoice list first — create is secondary action
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
@@ -50,25 +50,34 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
   const [loading, setLoading] = useState(false);
 
   // Form Fields state wired directly to local variables
-  const [clientName, setClientName] = useState('ABC Ltd');
+  const [clientName, setClientName] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('0.00');
   const [status, setStatus] = useState<'Paid' | 'Pending'>('Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Generate dynamic invoice numbers based on today's date
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  const todayStr = `${dd}/${mm}/${yyyy}`;
+  const dueDateObj = new Date(today);
+  dueDateObj.setDate(dueDateObj.getDate() + 30);
+  const dueDateStr = `${String(dueDateObj.getDate()).padStart(2, '0')}/${String(dueDateObj.getMonth() + 1).padStart(2, '0')}/${dueDateObj.getFullYear()}`;
+  const seqId = String(Math.floor(Math.random() * 9000) + 1000);
+
   const [formFields, setFormFields] = useState({
-    reqNumber: 'REQ/SLS/INV/06112025/0005',
-    invNumber: 'INV/SLS/112025/0142',
+    reqNumber: `REQ/SLS/INV/${dd}${mm}${yyyy}/${seqId}`,
+    invNumber: `INV/SLS/${mm}${yyyy}/${seqId}`,
     docType: 'Invoice',
-    invDate: '21/11/2025',
-    dueDate: '25/11/2025',
+    invDate: todayStr,
+    dueDate: dueDateStr,
   });
 
-  // Table items list with VAT 12% calculation replicating Image 3
+  // Start with an empty line item — user fills it in
   const [items, setItems] = useState([
-    { id: 1, desc: 'Consulting Services (Q4)', qty: 80, price: 120.00 },
-    { id: 2, desc: 'Software License - Pro (Annual)', qty: 1, price: 4500.00 },
-    { id: 3, desc: 'Hardware Supply (50 units)', qty: 50, price: 50.00 }
+    { id: 1, desc: '', qty: 1, price: 0.00 },
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');

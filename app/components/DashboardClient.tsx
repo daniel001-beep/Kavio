@@ -11,7 +11,11 @@ import {
   Download, 
   ShieldCheck,
   Zap,
-  Loader2
+  Loader2,
+  Sparkles,
+  BookOpen,
+  AlertTriangle,
+  TrendingDown
 } from 'lucide-react';
 import DashboardLayout from '@/app/components/DashboardLayout';
 import PortfolioPerformance from '@/app/components/PortfolioPerformance';
@@ -29,6 +33,125 @@ interface DashboardClientProps {
   dayChangeUsd: number;
   transactions: UITransaction[];
   isDemoData?: boolean;
+}
+
+// --- Velox AI Insights Panel ---
+// Computes real financial insights from the user's actual ledger data.
+// No external API — all logic runs locally in-browser for instant results.
+function VeloxInsightsPanel({
+  transactions,
+  formatCurrency,
+}: {
+  transactions: UITransaction[];
+  formatCurrency: (v: number) => string;
+}) {
+  const insights = useMemo(() => {
+    if (transactions.length === 0) return [];
+
+    const thisMonth = new Date().getMonth();
+    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+
+    const thisMonthTxs = transactions.filter((tx) => {
+      const d = tx.date ? new Date(tx.date) : null;
+      return d && d.getMonth() === thisMonth;
+    });
+    const lastMonthTxs = transactions.filter((tx) => {
+      const d = tx.date ? new Date(tx.date) : null;
+      return d && d.getMonth() === lastMonth;
+    });
+
+    const thisCredits = thisMonthTxs
+      .filter((tx) => tx.amount > 0)
+      .reduce((s, tx) => s + tx.amount, 0);
+    const lastCredits = lastMonthTxs
+      .filter((tx) => tx.amount > 0)
+      .reduce((s, tx) => s + tx.amount, 0);
+
+    const thisDebits = Math.abs(
+      thisMonthTxs.filter((tx) => tx.amount < 0).reduce((s, tx) => s + tx.amount, 0)
+    );
+
+    const pendingAR = transactions
+      .filter((tx) => tx.status === 'PENDING' && tx.amount > 0)
+      .reduce((s, tx) => s + tx.amount, 0);
+
+    const topCredit = [...transactions]
+      .filter((tx) => tx.amount > 0)
+      .sort((a, b) => b.amount - a.amount)[0];
+
+    const result: { icon: 'up' | 'down' | 'warn' | 'star'; text: string }[] = [];
+
+    if (thisCredits > 0 && lastCredits > 0) {
+      const pct = (((thisCredits - lastCredits) / lastCredits) * 100).toFixed(1);
+      const dir = thisCredits >= lastCredits ? 'up' : 'down';
+      result.push({
+        icon: dir,
+        text: `Revenue is ${dir === 'up' ? '▲' : '▼'} ${Math.abs(Number(pct))}% vs last month (${formatCurrency(thisCredits)} this month)`,
+      });
+    }
+
+    if (thisDebits > 0) {
+      result.push({
+        icon: 'warn',
+        text: `Spend this month: ${formatCurrency(thisDebits)} — ${thisMonthTxs.filter(tx => tx.amount < 0).length} outgoing transactions`,
+      });
+    }
+
+    if (topCredit) {
+      result.push({
+        icon: 'star',
+        text: `Largest credit: ${formatCurrency(topCredit.amount)} — "${topCredit.description}"`,
+      });
+    }
+
+    if (pendingAR > 0) {
+      result.push({
+        icon: 'warn',
+        text: `${formatCurrency(pendingAR)} in pending receivables — follow up to accelerate cash flow`,
+      });
+    }
+
+    return result;
+  }, [transactions, formatCurrency]);
+
+  if (insights.length === 0) return null;
+
+  const iconMap = {
+    up: <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />,
+    down: <TrendingDown className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />,
+    warn: <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />,
+    star: <Sparkles className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />,
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-900/40 rounded-[24px] overflow-hidden shadow-sm p-5 sm:p-8 mt-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <Sparkles className="w-4 h-4 text-blue-400" />
+        </div>
+        <div>
+          <h2 className="text-sm font-bold text-white tracking-tight">Velox Intelligence</h2>
+          <p className="text-[10px] text-blue-300/70 font-medium">Computed from your live ledger data</p>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Live</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {insights.map((insight, i) => (
+          <div
+            key={i}
+            className="flex items-start gap-3 bg-white/5 hover:bg-white/8 transition-colors border border-white/8 rounded-xl p-4"
+          >
+            {iconMap[insight.icon]}
+            <p className="text-xs text-slate-300 leading-relaxed font-medium">{insight.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardClient({ 
@@ -149,8 +272,8 @@ export default function DashboardClient({
   // Fetch on mount
   useEffect(() => {
     fetchLatestTransactions();
-    // Also refresh every 30 seconds to catch any changes
-    const interval = setInterval(fetchLatestTransactions, 30000);
+    // Supabase realtime handles live updates; poll every 90s only as a safety net
+    const interval = setInterval(fetchLatestTransactions, 90000);
     return () => clearInterval(interval);
   }, [fetchLatestTransactions]);
 
@@ -669,7 +792,19 @@ export default function DashboardClient({
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {transactions.length === 0 ? (
-                      <tr><td colSpan={3} className="py-6 text-center text-slate-500 text-xs">No transactions</td></tr>
+                      <tr>
+                        <td colSpan={3}>
+                          <div className="py-8 flex flex-col items-center gap-3 text-center">
+                            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-slate-300" />
+                            </div>
+                            <p className="text-slate-400 text-xs font-semibold">Your ledger is empty</p>
+                            <a href="/fintech/journals" className="text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors underline underline-offset-2">
+                              Post your first entry →
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
                     ) : transactions.slice(0, 5).map((tx) => (
                       <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="py-3 px-3">
@@ -722,8 +857,14 @@ export default function DashboardClient({
                   <tbody className="divide-y divide-slate-100 text-[11px]">
                     {arAgingData.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="py-16 text-center text-slate-400 font-semibold text-xs">
-                          No pending receivables
+                        <td colSpan={3}>
+                          <div className="py-10 flex flex-col items-center gap-2 text-center">
+                            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                            </div>
+                            <p className="text-slate-500 text-xs font-semibold">No pending receivables</p>
+                            <p className="text-[10px] text-slate-400">All invoices are settled ✓</p>
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -754,6 +895,9 @@ export default function DashboardClient({
             </div>
             <AuditTimeline transactions={transactions} />
           </div>
+
+          {/* Row 4: Velox AI Insights Panel */}
+          <VeloxInsightsPanel transactions={transactions} formatCurrency={formatCurrency} />
 
         </div>
       </div>

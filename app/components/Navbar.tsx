@@ -26,6 +26,7 @@ const Navbar = () => {
   // Links mapped exactly to the sure+ sidebar, using working fintech routes
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/fintech/ledger', label: 'Smart Ledger', icon: BookOpen },
     { href: '/fintech/master-data', label: 'Master Data', icon: Database },
     { href: '/fintech/bank-mutation', label: 'Bank Mutation', icon: ArrowLeftRight },
     { href: '/fintech/financial-documents', label: 'Financial Documents', icon: FileSpreadsheet },
