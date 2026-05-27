@@ -159,50 +159,50 @@ export default function SecurityMonitorPage() {
             
             <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm flex items-center gap-5 md:col-span-2">
               {chainValid === true ? (
-                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100/50">
+                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100/50 shrink-0">
                   <ShieldCheck className="w-10 h-10" />
                 </div>
               ) : chainValid === false ? (
-                <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/50 animate-bounce">
+                <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/50 animate-bounce shrink-0">
                   <ShieldAlert className="w-10 h-10" />
                 </div>
               ) : (
-                <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl border border-slate-100 animate-pulse">
+                <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl border border-slate-100 animate-pulse shrink-0">
                   <Activity className="w-10 h-10" />
                 </div>
               )}
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Integrity Status</p>
-                <h3 className={`text-2xl font-black mt-1 ${
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-words">Global Integrity Status</p>
+                <h3 className={`text-lg sm:text-xl lg:text-2xl font-black mt-1 break-words ${
                   chainValid === true ? 'text-emerald-600' : chainValid === false ? 'text-rose-600' : 'text-slate-500'
                 }`}>
                   {chainValid === true ? 'CHAIN SECURED & VERIFIED' : chainValid === false ? 'TAMPERING DETECTED' : 'AUDITING BLOCKCHAIN...'}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5 break-words">
                   {chainValid === true ? 'All block hashes match their preceding signature' : chainValid === false ? 'A transaction was altered without matching hash updates' : 'Analyzing transaction blocks'}
                 </p>
               </div>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm flex items-center gap-5">
-              <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
+              <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50 shrink-0">
                 <Binary className="w-6 h-6" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Audited Blocks</p>
-                <h3 className="text-2xl font-black text-slate-800 mt-1">{auditedCount}</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Chronological Tx records</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-words">Audited Blocks</p>
+                <h3 className="text-xl lg:text-2xl font-black text-slate-800 mt-1 break-words">{auditedCount}</h3>
+                <p className="text-xs text-slate-400 mt-0.5 break-words">Chronological Tx records</p>
               </div>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm flex items-center gap-5">
-              <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100/50">
+              <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100/50 shrink-0">
                 <UserCheck className="w-6 h-6 animate-pulse" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Idempotency Guard</p>
-                <h3 className="text-2xl font-black text-emerald-600 mt-1">SHIELDED</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Zero double-payout risk</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-words">Idempotency Guard</p>
+                <h3 className="text-xl lg:text-2xl font-black text-emerald-600 mt-1 break-words">SHIELDED</h3>
+                <p className="text-xs text-slate-400 mt-0.5 break-words">Zero double-payout risk</p>
               </div>
             </div>
 
