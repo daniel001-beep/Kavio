@@ -896,9 +896,6 @@ export default function DashboardClient({
             <AuditTimeline transactions={transactions} />
           </div>
 
-          {/* Row 4: Velox AI Insights Panel */}
-          <VeloxInsightsPanel transactions={transactions} formatCurrency={formatCurrency} />
-
         </div>
       </div>
     </DashboardLayout>

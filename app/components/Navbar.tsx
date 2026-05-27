@@ -23,25 +23,41 @@ const Navbar = () => {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Links mapped exactly to the sure+ sidebar, using working fintech routes
-  const navLinks = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/fintech/ledger', label: 'Smart Ledger', icon: BookOpen },
-    { href: '/fintech/master-data', label: 'Master Data', icon: Database },
-    { href: '/fintech/bank-mutation', label: 'Bank Mutation', icon: ArrowLeftRight },
-    { href: '/fintech/financial-documents', label: 'Financial Documents', icon: FileSpreadsheet },
-    { href: '/fintech/journals', label: 'Journals', icon: BookOpen },
-    { href: '/fintech/reconciliation', label: 'Reconciliation Feed', icon: ArrowLeftRight },
-    { href: '/fintech/ar-aging', label: 'AR Aging Schedule', icon: FileSpreadsheet },
-    { href: '/fintech/security', label: 'Audit Vault Security', icon: ShieldCheck },
-    { href: '/fintech/reports', label: 'Reports', icon: BarChart3 },
+  // Links grouped by category for mobile
+  const navGroups = [
+    {
+      label: 'OVERVIEW',
+      items: [
+        { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      ]
+    },
+    {
+      label: 'CORE ACCOUNTING',
+      items: [
+        { href: '/fintech/bank-mutation', label: 'Bank Mutation', icon: ArrowLeftRight },
+        { href: '/fintech/reconciliation', label: 'Reconciliation Feed', icon: ArrowLeftRight },
+        { href: '/fintech/financial-documents', label: 'Financial Documents', icon: FileSpreadsheet },
+        { href: '/fintech/journals', label: 'Journals', icon: BookOpen },
+        { href: '/fintech/ar-aging', label: 'AR Aging Schedule', icon: FileSpreadsheet },
+      ]
+    },
+    {
+      label: 'SYSTEM & SECURITY',
+      items: [
+        { href: '/fintech/master-data', label: 'Master Data', icon: Database },
+        { href: '/fintech/security', label: 'Audit Vault Security', icon: ShieldCheck },
+      ]
+    }
   ];
 
   const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
   const showAdminLink = session?.user?.isAdmin || (adminEmail && session?.user?.email?.toLowerCase().trim() === adminEmail);
   if (showAdminLink) {
-    navLinks.push({ href: '/fintech/admin', label: 'Admin Console', icon: ShieldCheck });
+    navGroups[2].items.push({ href: '/fintech/admin', label: 'Admin Console', icon: ShieldCheck });
   }
+
+  // Flatten for desktop mapping (since categories are only for mobile)
+  const flatNavLinks = navGroups.flatMap(group => group.items);
 
   return (
     <>
@@ -66,10 +82,10 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Nav Links List */}
+        {/* Nav Links List (Flat for Desktop) */}
         <nav className="flex-1 overflow-y-auto py-6 px-4">
           <ul className="space-y-4">
-            {navLinks.map((link) => {
+            {flatNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
 
@@ -137,31 +153,42 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Nav Links */}
+            {/* Nav Links Grouped for Mobile */}
             <nav className="flex-1 overflow-y-auto py-6 px-4">
-              <ul className="space-y-4">
-                {navLinks.map((link) => {
-                  const Icon = link.icon;
-                  const isActive = pathname === link.href;
+              <div className="space-y-6">
+                {navGroups.map((group) => (
+                  <div key={group.label}>
+                    {/* Category Header */}
+                    <h3 className="px-4 mb-2 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                      {group.label}
+                    </h3>
+                    {/* Group Links */}
+                    <ul className="space-y-1">
+                      {group.items.map((link) => {
+                        const Icon = link.icon;
+                        const isActive = pathname === link.href;
 
-                  return (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        onClick={() => setIsMobileOpen(false)}
-                        className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-[14px] font-medium transition-all duration-150 ${
-                          isActive
-                            ? 'bg-blue-50/80 text-blue-600'
-                            : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                        <span className="flex-1">{link.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+                        return (
+                          <li key={link.label}>
+                            <Link
+                              href={link.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-[14px] font-medium transition-all duration-150 ${
+                                isActive
+                                  ? 'bg-blue-50/80 text-blue-600'
+                                  : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                              <span className="flex-1">{link.label}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             </nav>
 
             {/* Footer Area - Log Out at bottom */}
