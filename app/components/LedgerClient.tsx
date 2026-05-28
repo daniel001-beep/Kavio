@@ -124,8 +124,8 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
           if (res.ok) {
             drizzleSucceeded = true;
             const data = await res.json();
-            drizzleMapped = Array.isArray(data) 
-              ? data.map((tx: any) => {
+            const txPayload = Array.isArray(data) ? data : data.transactions || [];
+            drizzleMapped = txPayload.map((tx: any) => {
                   let meta = tx.metadata;
                   if (typeof meta === 'string') {
                     try {
@@ -140,8 +140,7 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
                     status: tx.status === 'completed' ? 'Paid' : 'Pending',
                     created_at: tx.createdAt
                   };
-                })
-              : [];
+                });
           }
         } catch (drizzleErr) {
           console.error('Error fetching drizzle transactions:', drizzleErr);

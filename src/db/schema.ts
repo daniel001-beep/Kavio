@@ -157,3 +157,13 @@ export const webhookEndpoints = pgTable("webhook_endpoint", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const outboxEvents = pgTable("outbox_event", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  eventType: text("event_type").notNull(),
+  payload: jsonb("payload").notNull(),
+  status: text("status").notNull().default("pending"), // 'pending', 'processing', 'completed', 'failed'
+  attemptCount: integer("attempt_count").default(0),
+  nextRetryAt: timestamp("next_retry_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
