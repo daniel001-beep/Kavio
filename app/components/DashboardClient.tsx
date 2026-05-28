@@ -45,6 +45,15 @@ export default function DashboardClient({
   const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
   const userId = session?.user?.id;
+  
+  // Use Next.js router
+  const router = import('next/navigation').then(m => m.useRouter);
+  
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      window.location.href = '/auth/signin';
+    }
+  }, [status]);
 
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'NGN'>('USD');
   const [isSentinelActive, setIsSentinelActive] = useState(true);
