@@ -623,27 +623,7 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
           <div className="bg-white border border-slate-200 rounded-[24px] shadow-sm p-4 xs:p-6 sm:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Request Number (Disabled mock) */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Request Number</label>
-                <input
-                  type="text"
-                  value={formFields.reqNumber}
-                  disabled
-                  className="px-4 py-2.5 text-sm bg-slate-100 border border-slate-200 rounded-lg text-slate-400 font-semibold"
-                />
-              </div>
 
-              {/* Invoice Number (Disabled mock) */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Invoice Number</label>
-                <input
-                  type="text"
-                  value={formFields.invNumber}
-                  disabled
-                  className="px-4 py-2.5 text-sm bg-slate-100 border border-slate-200 rounded-lg text-slate-400 font-semibold"
-                />
-              </div>
 
               {/* Client Name / Customer Data */}
               <div className="flex flex-col gap-1.5">

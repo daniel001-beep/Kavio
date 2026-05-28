@@ -113,7 +113,6 @@ export async function signInAction(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
 
-    cookieStore.set('sb-access-token', 'mock-token', { path: '/' });
     await logAuditEvent('usr_6wshej3ht', 'USER_LOGIN', lowerEmail);
     return { success: true };
   }
@@ -225,8 +224,6 @@ export async function signInAction(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
 
-    // Set a dummy Supabase cookie to keep any standard library checks happy
-    cookieStore.set('sb-access-token', 'mock-token', { path: '/' });
     await logAuditEvent(drizzleUser.id, 'USER_LOGIN', lowerEmail);
 
     return { success: true };
@@ -290,8 +287,6 @@ export async function signUpAction(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
 
-    // Set a dummy Supabase cookie
-    cookieStore.set('sb-access-token', 'mock-token', { path: '/' });
     await logAuditEvent(newUser?.id || userId, 'USER_SIGNUP', lowerEmail);
 
     return { success: true };
@@ -339,7 +334,6 @@ export async function signUpAction(formData: FormData) {
         maxAge: 60 * 60 * 24 * 7 // 1 week
       });
 
-      cookieStore.set('sb-access-token', 'mock-token', { path: '/' });
       await logAuditEvent(newUserObj.id, 'USER_SIGNUP', lowerEmail);
       return { success: true };
     } catch (fallbackErr: any) {
@@ -368,7 +362,6 @@ export async function signOutAction() {
     await supabase.auth.signOut().catch(() => {});
   }
   cookieStore.set('velox-local-user', '', { path: '/', maxAge: 0 });
-  cookieStore.set('sb-access-token', '', { path: '/', maxAge: 0 });
   return { success: true };
 }
 
