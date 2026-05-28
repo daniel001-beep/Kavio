@@ -12,6 +12,19 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 403 });
     }
 
+    // Create outbox_event table if it doesn't exist
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS outbox_event (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        event_type text NOT NULL,
+        payload jsonb NOT NULL,
+        status text NOT NULL DEFAULT 'pending',
+        attempt_count integer NOT NULL DEFAULT 0,
+        next_retry_at timestamp NOT NULL DEFAULT now(),
+        created_at timestamp NOT NULL DEFAULT now()
+      );
+    `);
+
     // Attempt to add the "transaction" table to the existing supabase_realtime publication
     await db.execute(sql`ALTER PUBLICATION supabase_realtime ADD TABLE "transaction";`);
 
