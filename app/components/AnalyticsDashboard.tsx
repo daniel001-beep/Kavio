@@ -14,30 +14,14 @@ import {
 import { TrendingUp, ShieldAlert, Users } from 'lucide-react';
 import RunwayGauge from './RunwayGauge';
 
-// --- MOCK DATA FOR DEMO DAY ---
-const ledgerPulseData = [
-  { time: '09:00', success: 4200, failed: 120, rollback: 10 },
-  { time: '10:00', success: 5100, failed: 80, rollback: 5 },
-  { time: '11:00', success: 4800, failed: 250, rollback: 45 },
-  { time: '12:00', success: 6200, failed: 450, rollback: 120 }, // Simulated outage/spike
-  { time: '13:00', success: 5800, failed: 90, rollback: 8 },
-  { time: '14:00', success: 7100, failed: 110, rollback: 12 },
-  { time: '15:00', success: 6900, failed: 140, rollback: 15 },
-];
-
-const cohortData = [
-  { month: 'Jan', m1: 100, m2: 85, m3: 75, m4: 65, m5: 60, m6: 58 },
-  { month: 'Feb', m1: 100, m2: 88, m3: 78, m4: 70, m5: 68, m6: null },
-  { month: 'Mar', m1: 100, m2: 92, m3: 85, m4: 80, m5: null, m6: null },
-  { month: 'Apr', m1: 100, m2: 95, m3: 89, m4: null, m5: null, m6: null },
-  { month: 'May', m1: 100, m2: 96, m3: null, m4: null, m5: null, m6: null },
-  { month: 'Jun', m1: 100, m2: null, m3: null, m4: null, m5: null, m6: null },
-];
+// --- LIVE DATA STATES (Currently empty pending API integration) ---
+const ledgerPulseData: any[] = [];
+const cohortData: any[] = [];
 
 export default function AnalyticsDashboard() {
   // Financial State
-  const currentBalance = 4250000;
-  const avgMonthlyOutflow = 285000;
+  const currentBalance = 0;
+  const avgMonthlyOutflow = 0;
 
   const getHeatmapColor = (value: number | null) => {
     if (value === null) return 'bg-slate-800/20 text-transparent border-slate-800/50';
