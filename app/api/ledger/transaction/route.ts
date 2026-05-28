@@ -39,10 +39,11 @@ export async function POST(req: Request) {
       );
     }
 
+    const idempotencyKey = headersList.get("idempotency-key");
+
     const body = await req.json();
 
-    const { amount, idempotencyKey, orderId, metadata, description, status } =
-      body;
+    const { amount, orderId, metadata, description, status } = body;
 
     // Validate inputs
     const parsedAmount = Number(amount);
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
 
     if (!idempotencyKey) {
       return NextResponse.json(
-        { error: "idempotencyKey is required" },
+        { error: "Idempotency-Key header is required" },
         { status: 400 },
       );
     }
@@ -138,7 +139,7 @@ export async function POST(req: Request) {
 
           // Log transaction created in audits
           try {
-            const { auditLogs } = await import("@/src/db/schema");
+            const { auditLogs, outboxEvents } = await import("@/src/db/schema");
             await tx.insert(auditLogs).values({
               userId,
               eventType: "TRANSACTION_CREATED",
@@ -152,9 +153,18 @@ export async function POST(req: Request) {
                 amount: Number(amountBigInt) / 100,
               },
             });
+
+            // Outbox Pattern: Insert webhook event in the same transaction
+            if (status === "Paid") {
+              await tx.insert(outboxEvents).values({
+                eventType: "transaction.completed",
+                payload: newTx,
+                status: "pending",
+              });
+            }
           } catch (auditErr) {
             console.warn(
-              "[Audit Log Bypass] Non-blocking: Failed to log TRANSACTION_CREATED event:",
+              "[Audit/Outbox] Non-blocking: Failed to log event:",
               auditErr,
             );
           }
@@ -172,7 +182,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 6. Dispatch webhook for new successful transactions (Async)
+    // 6. Legacy inline webhook dispatch (Optional, can be removed once Cron is verified)
     if (result.success && !result.idempotent) {
       dispatchWebhook(userId, "transaction.completed", result.transaction);
     }
