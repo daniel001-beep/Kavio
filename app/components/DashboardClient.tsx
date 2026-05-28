@@ -210,7 +210,7 @@ export default function DashboardClient({
       // 1. Subscribe to transactions table (insertions & updates)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'transaction' },
+        { event: '*', schema: 'public', table: 'transaction', filter: `user_id=eq.${userId}` },
         async (payload) => {
           console.log('[Realtime] Transaction change:', payload.eventType, payload.new);
           
