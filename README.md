@@ -10,7 +10,7 @@
 ## 🎬 Native Architecture Walkthrough
 Witness the system execution, real-time database state transitions, and responsive financial layouts in high fidelity.
 
-🔗 **[Watch the Live Velox System Walkthrough](https://lyhgfezubrbgikuxhcug.supabase.co/storage/v1/object/public/velox/Screen%20Recording%202026-05-20%20205157%20(1).mp4)**
+🔗 **[Watch the Live Velox System Walkthrough](https://tinyurl.com/velox-ledger-walkthrough)**
 
 *💡 Click the link above to watch the full 2-minute system walkthrough directly streaming inside your browser tab (No download required).*
 
