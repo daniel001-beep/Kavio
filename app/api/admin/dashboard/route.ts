@@ -75,7 +75,7 @@ export async function GET() {
       .where(eq(users.email, user.email))
       .limit(1);
 
-    const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "idowuisdaniel1@gmail.com").toLowerCase().trim();
+    const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@velox.com").toLowerCase().trim();
     const isSuperAdmin = user.email.toLowerCase().trim() === adminEmail || user.email.toLowerCase().trim() === "admin@velox.com";
 
     if (!currentUser[0]?.isAdmin && !isSuperAdmin) {
@@ -187,7 +187,7 @@ export async function DELETE(req: Request) {
       .where(eq(users.email, user.email))
       .limit(1);
 
-    const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "idowuisdaniel1@gmail.com").toLowerCase().trim();
+    const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@velox.com").toLowerCase().trim();
     const isSuperAdmin = user.email.toLowerCase().trim() === adminEmail || user.email.toLowerCase().trim() === "admin@velox.com";
 
     if (!currentUser[0]?.isAdmin && !isSuperAdmin) {

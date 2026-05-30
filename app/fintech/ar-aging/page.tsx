@@ -55,7 +55,8 @@ export default function ARAgingPage() {
       const now = new Date();
 
       if (res.ok) {
-        const dbTxs = await res.json();
+        const dbTxsResponse = await res.json();
+        const dbTxs = Array.isArray(dbTxsResponse) ? dbTxsResponse : dbTxsResponse.transactions || [];
         const pendingTxs = dbTxs.filter((tx: any) => tx.status === 'pending' || tx.status === 'PENDING');
         
         const mappedDbInvoices = pendingTxs.map((tx: any) => {
@@ -147,12 +148,16 @@ export default function ARAgingPage() {
       const allowanceCents = Math.floor(totals.requiredAllowance * 100);
 
       // Book transaction representing dynamic bad debt allowance provisioning
+      const idempotencyKey = `bad_debt_${Date.now()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
+        },
         body: JSON.stringify({
           amount: -allowanceCents,
-          idempotencyKey: `bad_debt_${Date.now()}`,
+          idempotencyKey: idempotencyKey,
           description: "GAAP Provision: Allowance for Doubtful Accounts Adjustment",
           metadata: {
             client_name: "GAAP Bad Debt Provision",
