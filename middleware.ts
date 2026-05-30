@@ -125,7 +125,6 @@ export async function middleware(request: NextRequest) {
     const normalizedEmail = user?.email ? user.email.toLowerCase().trim() : "";
     const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
     const isUserAdmin = normalizedEmail === adminEmail || 
-                        normalizedEmail === 'idowuisdaniel1@gmail.com' || 
                         normalizedEmail === 'admin@velox.com' || 
                         normalizedEmail === 'daniel@velox.com';
     if (!isUserAdmin) {
