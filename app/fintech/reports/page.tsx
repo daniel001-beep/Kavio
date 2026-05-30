@@ -41,8 +41,9 @@ export default function ReportsPage() {
         const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
+          const txData = Array.isArray(data) ? data : data.transactions || [];
           // Map Drizzle transactions to client format safely parsing metadata
-          const mapped = data.map((tx: any) => {
+          const mapped = txData.map((tx: any) => {
             let meta = tx.metadata;
             if (typeof meta === 'string') {
               try {

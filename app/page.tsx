@@ -391,7 +391,7 @@ export default function Home() {
         {/* Bottom bar */}
         <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-slate-505 font-medium m-0">
-            &copy; {new Date().getFullYear()} Velox Fintech Inc. All rights reserved. Platform-wide secure SSL endpoints.
+            &copy; {new Date().getFullYear()} Velox Fintech. Built by <a href="https://github.com/daniel001-beep" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:text-blue-700 underline underline-offset-2">Daniel</a>.
           </p>
           <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

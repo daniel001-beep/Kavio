@@ -13,6 +13,12 @@ export default function SignIn() {
   const [error, setError] = useState('');
   const [systemTime, setSystemTime] = useState('');
 
+  const handleDemoSignIn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setEmail('demo@velox.com');
+    setPassword('demo1234');
+  };
+
   useEffect(() => {
     setSystemTime(new Date().toISOString().slice(11, 19));
     const interval = setInterval(() => {
@@ -197,6 +203,18 @@ export default function SignIn() {
             </button>
 
           </form>
+
+          {/* Recruiter / Portfolio Demo Login */}
+          <div className="pt-2 pb-1 text-center">
+            <button
+              type="button"
+              onClick={handleDemoSignIn}
+              className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors flex items-center justify-center w-full gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              Recruiter? Load Demo Credentials
+            </button>
+          </div>
 
           {/* Account Enrollment Link */}
           <div className="text-center pt-0.5 text-[11px] text-slate-400 font-medium">

@@ -344,14 +344,16 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
     setActiveTab('list');
 
     try {
+      const idempotencyKey = `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const res = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
         },
         body: JSON.stringify({
           amount: Math.round(parseFloat(amount) * 100), // convert to cents
-          idempotencyKey: `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          idempotencyKey: idempotencyKey,
           description: description,
           status: status,
           metadata: {

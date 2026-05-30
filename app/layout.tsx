@@ -22,8 +22,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Velox Fintech",
     description: "Enterprise-grade double-entry ledger engine built for B2B financial operators.",
-    url: "https://velox-fintech-ksr3ylffz-daniel-s-projects-02e1bc2d.vercel.app",
+    url: "https://velox-fintech.vercel.app",
     siteName: "Velox Fintech",
+    images: [
+      {
+        url: "https://velox-fintech.vercel.app/cdn.png",
+        width: 1200,
+        height: 630,
+        alt: "Velox Fintech Architecture",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
@@ -31,6 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Velox Fintech | Production-Ready Ledger Infrastructure",
     description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams.",
+    images: ["https://velox-fintech.vercel.app/cdn.png"],
   }
 };
 

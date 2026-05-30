@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     // Lazily instantiate Supabase client inside the handler body.
     // This prevents module-level execution crashes during Next.js build-time page collection on Vercel.
-    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://lyhgfezubrbgikuxhcug.supabase.co";
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
     const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
     let supabaseUrl = "";

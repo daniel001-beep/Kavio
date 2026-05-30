@@ -44,8 +44,9 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           return res.json();
         })
         .then(data => {
-          if (Array.isArray(data) && data.length > 0) {
-            const mapped = data.map((tx: any) => {
+          const txData = Array.isArray(data) ? data : data.transactions || [];
+          if (Array.isArray(txData) && txData.length > 0) {
+            const mapped = txData.map((tx: any) => {
               const amountInDollars = Number(tx.amount) / 100;
               let meta = tx.metadata;
               if (typeof meta === 'string') {
@@ -145,6 +146,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
         },
         body: JSON.stringify({
           amount: -Math.round(amt * 100), // negative cents

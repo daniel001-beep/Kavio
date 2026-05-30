@@ -69,9 +69,10 @@ export default function ReconciliationPage() {
       const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
+        const txData = Array.isArray(data) ? data : data.transactions || [];
         
         // Filter out transactions that are already reconciled
-        const unreconciled = data.filter((tx: any) => {
+        const unreconciled = txData.filter((tx: any) => {
           let meta = tx.metadata;
           if (typeof meta === 'string') {
             try { meta = JSON.parse(meta); } catch (e) { meta = {}; }
@@ -183,12 +184,16 @@ export default function ReconciliationPage() {
       const feeCents = Math.floor(parseFloat(modalAmount) * 100);
       const isFee = modalType === 'FEE';
 
+      const idempotencyKey = `adj_${Date.now()}_${Math.random()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
+        },
         body: JSON.stringify({
           amount: isFee ? -feeCents : feeCents,
-          idempotencyKey: `adj_${Date.now()}_${Math.random()}`,
+          idempotencyKey: idempotencyKey,
           description: modalDesc,
           metadata: {
             client_name: isFee ? "Bank Charge Settlement" : "Interest Income",

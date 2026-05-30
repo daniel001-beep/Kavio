@@ -20,17 +20,18 @@ export default function RunwaySimulatorPage() {
         const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) return;
+        const txData = Array.isArray(data) ? data : data.transactions || [];
+        if (!Array.isArray(txData) || txData.length === 0) return;
 
         // Compute total cash position from all completed credits (in dollars)
-        const totalCash = data
+        const totalCash = txData
           .filter((tx: any) => Number(tx.amount) > 0 && tx.status === 'completed')
           .reduce((sum: number, tx: any) => sum + Number(tx.amount) / 100, 0);
 
         // Compute average monthly outflows over the last 3 months
         const threeMonthsAgo = new Date();
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        const recentDebits = data
+        const recentDebits = txData
           .filter((tx: any) => {
             const d = tx.createdAt ? new Date(tx.createdAt) : null;
             return d && d >= threeMonthsAgo && Number(tx.amount) < 0;

@@ -83,8 +83,9 @@ export default function JournalsPage() {
         const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
+          const txData = Array.isArray(data) ? data : data.transactions || [];
           // Map Drizzle transactions to client format safely parsing metadata
-          const mapped = data.map((tx: any) => {
+          const mapped = txData.map((tx: any) => {
             let meta = tx.metadata;
             if (typeof meta === 'string') {
               try {
@@ -208,12 +209,16 @@ export default function JournalsPage() {
       const amountCents = Math.floor(amountVal * 100);
 
       // Create transaction in real database as "Pending" (Unpaid Invoice)
+      const idempotencyKey = `journal_${Date.now()}_${Math.random()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
+        },
         body: JSON.stringify({
           amount: formData.type === 'Expense' ? -amountCents : amountCents,
-          idempotencyKey: `journal_${Date.now()}_${Math.random()}`,
+          idempotencyKey: idempotencyKey,
           description: formData.title,
           metadata: {
             client_name: formData.customer || 'Client',

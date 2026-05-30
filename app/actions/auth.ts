@@ -10,7 +10,7 @@ import bcrypt from 'bcryptjs';
 
 function getDeterministicUserId(email: string): string {
   const lowerEmail = email.toLowerCase().trim();
-  if (lowerEmail === 'idowuisdaniel1@gmail.com' || lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com') {
+  if (lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com') {
     return 'usr_6wshej3ht';
   }
   const hash = createHash('sha256').update(lowerEmail).digest('hex').substring(0, 12);
@@ -29,8 +29,8 @@ export async function signInAction(formData: FormData) {
   const lowerEmail = email.toLowerCase().trim();
 
   // Admin bypass
-  const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'idowuisdaniel1@gmail.com').toLowerCase().trim();
-  const isAdminBypass = lowerEmail === adminEmail || lowerEmail === 'idowuisdaniel1@gmail.com' || lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com';
+  const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@velox.com').toLowerCase().trim();
+  const isAdminBypass = lowerEmail === adminEmail || lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com';
 
   if (isAdminBypass) {
     // Attempt remote upsert
@@ -104,7 +104,7 @@ export async function signInAction(formData: FormData) {
       return { error: 'Invalid credentials. Password incorrect.' };
     }
 
-    const isUserAdmin = drizzleUser.isAdmin || lowerEmail === 'idowuisdaniel1@gmail.com' || (adminEmail ? lowerEmail === adminEmail : false);
+    const isUserAdmin = drizzleUser.isAdmin || lowerEmail === 'admin@velox.com' || (adminEmail ? lowerEmail === adminEmail : false);
     
     cookieStore.set('velox-local-user', encodeURIComponent(JSON.stringify({
       id: drizzleUser.id,
