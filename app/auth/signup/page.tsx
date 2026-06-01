@@ -62,12 +62,9 @@ export default function SignUp() {
         {/* Top Logo & Header */}
         <div className="text-center space-y-1.5">
           <div className="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/60 shadow-sm">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 animate-pulse"></div>
-            <span className="text-[10px] font-bold text-slate-800 tracking-wide font-mono">KAVIO REGISTRATION</span>
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 animate-pulse"></div>
+            <span className="text-[10px] font-extrabold text-slate-800 tracking-wide font-mono">KAVIO PARTNER ACCESS</span>
           </div>
-          <p className="text-slate-400 text-[9px] font-bold font-mono uppercase tracking-widest">
-            CREATE LEDGER IDENTITY
-          </p>
         </div>
 
         {/* Elevated Dribbble-Style Compact Card */}
@@ -78,26 +75,24 @@ export default function SignUp() {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)'
           }}
-          className="rounded-2xl p-5 md:p-7 space-y-4"
+          className="rounded-2xl p-5 md:p-7 space-y-5"
         >
           
           {/* Card Header */}
           <div className="text-center space-y-1">
             <h2 
               style={{ color: '#0f172a' }} 
-              className="text-2xl font-black tracking-tight"
+              className="text-2xl font-extrabold tracking-tight"
             >
-              Create identity
+              Create your account
             </h2>
             <p 
               style={{ color: '#64748b' }} 
-              className="text-[11px] leading-relaxed max-w-[280px] mx-auto"
+              className="text-xs leading-relaxed max-w-[280px] mx-auto font-medium"
             >
-              Register credentials to activate your node.
+              Get started in seconds and take control of your business finances.
             </p>
           </div>
-
-
 
           {error && (
             <div 
@@ -120,15 +115,15 @@ export default function SignUp() {
           )}
 
           {/* Credentials Form */}
-          <form onSubmit={handleCredentialsSignUp} className="space-y-3.5">
+          <form onSubmit={handleCredentialsSignUp} className="space-y-4">
             
-            {/* Center Email Input */}
-            <div className="space-y-1 text-center">
+            {/* Work Email Input */}
+            <div className="space-y-1.5 text-left">
               <label 
-                style={{ color: '#94a3b8' }} 
-                className="text-[9px] font-bold uppercase tracking-wider font-mono block text-center"
+                style={{ color: '#64748b' }} 
+                className="text-[10px] font-bold uppercase tracking-wider block"
               >
-                Enterprise Email
+                Work Email
               </label>
               <input
                 type="email"
@@ -136,22 +131,21 @@ export default function SignUp() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@kavio.com"
                 style={{
-                  textAlign: 'center',
                   color: '#0f172a',
                   backgroundColor: '#f8fafc',
                   border: '1.5px solid #e2e8f0'
                 }}
-                className="block w-full px-3 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all font-sans font-medium"
+                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans font-medium"
               />
             </div>
 
-            {/* Center Password Input */}
-            <div className="space-y-1 text-center">
+            {/* Password Input */}
+            <div className="space-y-1.5 text-left">
               <label 
-                style={{ color: '#94a3b8' }} 
-                className="text-[9px] font-bold uppercase tracking-wider font-mono block text-center w-full"
+                style={{ color: '#64748b' }} 
+                className="text-[10px] font-bold uppercase tracking-wider block w-full"
               >
-                System Password
+                Password
               </label>
               <input
                 type="password"
@@ -159,12 +153,11 @@ export default function SignUp() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{
-                  textAlign: 'center',
                   color: '#0f172a',
                   backgroundColor: '#f8fafc',
                   border: '1.5px solid #e2e8f0'
                 }}
-                className="block w-full px-3 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all font-sans"
+                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans"
               />
             </div>
 
@@ -173,12 +166,12 @@ export default function SignUp() {
               type="submit"
               disabled={isLoading}
               style={{
-                height: '42px',
+                height: '44px',
                 width: '100%',
-                borderRadius: '10px',
+                borderRadius: '12px',
                 backgroundColor: '#0f172a',
                 color: '#ffffff',
-                fontWeight: '600',
+                fontWeight: '700',
                 fontSize: '13px',
                 border: 'none',
                 cursor: 'pointer',
@@ -186,7 +179,7 @@ export default function SignUp() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 10px rgba(15, 23, 42, 0.1)',
+                boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
                 transition: 'all 0.15s ease-in-out'
               }}
               className="hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -200,13 +193,11 @@ export default function SignUp() {
 
           </form>
 
-          <div className="border-t border-slate-100 my-1"></div>
-
           {/* Go back to Sign In */}
-          <div className="text-center">
+          <div className="text-center pt-1 text-[11px] text-slate-500 font-semibold border-t border-slate-100">
             <Link 
               href="/auth/signin" 
-              className="inline-flex items-center gap-0.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+              className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
             >
               Already registered? Sign In
             </Link>
@@ -215,9 +206,9 @@ export default function SignUp() {
         </div>
 
         {/* Security Badge */}
-        <div className="flex items-center justify-center gap-1.5 text-slate-400 text-[10px] font-medium">
-          <Shield className="w-3.5 h-3.5 text-slate-300" />
-          <span>Secured by multi-party protocols</span>
+        <div className="flex items-center justify-center gap-1.5 text-slate-500 text-[10px] font-bold">
+          <Lock className="w-3.5 h-3.5 text-slate-450" />
+          <span>Secured by AES-256 Encryption</span>
         </div>
 
       </div>
