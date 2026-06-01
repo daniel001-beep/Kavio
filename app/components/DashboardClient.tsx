@@ -1,448 +1,77 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState } from "react";
 import { 
   TrendingUp, 
   Activity, 
-  Globe, 
   ArrowDownRight, 
   ArrowUpRight, 
   RefreshCw, 
   Download, 
-  ShieldCheck,
-  Zap,
-  Loader2,
-  Sparkles,
-  BookOpen,
-  AlertTriangle,
-  TrendingDown
-} from 'lucide-react';
-import DashboardLayout from '@/app/components/DashboardLayout';
-import PortfolioPerformance from '@/app/components/PortfolioPerformance';
-import RevenuePerformance from '@/app/components/RevenuePerformance';
-import ExpenseAllocation from '@/app/components/ExpenseAllocation';
-import AuditTimeline from '@/app/components/AuditTimeline';
-import { UITransaction } from './LedgerClient';
-import { supabase } from '@/src/lib/supabase-client';
-import { useNotifications } from '@/app/context/NotificationContext';
-
-import { useSession } from '@/app/context/AuthContext';
+  ShieldCheck, 
+  Zap, 
+  Loader2, 
+  BookOpen, 
+  Plus, 
+  Layers,
+  ArrowRight,
+  TrendingDown,
+  Sparkles
+} from "lucide-react";
+import { useDashboardData } from "@/app/hooks/useDashboardData";
+import { BlurredPaywall } from "@/app/components/BlurredPaywall";
+import PortfolioPerformance from "@/app/components/PortfolioPerformance";
+import RevenuePerformance from "@/app/components/RevenuePerformance";
+import ExpenseAllocation from "@/app/components/ExpenseAllocation";
+import AuditTimeline from "@/app/components/AuditTimeline";
+import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardClientProps {
   totalBalanceUsd: number;
   dayChangeUsd: number;
-  transactions: UITransaction[];
+  transactions: any[];
   isDemoData?: boolean;
 }
 
-
-export default function DashboardClient({ 
-  totalBalanceUsd: initialBalance, 
-  dayChangeUsd: initialChange, 
+export default function DashboardClient({
+  totalBalanceUsd: initialBalance,
+  dayChangeUsd: initialChange,
   transactions: initialTransactions = [],
-  isDemoData = false
 }: DashboardClientProps) {
-  const { data: session, status } = useSession();
-  const userEmail = session?.user?.email;
-  const userId = session?.user?.id;
-  
-  // Use Next.js router
-  const router = import('next/navigation').then(m => m.useRouter);
-  
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      window.location.href = '/auth/signin';
-    }
-  }, [status]);
-
-  const [currency, setCurrency] = useState<'USD' | 'EUR' | 'NGN'>('USD');
-  const [isSentinelActive, setIsSentinelActive] = useState(true);
-  const [isExporting, setIsExporting] = useState(false);
-  const { addNotification } = useNotifications();
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [apiTransactions, setApiTransactions] = useState<UITransaction[]>([]);
-  const [serverBalance, setServerBalance] = useState(initialBalance);
-  const [serverDayChange, setServerDayChange] = useState(initialChange);
-  const [exchangeRates, setExchangeRates] = useState({
-    USD: 1,
-    EUR: 0.92,
-    NGN: 1450.50,
+  // Use our custom data hook
+  const {
+    status,
+    userEmail,
+    currency,
+    setCurrency,
+    isExporting,
+    transactions,
+    gmvSum,
+    gpSum,
+    apSum,
+    arSum,
+    netProfit,
+    formatCurrency,
+    formatLiveCurrency,
+    exportToCSV,
+    todayFormatted,
+    todayReadable,
+  } = useDashboardData({
+    initialBalance,
+    initialChange,
+    initialTransactions,
   });
 
-  useEffect(() => {
-    fetch('https://open.er-api.com/v6/latest/USD')
-      .then(r => r.json())
-      .then(d => {
-        if (d && d.rates) {
-          setExchangeRates({
-            USD: 1,
-            EUR: d.rates.EUR || 0.92,
-            NGN: d.rates.NGN || 1450.50,
-          });
-        }
-      })
-      .catch(e => console.warn('Failed to fetch live exchange rates', e));
-  }, []);
+  // Feature Flag: simulate Free vs Pro to test BlurredPaywall
+  const [userTier, setUserTier] = useState<"FREE" | "PRO">("FREE");
 
-  // Load from localStorage cache on mount for instant sub-0.1s loading
-  // This runs BEFORE any API fetch, so cached data is always visible first
-  // STRICT TENANT ISOLATION: Never load fallback cache from other users or global keys
-  useEffect(() => {
-    // 1. Reset client states to clean baseline first to prevent brief cross-tenant bleed
-    setApiTransactions([]);
-    setInvoices([]);
-
-    if (initialTransactions && initialTransactions.length > 0) {
-      setApiTransactions(initialTransactions);
-    }
-
-    if (userEmail) {
-      const cached = localStorage.getItem(`velox_cached_api_transactions_${userEmail}`);
-      if (cached) {
-        try {
-          const parsedCache = JSON.parse(cached);
-          if (Array.isArray(parsedCache)) {
-            setApiTransactions(parsedCache);
-          }
-        } catch (e) {
-          console.warn('Failed to parse cached dashboard transactions:', e);
-        }
-      }
-
-      const cachedInvoices = localStorage.getItem(`velox_cached_invoices_${userEmail}`);
-      if (cachedInvoices) {
-        try {
-          const parsedInvoices = JSON.parse(cachedInvoices);
-          if (Array.isArray(parsedInvoices)) {
-            setInvoices(parsedInvoices);
-          }
-        } catch (e) {
-          console.warn('Failed to parse cached dashboard invoices:', e);
-        }
-      }
-    }
-  }, [userEmail, initialTransactions]);
-
-  // Track the last active email for instant recovery after logout
-  useEffect(() => {
-    if (userEmail && typeof window !== 'undefined') {
-      localStorage.setItem('velox_last_active_user_email', userEmail);
-    }
-  }, [userEmail]);
-
-  // Fetch fresh transactions from the API on mount and after any change
-  // CRITICAL: Overwrite state with [] if user has zero transactions.
-  // We only skip overwrite if the API actually failed with a non-OK status (500/503).
-  const fetchLatestTransactions = useCallback(async () => {
-    try {
-      const res = await fetch('/api/ledger/transaction?_t=' + Date.now(), { cache: 'no-store' });
-      
-      // If the API returns a non-OK status (e.g., 503 database unavailable),
-      // DO NOT overwrite the client cache — just silently skip
-      if (!res.ok) {
-        console.warn('Dashboard: API returned non-OK status:', res.status, '— preserving cached data');
-        return;
-      }
-      
-      const data = await res.json();
-      
-      const transactionsPayload = Array.isArray(data) ? data : data.transactions || [];
-      if (!Array.isArray(data)) {
-        setServerBalance(data.totalBalanceUsd !== undefined ? data.totalBalanceUsd : initialBalance);
-        setServerDayChange(data.dayChangeUsd !== undefined ? data.dayChangeUsd : initialChange);
-      }
-
-      // Map data successfully.
-      const mapped: UITransaction[] = transactionsPayload.map((tx: any) => {
-            const amountInDollars = Number(tx.amount) / 100;
-            let meta = tx.metadata;
-            if (typeof meta === 'string') {
-              try {
-                meta = JSON.parse(meta);
-              } catch (e) {}
-            }
-            return {
-              id: tx.id?.toString(),
-              type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
-              description: meta?.description || tx.description || 'Transaction',
-              date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
-              amount: amountInDollars,
-              status: tx.status?.toUpperCase() || 'COMPLETED',
-            };
-          });
-
-      setApiTransactions(prev => {
-        const now = Date.now();
-        const optimisticTxs = prev.filter(pTx => {
-          const isMissing = !mapped.find(m => m.id === pTx.id);
-          const isRecent = now - new Date(pTx.date).getTime() < 15000; // 15 seconds grace period for DB propagation
-          return isMissing && isRecent;
-        });
-
-        const finalMerged = [...optimisticTxs, ...mapped];
-
-        // Cache the newly retrieved list strictly per-user
-        if (userEmail) {
-          localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(finalMerged));
-        }
-        return finalMerged;
-      });
-    } catch (err) {
-      // Network error — preserve cached data, don't wipe it
-      console.error('Dashboard: Failed to fetch transactions from API:', err);
-    }
-  }, [userEmail]);
-
-  // Fetch on mount
-  useEffect(() => {
-    fetchLatestTransactions();
-    // Supabase realtime handles live updates; poll every 90s only as a safety net
-    const interval = setInterval(fetchLatestTransactions, 90000);
-    return () => clearInterval(interval);
-  }, [fetchLatestTransactions]);
-
-  // Real-time subscription: open a persistent WebSocket channel for instant lag-free updates
-  useEffect(() => {
-    if (!supabase || !userEmail || !userId) return;
-
-    const channel = supabase
-      .channel('dashboard-realtime')
-      // 1. Subscribe to transactions table (insertions & updates)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'transaction', filter: `user_id=eq.${userId}` },
-        async (payload) => {
-          console.log('[Realtime] Transaction change:', payload.eventType, payload.new);
-          
-          // Re-fetch in background to ensure final backend consistency
-          fetchLatestTransactions();
-
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            const newTx = payload.new as any;
-            
-            // Only update local React state if this belongs to the active tenant
-            if (newTx && (newTx.user_id === userId || newTx.userId === userId)) {
-              const amountInCents = Number(newTx.amount || 0);
-              const amountInDollars = amountInCents / 100;
-              
-              let meta = newTx.metadata;
-              if (typeof meta === 'string') {
-                try {
-                  meta = JSON.parse(meta);
-                } catch (e) {}
-              }
-
-              const uiTx: UITransaction = {
-                id: newTx.id?.toString(),
-                type: amountInDollars > 0 ? 'CREDIT' : 'DEBIT',
-                description: meta?.description || newTx.description || 'Transaction via Webhook',
-                date: newTx.created_at ? new Date(newTx.created_at).toISOString() : new Date().toISOString(),
-                amount: amountInDollars,
-                status: newTx.status?.toUpperCase() || 'COMPLETED',
-              };
-
-              setApiTransactions((prev) => {
-                const index = prev.findIndex((tx) => tx.id === uiTx.id);
-                let updated = [...prev];
-                if (index >= 0) {
-                  updated[index] = uiTx;
-                } else {
-                  updated = [uiTx, ...updated];
-                }
-
-                // Update cache
-                localStorage.setItem(`velox_cached_api_transactions_${userEmail}`, JSON.stringify(updated));
-                localStorage.setItem(`velox_last_active_cached_api_transactions`, JSON.stringify(updated));
-                return updated;
-              });
-
-              if (payload.eventType === 'INSERT') {
-                addNotification({
-                  type: 'SUCCESS',
-                  title: 'New Ledger Entry',
-                  message: `Transaction processed: $${Math.abs(amountInDollars).toLocaleString()} (${uiTx.description})`,
-                });
-                addNotification({
-                  type: 'SENTINEL',
-                  title: 'Sentinel Alert: New Ledger Entry',
-                  message: `Detected transaction: $${Math.abs(amountInDollars).toLocaleString()}. Integrity verified.`,
-                });
-              }
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [addNotification, userEmail, userId, fetchLatestTransactions]);
-
-  // Supabase Presence: Track user online status in real-time
-  useEffect(() => {
-    if (!supabase || !userEmail) return;
-
-    const channel = supabase.channel('online-users', {
-      config: {
-        presence: {
-          key: userEmail,
-        },
-      },
-    });
-
-    channel
-      .on('presence', { event: 'sync' }, () => {})
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          try {
-            await channel.track({
-              online_at: new Date().toISOString(),
-              email: userEmail,
-            });
-          } catch (trackErr) {
-            console.warn('Failed to track user presence:', trackErr);
-          }
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userEmail]);
-
-  // Compute live visual states: just sort API transactions
-  const transactions = useMemo<UITransaction[]>(() => {
-    return [...apiTransactions].sort((a, b) => {
-      const timeA = a.date ? new Date(a.date).getTime() : 0;
-      const timeB = b.date ? new Date(b.date).getTime() : 0;
-      return timeB - timeA;
-    });
-  }, [apiTransactions]);
-
-  const balance = serverBalance;
-  const dayChange = serverDayChange;
-
-  const formatCurrency = (usdValue: number) => {
-    const rate = exchangeRates[currency];
-    const converted = usdValue * rate;
-    
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      maximumFractionDigits: currency === 'NGN' ? 0 : 2,
-    }).format(converted);
-  };
-
-  // Compute real account aging dynamic data based on unified transactions
-  const arAgingData = useMemo(() => {
-    const pendingTransactions = transactions.filter(tx => tx.status === 'PENDING');
-    if (pendingTransactions.length > 0) {
-      return pendingTransactions.slice(0, 5).map(tx => ({
-        inv: tx.id ? `TX-${tx.id.toString().substring(0, 8).toUpperCase()}` : 'TX/SLS/112025/0142',
-        amt: formatCurrency(tx.amount || 0),
-        days: 'Pending'
-      }));
-    }
-    return [];
-  }, [transactions, currency]);
-
-  // --- EXPORT ENGINE ---
-  const exportToCSV = async () => {
-    setIsExporting(true);
-    
-    // Simulate deep cryptographic audit/processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const headers = ['Date', 'Description', 'Type', 'Amount', 'Status'];
-    const csvContent = [
-      headers.join(','),
-      ...transactions.map(tx => [
-        `"${tx.date ? new Date(tx.date).toLocaleString() : ''}"`,
-        `"${tx.description}"`,
-        tx.type,
-        tx.amount,
-        tx.status
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `velox_audit_report_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    setIsExporting(false);
-    addNotification({
-      type: 'SUCCESS',
-      title: 'Audit Complete',
-      message: 'Your cryptographically verified report has been exported.',
-    });
-  };
-
-  const gmvSum = transactions.reduce((acc, tx) => acc + (tx.amount || 0), 0);
-  const gpSum = transactions.filter(tx => tx.status?.toUpperCase() === 'COMPLETED' || !tx.status).reduce((acc, tx) => acc + (tx.amount || 0), 0);
-  const apSum = transactions.filter(tx => tx.amount < 0).reduce((acc, tx) => acc + Math.abs(tx.amount), 0);
-  const arSum = transactions.filter(tx => tx.status === 'PENDING' && tx.amount > 0).reduce((acc, tx) => acc + (tx.amount || 0), 0);
-
-  const formatLiveCurrency = (value: number) => {
-    const rate = exchangeRates[currency];
-    const converted = value * rate;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: currency === 'NGN' ? 0 : 2,
-      maximumFractionDigits: currency === 'NGN' ? 0 : 2
-    }).format(converted);
-  };
-
-  const statCards = [
-    {
-      label: 'Gross Merchandise Value (GMV)',
-      value: formatLiveCurrency(gmvSum),
-      subtext: gmvSum > 0 ? `+${formatLiveCurrency(gmvSum * 0.015)} (+1.50%) this month` : '$0.00 this month',
-      icon: TrendingUp,
-      color: '#0052cc',
-    },
-    {
-      label: 'Gross Profit',
-      value: formatLiveCurrency(gpSum),
-      subtext: gpSum >= 0 ? `+${formatLiveCurrency(Math.abs(gpSum) * 0.011)} (+1.10%) this month` : `-${formatLiveCurrency(Math.abs(gpSum) * 0.011)} (-1.10%) this month`,
-      icon: TrendingUp,
-      color: '#00b4d8',
-    },
-    {
-      label: 'Account Payable',
-      value: formatLiveCurrency(apSum),
-      subtext: apSum > 0 ? `-${formatLiveCurrency(apSum * 0.0125)} (-1.25%) last month` : '$0.00 last month',
-      icon: TrendingUp,
-      color: '#f72585',
-    },
-    {
-      label: 'Account Receivable',
-      value: formatLiveCurrency(arSum),
-      subtext: arSum > 0 ? `+${formatLiveCurrency(arSum * 0.0145)} (+1.45%) last month` : '$0.00 last month',
-      icon: TrendingUp,
-      color: '#0052cc',
-    },
-  ];
-
-  const todayFormatted = useMemo(() => {
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const yyyy = today.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-  }, []);
-
-  const todayReadable = useMemo(() => {
-    const today = new Date();
-    return today.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  }, []);
+  // Get name from email
+  const displayName = userEmail 
+    ? userEmail.split("@")[0].charAt(0).toUpperCase() + userEmail.split("@")[0].slice(1)
+    : "Freelancer";
 
   const getTypeIcon = (type: string, amount: number) => {
     if (amount > 0) return <ArrowDownRight className="w-4 h-4 text-emerald-500" />;
@@ -450,247 +79,380 @@ export default function DashboardClient({
     return <RefreshCw className="w-4 h-4 text-blue-500" />;
   };
 
-  // Render a clean loading shell during session validation to prevent brief cache flashes of other users
-  // NOTE: Must be AFTER all hooks to comply with React's Rules of Hooks
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Securing Ledger Session...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+            Securing Kavio Command Center...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full animate-in fade-in duration-500">
-        
-        {/* Header Area */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-4xl font-bold text-blue-600 tracking-tight">Dashboard Overview</h1>
+    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
+      
+      {/* Top Banner: Greeting, Simulation Toggle & Primary CTA */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 text-white p-8 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden">
+        {/* Glow effect */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
 
-            </div>
-            
-            {/* Custom Interactive Mock Date Picker matching the screenshot exactly */}
-            <div className="mt-8">
-              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5">As Of Date</label>
-              <div className="flex items-center justify-between gap-2.5 px-3.5 py-2 border border-slate-200 bg-white rounded-xl shadow-sm w-fit text-slate-700 font-bold text-xs cursor-pointer hover:bg-slate-50 transition-all">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-slate-400 text-sm">📅</span>
-                  <span>{todayFormatted}</span>
-                </div>
-                <span className="text-slate-450 ml-2 hover:text-slate-650 transition-colors">✕</span>
-              </div>
-            </div>
+        <div className="space-y-2 relative z-10">
+          <div className="flex items-center gap-3">
+            <span className="text-slate-400 font-medium text-sm">Welcome back,</span>
+            <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3" />
+              {userTier === "FREE" ? "Free Tier" : "Pro Active"}
+            </Badge>
           </div>
-          <div className="flex flex-row items-center gap-3 w-fit mt-8 sm:mt-0 mb-6 sm:mb-0">
-             <button 
-                onClick={exportToCSV}
-                disabled={isExporting}
-                className="flex items-center justify-center gap-2 font-bold py-2 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all active:scale-95 shadow-sm text-xs md:text-sm min-w-[110px]"
-              >
-                {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" /> : <Download className="w-3.5 h-3.5 text-slate-500" />}
-                <span>{isExporting ? 'Exporting...' : 'Export'}</span>
-              </button>
-          </div>
-        </div>
-
-        {/* Stats Row */}
-        <div className="flex flex-col md:grid md:grid-cols-4 gap-8 mb-16 mt-6 md:mt-0">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            const isNegative = stat.subtext.startsWith('-');
-            return (
-              <div
-                key={index}
-                className="bg-white border border-slate-200 rounded-[24px] relative overflow-hidden group hover:border-slate-300 transition-all shadow-sm p-4 sm:p-8"
-              >
-                <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Icon size={120} />
-                </div>
-                
-                <div className="flex items-center justify-between mb-4 relative z-10">
-                  <p className="text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
-                    {stat.label}
-                  </p>
-                  <div 
-                    className="p-2 rounded-xl"
-                    style={{ backgroundColor: stat.color + '15' }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: stat.color }} />
-                  </div>
-                </div>
-                
-                <div className="relative z-10 flex flex-col justify-end">
-                  <h3 className="text-lg sm:text-2xl font-bold text-slate-800 font-mono mb-2">
-                    {stat.value}
-                  </h3>
-                  <div className="flex items-center">
-                    <span 
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        isNegative 
-                          ? 'text-rose-600 bg-rose-50 border-rose-100' 
-                          : 'text-emerald-600 bg-emerald-50 border-emerald-100'
-                      }`}
-                    >
-                      {stat.subtext}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Main Content Grid - exactly replicating the screenshot layout */}
-        <div className="flex flex-col gap-10 mt-10">
           
-          {/* Row 1: GMV Area Chart & Revenue vs Budget grouped bar chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div 
-              className="lg:col-span-2 bg-white border border-slate-200 rounded-[24px] relative overflow-hidden shadow-sm p-5 sm:p-10"
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Good morning, {displayName}.
+          </h1>
+          <p className="text-slate-400 text-sm font-medium">
+            Here is your financial command center for today, {todayReadable}.
+          </p>
+        </div>
+
+        {/* Action Controls & Simulated Tier Switcher */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10">
+          
+          {/* Simulation Toggle */}
+          <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700">
+            <button
+              onClick={() => setUserTier("FREE")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                userTier === "FREE"
+                  ? "bg-slate-700 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
             >
-              <PortfolioPerformance transactions={transactions} />
-            </div>
-            
-            <div 
-              className="lg:col-span-1 bg-white border border-slate-200 rounded-[24px] relative overflow-hidden shadow-sm p-5 sm:p-10"
+              Simulate Free
+            </button>
+            <button
+              onClick={() => setUserTier("PRO")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                userTier === "PRO"
+                  ? "bg-emerald-500 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
             >
-              <RevenuePerformance transactions={transactions} />
-            </div>
+              Simulate Pro
+            </button>
           </div>
 
-          {/* Row 2: Recent Transactions, Expense Allocation, and AR Aging */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Recent Activity Table */}
-            <div 
-              className="lg:col-span-1 bg-white border border-slate-200 rounded-[24px] overflow-hidden h-fit flex flex-col justify-between shadow-sm p-4 sm:p-8"
+          <div className="flex items-center gap-3">
+            {/* Currency Select */}
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as any)}
+              className="bg-slate-800 border border-slate-700 text-white font-semibold text-xs rounded-xl px-3 py-3 hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                <h2 style={{ color: '#0f172a' }} className="text-sm font-bold tracking-tight">Recent Transactions</h2>
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50">
-                      <th className="text-left py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
-                      <th className="text-left py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Details</th>
-                      <th className="text-right py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {transactions.length === 0 ? (
-                      <tr>
-                        <td colSpan={3}>
-                          <div className="py-8 flex flex-col items-center gap-3 text-center">
-                            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
-                              <BookOpen className="w-5 h-5 text-slate-300" />
-                            </div>
-                            <p className="text-slate-400 text-xs font-semibold">Your ledger is empty</p>
-                            <a href="/fintech/journals" className="text-[10px] font-bold text-blue-500 hover:text-blue-600 transition-colors underline underline-offset-2">
-                              Post your first entry →
-                            </a>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : transactions.slice(0, 5).map((tx) => (
-                      <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="py-3 px-3">
-                           <div className="w-7 h-7 rounded bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-blue-500/50 transition-colors">
-                             {getTypeIcon(tx.type, tx.amount)}
-                           </div>
-                        </td>
-                        <td className="py-3 px-3 min-w-0">
-                          <p className="text-slate-700 text-xs font-bold truncate max-w-[120px]">{tx.description}</p>
-                          <p className="text-slate-400 text-[10px] font-semibold mt-0.5">{tx.date ? new Date(tx.date).toLocaleDateString() : ''}</p>
-                        </td>
-                        <td className="py-3 px-3 text-right font-mono text-xs font-bold text-slate-800">
-                           <span className={tx.amount > 0 ? 'text-emerald-600' : 'text-slate-800'}>
-                             {formatCurrency(tx.amount)}
-                           </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+              <option value="NGN">₦ NGN</option>
+              <option value="USD">$ USD</option>
+              <option value="EUR">€ EUR</option>
+            </select>
 
-            {/* Operating Expense Allocation (Donut Chart) */}
-            <div 
-              className="lg:col-span-1 bg-white border border-slate-200 rounded-[24px] relative overflow-hidden flex flex-col justify-between shadow-sm p-4 sm:p-8"
-            >
-              <ExpenseAllocation transactions={transactions} />
-            </div>
-
-            {/* Account Receivable Aging Table */}
-            <div 
-              className="lg:col-span-1 bg-white border border-slate-200 rounded-[24px] overflow-hidden flex flex-col justify-start gap-4 shadow-sm p-4 sm:p-8"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                  <h2 style={{ color: '#0f172a' }} className="text-sm font-bold tracking-tight">Account Receivable Aging</h2>
-                  <p className="text-[10px] text-slate-400 font-medium">As of date: {todayReadable}</p>
-                </div>
-              </div>
-              <div className="overflow-x-auto w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50">
-                      <th className="text-left py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
-                      <th className="text-right py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
-                      <th className="text-right py-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Overdue</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[11px]">
-                    {arAgingData.length === 0 ? (
-                      <tr>
-                        <td colSpan={3}>
-                          <div className="py-10 flex flex-col items-center gap-2 text-center">
-                            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                            </div>
-                            <p className="text-slate-500 text-xs font-semibold">No pending receivables</p>
-                            <p className="text-[10px] text-slate-400">All invoices are settled ✓</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      arAgingData.map((row, i) => (
-                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-2.5 px-3 font-mono font-semibold text-slate-600 truncate max-w-[130px]">{row.inv}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-slate-700">{row.amt}</td>
-                          <td className="py-2.5 px-3 text-right font-semibold text-slate-400">{row.days}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 3: Security & Immutable Audit Trail (placed clean at bottom) */}
-          <div 
-            className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm p-5 sm:p-10"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 style={{ color: '#0f172a' }} className="text-base font-bold tracking-tight">Immutable Audit Trail</h2>
-                <p className="text-xs text-slate-400 mt-1">Cryptographically verified logs & ledger audits</p>
-              </div>
-
-            </div>
-            <AuditTimeline transactions={transactions} />
+            {/* Create Invoice Primary Anchor */}
+            <Link href="/dashboard/invoices/create" passHref legacyBehavior>
+              <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Create Invoice
+              </Button>
+            </Link>
           </div>
 
         </div>
       </div>
-    </DashboardLayout>
+
+      {/* Bento Grid — Metrics Row (3 Columns) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Metric 1: Total Invoices Unpaid (Amber alert `#F59E0B`) */}
+        <div className="bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10 hover:border-amber-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
+              Total Invoices Unpaid
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <BookOpen className="w-4 h-4" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
+            {formatLiveCurrency(arSum)}
+          </h2>
+          <div className="flex items-center">
+            <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-600 font-bold text-[10px] rounded-full px-2 py-0.5">
+              Receivables Pending
+            </Badge>
+          </div>
+        </div>
+
+        {/* Metric 2: Monthly Revenue (Emerald growth `#10B981`) */}
+        <div className="bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/10 hover:border-emerald-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
+              Monthly Revenue
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
+            {formatLiveCurrency(gpSum)}
+          </h2>
+          <div className="flex items-center">
+            <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold text-[10px] rounded-full px-2 py-0.5 flex items-center gap-1">
+              <ArrowDownRight className="w-3 h-3" />
+              Completed Earnings
+            </Badge>
+          </div>
+        </div>
+
+        {/* Metric 3: Net Profit (Blue trust `#3B82F6`) */}
+        <div className="bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/10 hover:border-blue-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
+              Net Profit
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
+            {formatLiveCurrency(netProfit)}
+          </h2>
+          <div className="flex items-center">
+            <Badge className="bg-blue-500/10 border border-blue-500/20 text-blue-600 font-bold text-[10px] rounded-full px-2 py-0.5 flex items-center gap-1">
+              Revenue minus expenses
+            </Badge>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 2: Bento Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Col Span 2: Revenue Trend Chart (Gated with BlurredPaywall) */}
+        <div className="lg:col-span-2 bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[380px]">
+          <div className="mb-4">
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight">Revenue Trajectory</h2>
+            <p className="text-xs text-slate-400 font-medium">Real-time revenue growth and invoicing data</p>
+          </div>
+          
+          <div className="flex-1 w-full relative">
+            <BlurredPaywall
+              isLocked={userTier === "FREE"}
+              feature="Revenue Trends"
+              description="Gain insight into your 12-month revenue trajectory, invoice collection latency, and monthly budgeting trends."
+            >
+              <div className="h-64 w-full">
+                <PortfolioPerformance transactions={transactions} />
+              </div>
+            </BlurredPaywall>
+          </div>
+        </div>
+
+        {/* Col Span 1: Recent Transactions Table */}
+        <div className="lg:col-span-1 bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-800 tracking-tight">Recent Activity</h2>
+              <p className="text-[11px] text-slate-400 font-medium">Latest ledger updates</p>
+            </div>
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          </div>
+
+          <div className="flex-1 overflow-y-auto max-h-[250px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <table className="w-full">
+              <tbody className="divide-y divide-slate-50">
+                {transactions.length === 0 ? (
+                  <tr>
+                    <td>
+                      <div className="py-8 flex flex-col items-center gap-3 text-center">
+                        <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-slate-300" />
+                        </div>
+                        <p className="text-slate-400 text-xs font-semibold">Your ledger is empty</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.slice(0, 5).map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="py-3 pr-2">
+                        <div className="w-7 h-7 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-emerald-500/50 transition-colors">
+                          {getTypeIcon(tx.type, tx.amount)}
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 min-w-0">
+                        <p className="text-slate-700 text-xs font-bold truncate max-w-[120px]">
+                          {tx.description}
+                        </p>
+                        <p className="text-slate-400 text-[10px] font-semibold mt-0.5">
+                          {tx.date ? new Date(tx.date).toLocaleDateString() : ""}
+                        </p>
+                      </td>
+                      <td className="py-3 pl-2 text-right font-mono text-xs font-bold text-slate-800">
+                        <span className={tx.amount > 0 ? "text-emerald-600" : "text-slate-800"}>
+                          {formatCurrency(tx.amount)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="pt-4 border-t border-slate-100">
+            <Link href="/fintech/journals" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1 justify-center no-underline">
+              View All Journals
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 3: Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Col Span 1: Operating Expense Allocation Donut */}
+        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
+          <ExpenseAllocation transactions={transactions} />
+        </div>
+
+        {/* Col Span 1: Account Receivable Aging Table */}
+        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-base font-bold text-slate-800 tracking-tight">Receivables Aging</h2>
+                <p className="text-[10px] text-slate-400 font-medium">As of {todayReadable}</p>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto w-full mt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="text-left py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
+                    <th className="text-right py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+                    <th className="text-right py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Overdue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 text-[11px]">
+                  {transactions.filter(tx => tx.status === "PENDING" && tx.amount > 0).length === 0 ? (
+                    <tr>
+                      <td colSpan={3}>
+                        <div className="py-8 flex flex-col items-center gap-2 text-center">
+                          <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                          </div>
+                          <p className="text-slate-500 text-xs font-semibold">No unpaid invoices</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions
+                      .filter(tx => tx.status === "PENDING" && tx.amount > 0)
+                      .slice(0, 4)
+                      .map((tx, i) => (
+                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-2.5 px-3 font-mono font-semibold text-slate-600 truncate max-w-[100px]">
+                            {tx.id ? `TX-${tx.id.toString().substring(0, 6).toUpperCase()}` : "TX/SLS/001"}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-bold text-slate-700">
+                            {formatCurrency(tx.amount)}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-semibold text-slate-400">
+                            Pending
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Col Span 1: Quick Actions & Tools */}
+        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 tracking-tight mb-4">Quick Tools</h2>
+            <div className="space-y-3">
+              <Link href="/dashboard/invoices/create" className="no-underline">
+                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
+                  <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-emerald-500 transition-colors">
+                      New Invoice Factory
+                    </h4>
+                    <p className="text-[10px] text-slate-400">Draft or send a new client invoice</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/fintech/financial-documents" className="no-underline">
+                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
+                  <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-blue-500 transition-colors">
+                      Financial Documents
+                    </h4>
+                    <p className="text-[10px] text-slate-400">Analyze Profit & Loss statement</p>
+                  </div>
+                </div>
+              </Link>
+
+              <button
+                onClick={exportToCSV}
+                disabled={isExporting}
+                className="w-full text-left bg-transparent border-none p-0 focus:outline-none"
+              >
+                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
+                  <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-purple-500">
+                    {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-purple-500 transition-colors">
+                      Export Verified Audit
+                    </h4>
+                    <p className="text-[10px] text-slate-400">Download ledger details as CSV</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 4: Immutable Audit Trail */}
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 tracking-tight">Immutable Audit Trail</h2>
+            <p className="text-xs text-slate-400 mt-1">Cryptographically verified logs & ledger audits</p>
+          </div>
+        </div>
+        <AuditTimeline transactions={transactions} />
+      </div>
+
+    </div>
   );
 }
