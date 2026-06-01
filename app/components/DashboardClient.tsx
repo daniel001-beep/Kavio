@@ -96,24 +96,20 @@ export default function DashboardClient({
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
       
       {/* Top Banner: Greeting, Simulation Toggle & Primary CTA */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 text-white p-8 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="text-slate-400 font-medium text-sm">Welcome back,</span>
-            <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" />
+            <span className="text-slate-500 font-bold text-sm">Welcome back,</span>
+            <Badge className="bg-emerald-50 border border-emerald-100 text-emerald-600 font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+              <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
               {userTier === "FREE" ? "Free Tier" : "Pro Active"}
             </Badge>
           </div>
           
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Good morning, {displayName}.
           </h1>
-          <p className="text-slate-400 text-sm font-medium">
+          <p className="text-slate-500 text-sm font-semibold">
             Here is your financial command center for today, {todayReadable}.
           </p>
         </div>
@@ -122,23 +118,23 @@ export default function DashboardClient({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10">
           
           {/* Simulation Toggle */}
-          <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700">
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60 shadow-inner">
             <button
               onClick={() => setUserTier("FREE")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
                 userTier === "FREE"
-                  ? "bg-slate-700 text-white shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
               Simulate Free
             </button>
             <button
               onClick={() => setUserTier("PRO")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
                 userTier === "PRO"
                   ? "bg-emerald-500 text-white shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
               Simulate Pro
@@ -150,7 +146,7 @@ export default function DashboardClient({
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as any)}
-              className="bg-slate-800 border border-slate-700 text-white font-semibold text-xs rounded-xl px-3 py-3 hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none"
+              className="bg-slate-100 border border-slate-200/60 text-slate-700 font-bold text-xs rounded-xl px-3.5 py-3 hover:bg-slate-200 transition-all cursor-pointer focus:outline-none shadow-sm"
             >
               <option value="NGN">₦ NGN</option>
               <option value="USD">$ USD</option>
