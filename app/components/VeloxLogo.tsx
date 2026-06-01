@@ -53,7 +53,7 @@ export const VeloxLogoIconOnly: React.FC<VeloxLogoProps> = ({ size = 36 }) => {
   return (
     <div
       className="hover:drop-shadow-lg transition-all duration-300"
-      aria-label="Velox Fintech Logo"
+      aria-label="Kavio Logo"
     >
       <VeloxLogoIcon size={size} variant="icon" />
     </div>
@@ -68,7 +68,7 @@ export const VeloxLogoLight: React.FC<VeloxLogoProps> = ({ size = 36, className 
     >
       <VeloxLogoIcon size={size} variant="light" />
       <div className="flex flex-col leading-tight">
-        <span className="text-sm font-bold tracking-tight text-slate-900">VELOX</span>
+        <span className="text-sm font-bold tracking-tight text-slate-900">KAVIO</span>
         <span className="text-xs font-light tracking-widest text-slate-500">FINTECH</span>
       </div>
     </div>
@@ -89,7 +89,7 @@ const VeloxLogo: React.FC<VeloxLogoProps> = ({ size = 36, variant = 'full', clas
       <VeloxLogoIcon size={size} variant={variant} />
       <div className="flex flex-col leading-tight">
         <span className={`text-base font-bold tracking-tight ${textColor}`}>
-          VELOX
+          KAVIO
         </span>
         <span
           className={`text-xs font-light tracking-widest ${mutedColor}`}

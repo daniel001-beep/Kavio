@@ -4,7 +4,7 @@ import HeaderUser from "../components/HeaderUser";
 import "./fintech.css";
 
 export const metadata: Metadata = {
-  title: "Velox Fintech - Enterprise Ledger System",
+  title: "Kavio - Enterprise Ledger System",
   description: "Enterprise-grade financial infrastructure with real-time reconciliation and AI-powered fraud detection.",
 };
 

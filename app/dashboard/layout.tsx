@@ -4,7 +4,7 @@ import HeaderUser from "../components/HeaderUser";
 import "../fintech/fintech.css";
 
 export const metadata: Metadata = {
-  title: "Velox Fintech - Portfolio Dashboard",
+  title: "Kavio - Portfolio Dashboard",
   description: "Enterprise portfolio dashboard and ledger balance statistics.",
 };
 

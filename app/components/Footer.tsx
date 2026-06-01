@@ -30,7 +30,7 @@ const Footer = () => {
       <div className="container mx-auto px-6 md:px-12 lg:px-24 max-w-6xl">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* About Velox */}
+          {/* About Kavio */}
           <div className="col-span-1">
             <Link href="/dashboard" className="inline-block mb-4 no-underline">
               <VeloxLogo size={28} variant="full" />
@@ -83,7 +83,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-slate-700 pt-6 text-center text-xs text-slate-500">
-          <p>&copy; 2026 Velox Fintech. All Rights Reserved. Enterprise Financial Platform</p>
+          <p>&copy; 2026 Kavio. All Rights Reserved. Enterprise Financial Platform</p>
         </div>
       </div>
     </footer>

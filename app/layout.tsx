@@ -16,20 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Velox Fintech | Production-Ready Ledger Infrastructure",
+  title: "Kavio | Production-Ready Ledger Infrastructure",
   description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams built for B2B financial operators.",
   keywords: "fintech, ledger, double-entry accounting, B2B payments, financial infrastructure, multi-tenant wallets, realtime APIs",
   openGraph: {
-    title: "Velox Fintech",
+    title: "Kavio",
     description: "Enterprise-grade double-entry ledger engine built for B2B financial operators.",
-    url: "https://velox-fintech.vercel.app",
-    siteName: "Velox Fintech",
+    url: "https://kavio.vercel.app",
+    siteName: "Kavio",
     images: [
       {
-        url: "https://velox-fintech.vercel.app/cdn.png",
+        url: "https://kavio.vercel.app/cdn.png",
         width: 1200,
         height: 630,
-        alt: "Velox Fintech Architecture",
+        alt: "Kavio Architecture",
       },
     ],
     locale: "en_US",
@@ -37,9 +37,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Velox Fintech | Production-Ready Ledger Infrastructure",
+    title: "Kavio | Production-Ready Ledger Infrastructure",
     description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams.",
-    images: ["https://velox-fintech.vercel.app/cdn.png"],
+    images: ["https://kavio.vercel.app/cdn.png"],
   }
 };
 

@@ -79,7 +79,7 @@ export default function SignIn() {
         <div className="text-center space-y-1.5">
           <div className="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/60 shadow-sm">
             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 animate-pulse"></div>
-            <span className="text-[10px] font-bold text-slate-800 tracking-wide font-mono">VELOX LEDGER LINK</span>
+            <span className="text-[10px] font-bold text-slate-800 tracking-wide font-mono">KAVIO LEDGER LINK</span>
           </div>
           <p className="text-slate-400 text-[9px] font-bold font-mono uppercase tracking-widest">
             
@@ -138,7 +138,7 @@ export default function SignIn() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="founder@velox.com"
+                placeholder="founder@kavio.com"
                 style={{
                   textAlign: 'center',
                   color: '#0f172a',
@@ -198,7 +198,7 @@ export default function SignIn() {
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                'Sign in to Velox'
+                'Sign in to Kavio'
               )}
             </button>
 

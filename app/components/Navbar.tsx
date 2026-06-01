@@ -87,8 +87,7 @@ const Navbar = () => {
             href="/dashboard"
             className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
           >
-            <span className="text-[22px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Velox</span>
-            <span className="text-[22px] font-medium text-slate-400 tracking-tight ml-1">Fintech</span>
+            <span className="text-[22px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Kavio</span>
           </Link>
         </div>
 
@@ -150,8 +149,7 @@ const Navbar = () => {
                 onClick={() => setIsMobileOpen(false)}
                 className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
               >
-                <span className="text-[22px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Velox</span>
-                <span className="text-[22px] font-medium text-slate-400 tracking-tight ml-1">Fintech</span>
+                <span className="text-[22px] font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Kavio</span>
               </Link>
 
               {/* Close Button */}
