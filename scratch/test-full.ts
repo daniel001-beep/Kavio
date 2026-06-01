@@ -48,7 +48,7 @@ async function main() {
     const [newTx] = await db.insert(transactions).values({
       userId: 'usr_test_123',
       idempotencyKey: `idemp_${Date.now()}`,
-      amount: 5000n, // 50.00 dollars
+      amount: 5000, // 50.00 dollars
       status: 'completed',
     }).returning();
     console.log("Transaction insert result:", newTx);

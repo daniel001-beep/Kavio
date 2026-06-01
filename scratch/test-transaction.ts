@@ -12,7 +12,7 @@ async function main() {
   console.log("Loading DB...");
   const userId = 'usr_6wshej3ht'; // Admin ID
   const idempotencyKey = `test_idemp_${Date.now()}`;
-  const amountBigInt = 1000n;
+  const amountBigInt = 1000;
 
   try {
     console.log("Starting db.transaction...");

@@ -241,7 +241,7 @@ export default function DashboardClient({
         <div className="lg:col-span-2 bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[380px]">
           <div className="mb-4">
             <h2 className="text-lg font-bold text-slate-800 tracking-tight">Revenue Trajectory</h2>
-            <p className="text-xs text-slate-400 font-medium">Real-time revenue growth and invoicing data</p>
+            <p className="text-xs text-slate-600 font-semibold">Real-time revenue growth and invoicing data</p>
           </div>
           
           <div className="flex-1 w-full relative">
@@ -262,7 +262,7 @@ export default function DashboardClient({
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
             <div>
               <h2 className="text-base font-bold text-slate-800 tracking-tight">Recent Activity</h2>
-              <p className="text-[11px] text-slate-400 font-medium">Latest ledger updates</p>
+              <p className="text-[11px] text-slate-600 font-semibold">Latest ledger updates</p>
             </div>
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
           </div>
@@ -333,7 +333,7 @@ export default function DashboardClient({
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-base font-bold text-slate-800 tracking-tight">Receivables Aging</h2>
-                <p className="text-[10px] text-slate-400 font-medium">As of {todayReadable}</p>
+                <p className="text-[10px] text-slate-600 font-bold">As of {todayReadable}</p>
               </div>
             </div>
             
