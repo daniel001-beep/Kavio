@@ -1,5 +1,47 @@
 @import "tailwindcss";
 
+@theme {
+  --color-midnight: #0F172A;
+  --color-growth: #10B981;
+  --color-alert: #F59E0B; 
+  --color-trust: #3B82F6;
+  --color-surface: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-muted: #64748B;
+}
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  
+  --primary: #0F172A;
+  --primary-foreground: #F8FAFC;
+  
+  --secondary: #F1F5F9;
+  --secondary-foreground: #0F172A;
+  
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  
+  --accent: #F1F5F9;
+  --accent-foreground: #0F172A;
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #F8FAFC;
+  
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #0F172A;
+  
+  --radius: 0.5rem;
+}
+
 /* Explicit Color Utilities for Theme Tokens */
 @layer utilities {
   .text-electric-pulse { @apply text-[#635BFF]; }
@@ -29,48 +71,11 @@
   .text-text-secondary { @apply text-[oklch(75.3%_0.020_265.0)]; }
   .text-text-tertiary { @apply text-[oklch(55.0%_0.025_265.0)]; }
 
-  /* Force light theme sure+ inspired overrides */
-  .bg-slate-950,
-  .bg-zinc-950,
-  .bg-base-bg {
-    background-color: #f4f5f7 !important;
-    color: #1e293b !important;
-  }
-  
-  .bg-slate-900,
-  .bg-slate-800,
-  .bg-zinc-900,
-  .bg-card-bg {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-  }
-  
-  /* Text and detail colors mapping for dark-to-light theme */
-  .text-slate-100,
-  .text-slate-200,
-  .text-slate-300,
-  .text-slate-400 {
-    color: #1e293b !important;
-  }
-  
-  .text-slate-500,
-  .text-slate-600 {
-    color: #64748b !important;
-  }
-  
-  .page-title {
-    color: #0052cc !important;
-    font-weight: 700 !important;
+  .paywall-overlay {
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.4);
   }
 
-  /* Borders mapping to elegant slate border */
-  .border-slate-800,
-  .border-slate-700,
-  .border-white\/\[0\.04\],
-  .border-white\/\[0\.06\],
-  .border-white\/\[0\.08\] {
-    border-color: #e2e8f0 !important;
-  }
 
   /* Scoped light theme typography resets to override legacy oversized dark styling */
   .fintech-layout-root h1 {
