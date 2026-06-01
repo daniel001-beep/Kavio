@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-[#f8fafc] flex text-slate-900 font-sans">
       {/* Sidebar Navigation - Responsive hidden on mobile */}
-      <aside className="hidden md:flex w-72 border-r border-slate-200/80 flex flex-col fixed h-full bg-white z-20">
+      <aside className="hidden md:flex flex-col w-72 border-r border-slate-200/80 fixed h-full bg-white z-20">
         {/* Right edge decorative blue accent bar exactly like screenshot */}
         <div className="absolute right-0 top-36 w-[4px] h-60 bg-blue-600 z-30 rounded-l"></div>
 
