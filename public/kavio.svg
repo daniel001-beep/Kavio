@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="kavioGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#635BFF" />
+      <stop offset="100%" stopColor="#00FFC2" />
+    </linearGradient>
+  </defs>
+  <path d="M25 20V80H40V55L65 80H85L55 50L80 20H60L40 45V20H25Z" fill="url(#kavioGrad)" />
+</svg>
