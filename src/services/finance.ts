@@ -149,7 +149,7 @@ export class FinanceService {
           userId,
           orderId: params.orderId || null,
           idempotencyKey,
-          amount: amountBigInt.toString(),
+          amount: Number(amountBigInt),
           status: status,
           hash,
           previousHash,
@@ -165,7 +165,7 @@ export class FinanceService {
         userId,
         accountType: "MAIN",
         entryType: amountBigInt > 0n ? "CREDIT" : "DEBIT",
-        amount: amountBigInt.toString(),
+        amount: Number(amountBigInt),
         description: description,
         createdAt: timestamp,
       });
@@ -176,7 +176,7 @@ export class FinanceService {
         userId: "SYSTEM",
         accountType: "SETTLEMENT",
         entryType: amountBigInt > 0n ? "DEBIT" : "CREDIT",
-        amount: (-amountBigInt).toString(),
+        amount: Number(-amountBigInt),
         description: `Offset for transaction ${newTx.id}`,
         createdAt: timestamp,
       });
@@ -302,7 +302,7 @@ export class FinanceService {
       const [updatedTx] = await tx
         .update(transactions)
         .set({
-          amount: newAmountBigInt.toString(),
+          amount: Number(newAmountBigInt),
           status: newStatus,
           metadata: updatedMetadata,
           completedAt: newStatus === "completed" ? new Date() : null,
@@ -320,7 +320,7 @@ export class FinanceService {
         userId,
         accountType: "MAIN",
         entryType: newAmountBigInt > 0n ? "CREDIT" : "DEBIT",
-        amount: newAmountBigInt.toString(),
+        amount: Number(newAmountBigInt),
         description: params.description || updatedMetadata.description || "Updated Transaction",
         createdAt: existingTx.createdAt,
       });
@@ -331,7 +331,7 @@ export class FinanceService {
         userId: "SYSTEM",
         accountType: "SETTLEMENT",
         entryType: newAmountBigInt > 0n ? "DEBIT" : "CREDIT",
-        amount: (-newAmountBigInt).toString(),
+        amount: Number(-newAmountBigInt),
         description: `Offset for transaction ${transactionId}`,
         createdAt: existingTx.createdAt,
       });

@@ -31,14 +31,15 @@ export async function generateBusinessInsights(
     limit: 50, // Grab the last 50 for trend analysis
   });
 
-  let totalCredits = 0n;
-  let totalDebits = 0n;
+  let totalCredits = 0;
+  let totalDebits = 0;
 
   for (const tx of userTx) {
-    if (tx.amount > 0n) {
-      totalCredits += tx.amount;
+    const amt = Number(tx.amount || 0);
+    if (amt > 0) {
+      totalCredits += amt;
     } else {
-      totalDebits += tx.amount;
+      totalDebits += amt;
     }
   }
 
@@ -67,9 +68,9 @@ export async function generateBusinessInsights(
   }
 
   // 3. AI Generation
-  // Formatting BigInts down to readable standard floats for the LLM prompt so it doesn't get confused
-  const creditsFormatted = Number(totalCredits) / 100;
-  const debitsFormatted = Math.abs(Number(totalDebits)) / 100;
+  // Formatting down to readable standard floats for the LLM prompt so it doesn't get confused
+  const creditsFormatted = totalCredits / 100;
+  const debitsFormatted = Math.abs(totalDebits) / 100;
 
   const prompt = `
     Analyze the following financial data for a user:
@@ -84,7 +85,7 @@ export async function generateBusinessInsights(
   // Actually making the call
   try {
     const { object } = await generateObject({
-      model: google('gemini-2.5-pro'), // Use the smart model
+      model: google('gemini-2.5-pro') as any, // Use the smart model
       schema: InsightSchema,
       prompt: prompt,
     });

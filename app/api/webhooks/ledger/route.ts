@@ -128,7 +128,7 @@ export async function POST(req: Request) {
             userId,
             orderId: orderId || null,
             idempotencyKey,
-            amount: amountBigInt,
+            amount: Number(amountBigInt),
             status: isCompleted ? 'completed' : 'pending',
             hash,
             previousHash,
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
             userId,
             accountType: 'MAIN',
             entryType: amountBigInt > 0n ? 'CREDIT' : 'DEBIT',
-            amount: amountBigInt,
+            amount: Number(amountBigInt),
             description: description || 'Webhook transaction lines',
             createdAt: timestamp,
           });
@@ -154,7 +154,7 @@ export async function POST(req: Request) {
             userId: 'SYSTEM',
             accountType: 'SETTLEMENT',
             entryType: amountBigInt > 0n ? 'DEBIT' : 'CREDIT',
-            amount: -amountBigInt,
+            amount: Number(-amountBigInt),
             description: `Offset settlement for transaction ${newTx.id}`,
             createdAt: timestamp,
           });

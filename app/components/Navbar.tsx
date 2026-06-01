@@ -144,15 +144,15 @@ export default function Navbar() {
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-2 w-full">
           {/* Logout Button */}
           <button
             onClick={() => signOut()}
-            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-emerald-600 hover:bg-slate-50 transition-all duration-150 ${
-              isCollapsed ? "mx-auto justify-center w-full" : "flex-1"
+            className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-[13px] font-extrabold text-slate-600 hover:text-rose-600 hover:bg-rose-50/50 border border-slate-150 hover:border-rose-100 transition-all duration-200 shadow-sm ${
+              isCollapsed ? "mx-auto justify-center w-full" : "w-full"
             }`}
           >
-            <LogOut className="w-[18px] h-[18px] shrink-0" />
+            <LogOut className="w-[18px] h-[18px] shrink-0 text-slate-400 group-hover:text-rose-500 transition-colors" />
             {!isCollapsed && <span>Log Out</span>}
           </button>
 

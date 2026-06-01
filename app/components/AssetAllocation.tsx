@@ -87,16 +87,18 @@ const AssetAllocation: React.FC = () => {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              activeIndex={activeIndex}
-              activeShape={renderActiveShape}
-              data={assets}
-              cx="50%"
-              cy="50%"
-              innerRadius={90}
-              outerRadius={120}
-              dataKey="value"
-              onMouseEnter={onPieEnter}
-              stroke="none"
+              {...{
+                activeIndex,
+                activeShape: renderActiveShape,
+                data: assets,
+                cx: "50%",
+                cy: "50%",
+                innerRadius: 90,
+                outerRadius: 120,
+                dataKey: "value",
+                onMouseEnter: onPieEnter,
+                stroke: "none"
+              } as any}
             >
               {assets.map((entry, index) => (
                 <Cell key={"cell-" + index} fill={entry.color} />

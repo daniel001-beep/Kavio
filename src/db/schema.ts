@@ -103,7 +103,7 @@ export const transactions = pgTable("transaction", {
   userId: text("user_id").notNull(),
   orderId: integer("order_id"),
   idempotencyKey: text("idempotency_key"),
-  amount: bigint("amount", { mode: "bigint" }).notNull(),
+  amount: doublePrecision("amount").notNull(),
   status: text("status").notNull(),
   hash: text("hash"),
   previousHash: text("previous_hash"),
@@ -122,7 +122,7 @@ export const ledgerEntries = pgTable("ledger_entry", {
   userId: text("user_id").notNull(),
   accountType: text("account_type").notNull(),
   entryType: text("entry_type").notNull(),
-  amount: bigint("amount", { mode: "bigint" }).notNull(),
+  amount: doublePrecision("amount").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
