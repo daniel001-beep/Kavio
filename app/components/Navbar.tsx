@@ -13,7 +13,8 @@ import {
   Database, 
   LogOut, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Settings
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useSession, useSignOut } from "@/app/context/AuthContext";
@@ -47,6 +48,7 @@ export default function Navbar() {
         { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
         { href: "/dashboard/clients", label: "Clients", icon: Users },
         { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
+        { href: "/dashboard/settings", label: "Settings", icon: Settings },
       ],
     },
   ];
