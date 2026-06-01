@@ -83,40 +83,37 @@ export default function FinancialDocumentsPage() {
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-24">
       
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 text-white p-8 rounded-3xl border border-slate-800 shadow-xl relative overflow-hidden">
-        {/* Glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
         <div className="space-y-2 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="text-slate-400 font-medium text-xs uppercase tracking-widest">Kavio Tax & Compliance Suite</span>
-            <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold px-2.5 py-0.5 rounded-full text-[10px] tracking-wide">
+            <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">Kavio Tax & Compliance Suite</span>
+            <Badge className="bg-emerald-50 border border-emerald-100 text-emerald-600 font-bold px-2.5 py-0.5 rounded-full text-[10px] tracking-wide shadow-sm">
               {userTier === "FREE" ? "Free Tier" : "Pro Tier Enabled"}
             </Badge>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Profitability & Tax Hub
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm font-medium">
+          <p className="text-slate-500 text-xs sm:text-sm font-semibold">
             Generate tax-ready financial statements and export audited PDF files.
           </p>
         </div>
 
         {/* Action controls */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10">
-          <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700">
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60 shadow-inner">
             <button
               onClick={() => setUserTier("FREE")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                userTier === "FREE" ? "bg-slate-700 text-white shadow-sm" : "text-slate-400"
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
+                userTier === "FREE" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-800"
               }`}
             >
               Simulate Free
             </button>
             <button
               onClick={() => setUserTier("PRO")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                userTier === "PRO" ? "bg-emerald-500 text-white shadow-sm" : "text-slate-400"
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
+                userTier === "PRO" ? "bg-emerald-500 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
               }`}
             >
               Simulate Pro

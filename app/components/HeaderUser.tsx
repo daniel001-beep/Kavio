@@ -34,8 +34,7 @@ export default function HeaderUser() {
       </div>
 
       <div className="text-left hidden sm:block">
-        <p className="text-[13px] font-semibold text-slate-800 leading-tight capitalize">{firstName}</p>
-        <p className="text-[11px] text-slate-400 font-medium leading-none truncate max-w-[140px]">{email}</p>
+        <p className="text-[13px] font-bold text-slate-800 leading-tight capitalize">{firstName}</p>
       </div>
     </div>
   );
