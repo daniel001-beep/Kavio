@@ -18,11 +18,11 @@ export default function DashboardLayout({
     <div className="h-screen w-screen bg-[#f4f5f7] p-1.5 xs:p-3 sm:p-4 md:p-6 flex flex-col justify-center overflow-hidden fintech-layout-root">
       <div className="h-full flex bg-white border border-slate-200/60 rounded-[20px] xs:rounded-[24px] sm:rounded-[32px] shadow-sm overflow-hidden relative">
         <Navbar />
-        <div className="flex-1 flex flex-col min-w-0 bg-[#f8fafc]">
+        <div className="flex-1 flex flex-col min-w-0 bg-white">
           <header className="bg-white border-b border-slate-200/60 h-16 px-8 flex items-center justify-end shrink-0 md:flex hidden">
             <HeaderUser />
           </header>
-          <main className="grow overflow-y-auto p-3 xs:p-4 sm:p-6 md:p-8 pb-24 md:pb-8 bg-[#f8fafc]">
+          <main className="grow overflow-y-auto p-3 xs:p-4 sm:p-6 md:p-8 pb-24 md:pb-8 bg-white">
             {children}
           </main>
         </div>
