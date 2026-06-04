@@ -61,6 +61,13 @@ export async function POST(
       })
       .where(eq(invoices.id, id));
 
+    const { trackEvent } = await import("@/utils/tracker");
+    await trackEvent({
+      userId: finalUserId,
+      eventType: "INVOICE_PAID",
+      metadata: { invoiceId: invoice.id, paymentId: newPayment.id, amount: paymentAmount },
+    });
+
     return NextResponse.json({ success: true, payment: newPayment }, { status: 201 });
   } catch (error: any) {
     console.error("POST /api/invoices/[id]/pay error:", error);
