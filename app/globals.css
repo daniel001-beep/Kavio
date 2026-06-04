@@ -971,6 +971,31 @@ h1 {
     line-height: 1.2;
 }
 
+/* ===== AUTH PAGE OVERRIDE =====
+   Auth pages (signin/signup) use explicit inline colors.
+   Reset the global h1 gradient so headings render correctly. */
+[data-page="auth"] h1,
+[data-page="auth"] h2,
+[data-page="auth"] button {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
+}
+
+[data-page="auth"] h1 {
+    color: #10b981 !important;
+    -webkit-text-fill-color: #10b981 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0 !important;
+    line-height: 1.3 !important;
+}
+
+[data-page="auth"] button {
+    -webkit-text-fill-color: inherit !important;
+    color: inherit !important;
+}
+
 h2 {
     font-size: 2.5rem;
     font-weight: 600;
