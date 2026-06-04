@@ -7,6 +7,7 @@ import { db } from '@/src/db';
 import { users, auditLogs } from '@/src/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { trackEvent } from '@/utils/tracker';
 
 function getDeterministicUserId(email: string): string {
   const lowerEmail = email.toLowerCase().trim();
@@ -71,6 +72,15 @@ export async function signInAction(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
 
+    const userHeaders = await headers();
+    await trackEvent({
+      userId: drizzleUser.id,
+      eventType: "USER_LOGIN",
+      metadata: { email: lowerEmail },
+      ipAddress: userHeaders.get('x-forwarded-for') || '127.0.0.1',
+      userAgent: userHeaders.get('user-agent') || 'Unknown',
+    });
+
     return { success: true };
 
   } catch (err: any) {
@@ -129,6 +139,15 @@ export async function signUpAction(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
 
+    const userHeaders = await headers();
+    await trackEvent({
+      userId: newUser?.id || userId,
+      eventType: "USER_SIGNUP",
+      metadata: { email: lowerEmail },
+      ipAddress: userHeaders.get('x-forwarded-for') || '127.0.0.1',
+      userAgent: userHeaders.get('user-agent') || 'Unknown',
+    });
+
     return { success: true };
   } catch (err: any) {
     const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || 'MISSING_URL';
@@ -139,10 +158,24 @@ export async function signUpAction(formData: FormData) {
 
 export async function signOutAction() {
   const cookieStore = await cookies();
+  const localUser = cookieStore.get('velox-local-user')?.value;
+  let userId = "";
+  if (localUser) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(localUser));
+      userId = parsed.id;
+    } catch {}
+  }
   const supabase = await createClient();
   if (supabase) {
     await supabase.auth.signOut().catch(() => {});
   }
   cookieStore.set('velox-local-user', '', { path: '/', maxAge: 0 });
+  if (userId) {
+    await trackEvent({
+      userId,
+      eventType: "USER_LOGOUT"
+    });
+  }
   return { success: true };
 }

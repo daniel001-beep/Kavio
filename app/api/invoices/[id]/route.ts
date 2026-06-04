@@ -105,6 +105,13 @@ export async function PUT(
       .where(and(eq(invoices.id, id), eq(invoices.userId, userId)))
       .returning();
 
+    const { trackEvent } = await import("@/utils/tracker");
+    await trackEvent({
+      userId,
+      eventType: "INVOICE_UPDATED",
+      metadata: { invoiceId: updatedInvoice.id, status: updatedInvoice.status, amount: updatedInvoice.amount },
+    });
+
     return NextResponse.json(updatedInvoice, { status: 200 });
   } catch (error: any) {
     console.error("PUT /api/invoices/[id] error:", error);

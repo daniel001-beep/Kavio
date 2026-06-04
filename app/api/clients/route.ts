@@ -3,6 +3,7 @@ import { db } from "@/src/db";
 import { clients } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, desc } from "drizzle-orm";
+import { trackEvent } from "@/utils/tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,12 @@ export async function POST(req: Request) {
         location: location || null,
       })
       .returning();
+
+    await trackEvent({
+      userId,
+      eventType: "CLIENT_CREATED",
+      metadata: { clientId: newClient.id, name, email },
+    });
 
     return NextResponse.json(newClient, { status: 201 });
   } catch (error: any) {

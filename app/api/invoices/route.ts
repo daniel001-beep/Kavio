@@ -3,6 +3,7 @@ import { db } from "@/src/db";
 import { invoices, clients } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, desc } from "drizzle-orm";
+import { trackEvent } from "@/utils/tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,12 @@ export async function POST(req: Request) {
         paymentInstructions: paymentInstructions || null,
       })
       .returning();
+
+    await trackEvent({
+      userId,
+      eventType: "INVOICE_CREATED",
+      metadata: { invoiceId: newInvoice.id, invoiceNumber, amount: parsedAmount },
+    });
 
     return NextResponse.json(newInvoice, { status: 201 });
   } catch (error: any) {

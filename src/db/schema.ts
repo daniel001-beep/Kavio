@@ -24,6 +24,11 @@ export const users = pgTable("user", {
   image: text("image"),
   isAdmin: boolean("isAdmin").default(false),
   securityLockdown: boolean("security_lockdown").default(false),
+  planType: text("plan_type").default("FREE"),
+  status: text("status").default("ACTIVE"),
+  createdAt: timestamp("created_at").defaultNow(),
+  lastLogin: timestamp("last_login"),
+  lastActivity: timestamp("last_activity"),
 });
 
 export const accounts = pgTable(
@@ -229,4 +234,60 @@ export const reminders = pgTable("reminder", {
   sentDate: timestamp("sent_date").defaultNow(),
   reminderCount: integer("reminder_count").default(1),
   status: text("status").default("SENT"), // SENT, FAILED, DELIVERED
+});
+
+// 5. Founder Dashboard & Event Tracking Tables
+export const userActivityLogs = pgTable("user_activity_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(), // USER_SIGNUP, USER_LOGIN, etc.
+  metadata: jsonb("metadata").default({}),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const loginLogs = pgTable("login_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  deviceType: text("device_type"),
+  status: text("status").notNull().default("SUCCESS"), // SUCCESS, FAILED
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const featureUsageEvents = pgTable("feature_usage_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  featureName: text("feature_name").notNull(), // Invoice Creation, Client Management, Reminder Feature, Report Downloads
+  metadata: jsonb("metadata").default({}),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const supportTickets = pgTable("support_tickets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // SUPPORT, BUG, FEATURE_REQUEST, FEEDBACK
+  priority: text("priority").notNull().default("MEDIUM"), // LOW, MEDIUM, HIGH, URGENT
+  status: text("status").notNull().default("OPEN"), // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const adminNotifications = pgTable("admin_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  category: text("category").notNull(), // USER_SIGNUP, NEW_SUBSCRIPTION, SUPPORT_REQUEST, LARGE_INVOICE, USER_INACTIVE
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });
