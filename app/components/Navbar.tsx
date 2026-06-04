@@ -56,7 +56,7 @@ export default function Navbar() {
 
   return (
     <aside
-      className={`hidden md:flex flex-col bg-white border-r border-slate-200/80 shrink-0 h-screen sticky top-0 transition-all duration-300 ${
+      className={`hidden md:flex flex-col bg-white shrink-0 h-screen sticky top-0 transition-all duration-300 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >
@@ -70,7 +70,7 @@ export default function Navbar() {
             <span className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent tracking-tight">
               Kavio
             </span>
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100/50 px-2 py-0.5 rounded-full ml-2">
+            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-2">
               Pro
             </span>
           </Link>
@@ -129,11 +129,11 @@ export default function Navbar() {
       </nav>
 
       {/* Footer / Account / Collapse Toggle */}
-      <div className="p-4 border-t border-slate-100 space-y-4">
+      <div className="p-4 pt-6 space-y-4">
         {/* User Info when expanded */}
         {!isCollapsed && session?.user && (
-          <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold uppercase">
+          <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 rounded-xl">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold uppercase">
               {session.user.name ? session.user.name[0] : (session.user.email ? session.user.email[0] : "U")}
             </div>
             <div className="flex-1 min-w-0">
@@ -151,7 +151,7 @@ export default function Navbar() {
           {/* Logout Button */}
           <button
             onClick={() => signOut()}
-            className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-[13px] font-extrabold text-slate-600 hover:text-rose-600 hover:bg-rose-50/50 border border-slate-150 hover:border-rose-100 transition-all duration-200 shadow-sm ${
+            className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-[13px] font-bold text-slate-500 hover:text-rose-650 hover:bg-rose-50/50 transition-all duration-200 ${
               isCollapsed ? "mx-auto justify-center w-full" : "w-full"
             }`}
           >
@@ -162,7 +162,7 @@ export default function Navbar() {
           {/* Collapse Toggle Arrow (Desktop Only) */}
           <button
             onClick={toggleCollapse}
-            className="hidden md:flex p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-lg transition-colors ml-auto border border-slate-200"
+            className="hidden md:flex p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-lg transition-colors ml-auto"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>

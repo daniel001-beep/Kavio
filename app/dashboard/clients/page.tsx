@@ -207,7 +207,7 @@ export default function ClientsPage() {
 
       {/* Aggregate metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/50 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Connections</span>
@@ -218,7 +218,7 @@ export default function ClientsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/50 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Collected</span>
@@ -229,7 +229,7 @@ export default function ClientsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/50 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Outstanding</span>
@@ -242,7 +242,7 @@ export default function ClientsPage() {
       </div>
 
       {/* Search and List */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -251,7 +251,7 @@ export default function ClientsPage() {
               placeholder="Search clients by name or company..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+              className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
             />
           </div>
         </div>
@@ -260,7 +260,7 @@ export default function ClientsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredClients.length === 0 ? (
             <div className="col-span-2 py-16 flex flex-col items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-330">
                 <Users className="w-6 h-6" />
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function ClientsPage() {
               </div>
               <Button 
                 onClick={() => setShowAddModal(true)}
-                className="mt-2 text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100/50 py-4 rounded-xl"
+                className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl"
               >
                 Create Client Profile
               </Button>
@@ -280,12 +280,12 @@ export default function ClientsPage() {
               return (
                 <div 
                   key={client.id}
-                  className="border border-slate-100 rounded-3xl p-6 hover:shadow-md hover:border-slate-200/80 transition-all bg-white relative group flex flex-col justify-between"
+                  className="rounded-3xl p-6 shadow-sm hover:shadow-md transition-all bg-white relative group flex flex-col justify-between border-none"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-4 mb-5">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
                           {getInitials(client.name)}
                         </div>
                         <div>
@@ -293,7 +293,7 @@ export default function ClientsPage() {
                           <p className="text-xs text-slate-500 font-semibold mt-0.5">{client.companyName || "Freelance Client"}</p>
                         </div>
                       </div>
-                      <Badge className="font-bold text-[9px] uppercase px-2.5 py-0.5 rounded-full border bg-emerald-50 border-emerald-100 text-emerald-600">
+                      <Badge className="font-bold text-[9px] uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border-none">
                         {invoicesCount} Invoices
                       </Badge>
                     </div>
@@ -316,7 +316,7 @@ export default function ClientsPage() {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100/60 flex items-center justify-between">
+                  <div className="pt-4 border-t border-slate-100/30 flex items-center justify-between">
                     <div className="grid grid-cols-2 gap-4 flex-1">
                       <div>
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Billed</p>
@@ -340,7 +340,7 @@ export default function ClientsPage() {
       {/* Add Client Dialog / Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
             <div>
               <h2 className="text-xl font-bold text-slate-800">Add New Client Record</h2>
               <p className="text-xs text-slate-500 mt-1">Configure client details for automated invoicing and collections.</p>
@@ -356,7 +356,7 @@ export default function ClientsPage() {
                     onChange={e => setNewName(e.target.value)} 
                     placeholder="e.g. Chioma Nze"
                     required
-                    className="rounded-xl border-slate-200 text-xs py-4"
+                    className="rounded-xl border-slate-200/50 text-xs py-4"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -366,7 +366,7 @@ export default function ClientsPage() {
                     value={newCompany} 
                     onChange={e => setNewCompany(e.target.value)} 
                     placeholder="e.g. Flutterwave"
-                    className="rounded-xl border-slate-200 text-xs py-4"
+                    className="rounded-xl border-slate-200/50 text-xs py-4"
                   />
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function ClientsPage() {
                   onChange={e => setNewEmail(e.target.value)} 
                   placeholder="e.g. accounts@flutterwavego.com"
                   required
-                  className="rounded-xl border-slate-200 text-xs py-4"
+                  className="rounded-xl border-slate-200/50 text-xs py-4"
                 />
               </div>
 
@@ -392,7 +392,7 @@ export default function ClientsPage() {
                     onChange={e => setNewPhone(e.target.value)} 
                     placeholder="e.g. +234 812 345 6789"
                     required
-                    className="rounded-xl border-slate-200 text-xs py-4"
+                    className="rounded-xl border-slate-200/50 text-xs py-4"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -402,17 +402,17 @@ export default function ClientsPage() {
                     value={newLocation} 
                     onChange={e => setNewLocation(e.target.value)} 
                     placeholder="e.g. Lagos, Nigeria"
-                    className="rounded-xl border-slate-200 text-xs py-4"
+                    className="rounded-xl border-slate-200/50 text-xs py-4"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100/30">
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => setShowAddModal(false)}
-                  className="rounded-xl px-5 text-xs py-4 border-slate-200 font-semibold"
+                  className="rounded-xl px-5 text-xs py-4 border-slate-200/50 font-semibold"
                 >
                   Cancel
                 </Button>

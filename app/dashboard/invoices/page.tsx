@@ -194,7 +194,7 @@ export default function InvoicesPage() {
 
       {/* Aggregate Cards (Bento) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
@@ -205,7 +205,7 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Settled Earnings</span>
@@ -216,7 +216,7 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding</span>
@@ -227,7 +227,7 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overdue Alert</span>
@@ -240,7 +240,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           {/* Tab Filters */}
@@ -268,7 +268,7 @@ export default function InvoicesPage() {
               placeholder="Search invoice or client name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+              className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
             />
           </div>
 
@@ -278,7 +278,7 @@ export default function InvoicesPage() {
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
+              <tr className="border-b border-slate-100/40 bg-slate-50/30">
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice No.</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project Details</th>
@@ -293,7 +293,7 @@ export default function InvoicesPage() {
                 <tr>
                   <td colSpan={7}>
                     <div className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                      <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
                         <FileText className="w-6 h-6" />
                       </div>
                       <div>
@@ -301,7 +301,7 @@ export default function InvoicesPage() {
                         <p className="text-xs text-slate-400 mt-1">Create a new invoice and share payment link with clients.</p>
                       </div>
                       <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                        <Button className="mt-2 text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100/50 py-4 rounded-xl">
+                        <Button className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl">
                           Create Your First Invoice
                         </Button>
                       </Link>
