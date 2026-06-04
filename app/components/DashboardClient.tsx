@@ -6,77 +6,142 @@ import {
   Activity, 
   ArrowDownRight, 
   ArrowUpRight, 
-  RefreshCw, 
-  Download, 
-  ShieldCheck, 
-  Zap, 
-  Loader2, 
-  BookOpen, 
   Plus, 
-  Layers,
-  ArrowRight,
-  TrendingDown,
-  Sparkles
+  MessageSquare,
+  Mail,
+  ShieldCheck,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  FileText,
+  DollarSign,
+  Loader2,
+  Trash2,
+  Copy,
+  ExternalLink,
+  ChevronRight,
+  UserCheck
 } from "lucide-react";
-import { useDashboardData } from "@/app/hooks/useDashboardData";
-import { BlurredPaywall } from "@/app/components/BlurredPaywall";
-import PortfolioPerformance from "@/app/components/PortfolioPerformance";
-import RevenuePerformance from "@/app/components/RevenuePerformance";
-import ExpenseAllocation from "@/app/components/ExpenseAllocation";
-import AuditTimeline from "@/app/components/AuditTimeline";
+import { useDashboardData, Invoice } from "@/app/hooks/useDashboardData";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
-interface DashboardClientProps {
-  totalBalanceUsd: number;
-  dayChangeUsd: number;
-  transactions: any[];
-  isDemoData?: boolean;
-}
-
-export default function DashboardClient({
-  totalBalanceUsd: initialBalance,
-  dayChangeUsd: initialChange,
-  transactions: initialTransactions = [],
-}: DashboardClientProps) {
-  // Use our custom data hook
+export default function DashboardClient() {
   const {
     status,
     userEmail,
-    currency,
-    setCurrency,
-    isExporting,
-    transactions,
-    gmvSum,
-    gpSum,
-    apSum,
-    arSum,
-    netProfit,
+    invoices,
+    clientsCount,
+    outstandingSum,
+    overdueSum,
+    paidSum,
     formatCurrency,
-    formatLiveCurrency,
-    exportToCSV,
-    todayFormatted,
     todayReadable,
-  } = useDashboardData({
-    initialBalance,
-    initialChange,
-    initialTransactions,
-  });
+    recordManualPayment,
+    logReminder,
+  } = useDashboardData();
 
-  // Feature Flag: simulate Free vs Pro to test BlurredPaywall
-  const [userTier, setUserTier] = useState<"FREE" | "PRO">("FREE");
+  // Payment Modal States
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [paymentReference, setPaymentReference] = useState("");
+  const [paymentNotes, setPaymentNotes] = useState("");
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
-  // Get name from email
-  const displayName = userEmail 
-    ? userEmail.split("@")[0].charAt(0).toUpperCase() + userEmail.split("@")[0].slice(1)
-    : "Freelancer";
+  // Manual payment modal handler
+  const handleRecordPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvoice) return;
 
-  const getTypeIcon = (type: string, amount: number) => {
-    if (amount > 0) return <ArrowDownRight className="w-4 h-4 text-emerald-500" />;
-    if (amount < 0) return <ArrowUpRight className="w-4 h-4 text-rose-500" />;
-    return <RefreshCw className="w-4 h-4 text-blue-500" />;
+    setIsSubmittingPayment(true);
+    const success = await recordManualPayment(
+      selectedInvoice.id,
+      paymentReference,
+      paymentNotes
+    );
+    setIsSubmittingPayment(false);
+
+    if (success) {
+      setSelectedInvoice(null);
+      setPaymentReference("");
+      setPaymentNotes("");
+    }
+  };
+
+  // Pre-populated WhatsApp reminder link generator
+  const triggerWhatsAppNudge = (invoice: Invoice, templateType: string) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://kavio.finance";
+    const paymentLink = `${origin}/invoice/${invoice.id}`;
+    
+    let textMessage = "";
+    if (templateType === "DUE_TOMORROW") {
+      textMessage = `Hi ${invoice.client.name}, hope you're having a great week! Just a friendly note that invoice ${invoice.invoiceNumber} for NGN ${invoice.amount.toLocaleString()} is due tomorrow. Here is the payment link with bank details: ${paymentLink}. Thank you!`;
+    } else if (templateType === "DUE_TODAY") {
+      textMessage = `Hi ${invoice.client.name}, hope you're doing well. Just a gentle reminder that invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}) is due today. You can complete payment here: ${paymentLink}. Thanks!`;
+    } else if (templateType === "OVERDUE_3D") {
+      textMessage = `Hi ${invoice.client.name}, hope all is well. Just following up on invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}) which is now 3 days overdue. Here is the payment link: ${paymentLink}. Appreciate your help with this!`;
+    } else {
+      // 7 days overdue or general check-in
+      textMessage = `Hi ${invoice.client.name}, I hope this message finds you well. I'm checking in on the status of invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}), which is now past due. You can find the payment instructions and bank details here: ${paymentLink}. Thank you!`;
+    }
+
+    // Log the reminder event to database
+    logReminder(invoice.id, templateType, "WHATSAPP");
+
+    // Redirect to WhatsApp
+    const cleanPhone = invoice.client.phone.replace(/[^0-9+]/g, "");
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMessage)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  // Copy shareable link helper
+  const copyShareableLink = (id: string) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://kavio.finance";
+    const invoiceUrl = `${origin}/invoice/${id}`;
+    navigator.clipboard.writeText(invoiceUrl);
+    alert(`Public invoice link copied to clipboard!\n${invoiceUrl}`);
+  };
+
+  const getStatusBadge = (invoiceStatus: string) => {
+    switch (invoiceStatus) {
+      case "PAID":
+        return (
+          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <CheckCircle className="w-3.5 h-3.5" />
+            Paid
+          </Badge>
+        );
+      case "SENT":
+        return (
+          <Badge className="bg-blue-500/10 border border-blue-500/20 text-blue-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <Clock className="w-3.5 h-3.5" />
+            Sent
+          </Badge>
+        );
+      case "VIEWED":
+        return (
+          <Badge className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-650 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <UserCheck className="w-3.5 h-3.5" />
+            Viewed
+          </Badge>
+        );
+      case "OVERDUE":
+        return (
+          <Badge className="bg-rose-500/10 border border-rose-500/20 text-rose-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Overdue
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-slate-500/10 border border-slate-500/20 text-slate-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <FileText className="w-3.5 h-3.5" />
+            Draft
+          </Badge>
+        );
+    }
   };
 
   if (status === "loading") {
@@ -85,369 +150,262 @@ export default function DashboardClient({
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Securing Kavio Command Center...
+            Loading your collections console...
           </p>
         </div>
       </div>
     );
   }
 
+  // Segment pending invoices
+  const pendingInvoices = invoices.filter(inv => inv.status !== "PAID" && inv.status !== "DRAFT");
+
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
       
-      {/* Top Banner: Greeting, Simulation Toggle & Primary CTA */}
+      {/* Top Header Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-        <div className="space-y-2 relative z-10">
-          <div className="flex items-center gap-3">
-            <span className="text-slate-500 font-bold text-sm">Welcome back,</span>
-            <Badge className="bg-emerald-50 border border-emerald-100 text-emerald-600 font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-              <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
-              {userTier === "FREE" ? "Free Tier" : "Pro Active"}
-            </Badge>
-          </div>
-          
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Good morning, {displayName}.
+        <div className="space-y-1.5 relative z-10">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            Revenue OS Dashboard
           </h1>
           <p className="text-slate-500 text-sm font-semibold">
-            Here is your financial command center for today, {todayReadable}.
+            Track outstanding balances, log payments, and nudge clients on time. As of {todayReadable}.
           </p>
         </div>
 
-        {/* Action Controls & Simulated Tier Switcher */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 relative z-10">
-          
-          {/* Simulation Toggle */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60 shadow-inner">
-            <button
-              onClick={() => setUserTier("FREE")}
-              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
-                userTier === "FREE"
-                  ? "bg-white text-slate-800 shadow-sm"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              Simulate Free
-            </button>
-            <button
-              onClick={() => setUserTier("PRO")}
-              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg transition-all ${
-                userTier === "PRO"
-                  ? "bg-emerald-500 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              Simulate Pro
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Currency Select */}
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as any)}
-              className="bg-slate-100 border border-slate-200/60 text-slate-700 font-bold text-xs rounded-xl px-3.5 py-3 hover:bg-slate-200 transition-all cursor-pointer focus:outline-none shadow-sm"
-            >
-              <option value="NGN">₦ NGN</option>
-              <option value="USD">$ USD</option>
-              <option value="EUR">€ EUR</option>
-            </select>
-
-            {/* Create Invoice Primary Anchor */}
-            <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-              <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Create Invoice
-              </Button>
-            </Link>
-          </div>
-
+        <div className="flex items-center gap-3 relative z-10">
+          <Link href="/dashboard/invoices/create" passHref legacyBehavior>
+            <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-450 hover:to-emerald-550 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Create Invoice
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Bento Grid — Metrics Row (3 Columns) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Aggregate Cards (Outstanding Revenue Dashboard) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        {/* Metric 1: Total Invoices Unpaid (Amber alert `#F59E0B`) */}
-        <div className="bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/10 hover:border-amber-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
-              Total Invoices Unpaid
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-              <BookOpen className="w-4 h-4" />
+        {/* Total Outstanding */}
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/10 hover:border-amber-500/20 transition-all">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Outstanding</span>
+              <Clock className="w-4 h-4 text-amber-500" />
             </div>
-          </div>
-          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
-            {formatLiveCurrency(arSum)}
-          </h2>
-          <div className="flex items-center">
-            <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-600 font-bold text-[10px] rounded-full px-2 py-0.5">
-              Receivables Pending
-            </Badge>
-          </div>
-        </div>
+            <h3 className="text-2xl font-black text-slate-800 font-mono tracking-tight">{formatCurrency(outstandingSum)}</h3>
+            <p className="text-[10px] text-slate-550 font-semibold mt-1">Pending client payments</p>
+          </CardContent>
+        </Card>
 
-        {/* Metric 2: Monthly Revenue (Emerald growth `#10B981`) */}
-        <div className="bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/10 hover:border-emerald-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
-              Monthly Revenue
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-              <TrendingUp className="w-4 h-4" />
+        {/* Total Overdue */}
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/10 hover:border-rose-500/20 transition-all">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Overdue</span>
+              <AlertTriangle className="w-4 h-4 text-rose-500" />
             </div>
-          </div>
-          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
-            {formatLiveCurrency(gpSum)}
-          </h2>
-          <div className="flex items-center">
-            <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold text-[10px] rounded-full px-2 py-0.5 flex items-center gap-1">
-              <ArrowDownRight className="w-3 h-3" />
-              Completed Earnings
-            </Badge>
-          </div>
-        </div>
+            <h3 className="text-2xl font-black text-rose-600 font-mono tracking-tight">{formatCurrency(overdueSum)}</h3>
+            <p className="text-[10px] text-rose-500 font-semibold mt-1">Past due invoices</p>
+          </CardContent>
+        </Card>
 
-        {/* Metric 3: Net Profit (Blue trust `#3B82F6`) */}
-        <div className="bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/10 hover:border-blue-500/20 rounded-3xl p-6 sm:p-8 transition-all group relative overflow-hidden shadow-sm">
-          <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">
-              Net Profit
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-              <Activity className="w-4 h-4" />
+        {/* Total Paid (This month / aggregate) */}
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/10 hover:border-emerald-500/20 transition-all">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Recovered</span>
+              <CheckCircle className="w-4 h-4 text-emerald-500" />
             </div>
-          </div>
-          <h2 className="text-3xl font-extrabold text-slate-800 font-mono tracking-tight mb-2">
-            {formatLiveCurrency(netProfit)}
-          </h2>
-          <div className="flex items-center">
-            <Badge className="bg-blue-500/10 border border-blue-500/20 text-blue-600 font-bold text-[10px] rounded-full px-2 py-0.5 flex items-center gap-1">
-              Revenue minus expenses
-            </Badge>
-          </div>
-        </div>
+            <h3 className="text-2xl font-black text-emerald-600 font-mono tracking-tight">{formatCurrency(paidSum)}</h3>
+            <p className="text-[10px] text-emerald-600 font-semibold mt-1">Total revenue collected</p>
+          </CardContent>
+        </Card>
 
+        {/* Total Invoices Count */}
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tracked Invoices</span>
+              <FileText className="w-4 h-4 text-slate-400" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight">{invoices.length} Invoices</h3>
+            <p className="text-[10px] text-slate-400 font-semibold mt-1">Across {clientsCount} clients</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Row 2: Bento Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Col Span 2: Revenue Trend Chart (Gated with BlurredPaywall) */}
-        <div className="lg:col-span-2 bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[380px]">
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-slate-800 tracking-tight">Revenue Trajectory</h2>
-            <p className="text-xs text-slate-600 font-semibold">Real-time revenue growth and invoicing data</p>
-          </div>
-          
-          <div className="flex-1 w-full relative">
-            <BlurredPaywall
-              isLocked={userTier === "FREE"}
-              feature="Revenue Trends"
-              description="Gain insight into your 12-month revenue trajectory, invoice collection latency, and monthly budgeting trends."
-            >
-              <div className="h-64 w-full">
-                <PortfolioPerformance transactions={transactions} />
-              </div>
-            </BlurredPaywall>
-          </div>
+      {/* Main Action Area: Invoices Registry */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div>
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">Active Accounts Receivable</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">Politely chase overdue payments and record transfers</p>
         </div>
 
-        {/* Col Span 1: Recent Transactions Table */}
-        <div className="lg:col-span-1 bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-800 tracking-tight">Recent Activity</h2>
-              <p className="text-[11px] text-slate-600 font-semibold">Latest ledger updates</p>
-            </div>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          </div>
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50">
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount Owed</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Collections & Tracking Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 text-xs">
+              {pendingInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="py-16 flex flex-col items-center gap-4 text-center">
+                      <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-350">
+                        <CheckCircle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-700">No pending collections!</h4>
+                        <p className="text-xs text-slate-400 mt-1">You are 100% paid up. Create an invoice to begin tracking new client payments.</p>
+                      </div>
+                      <Link href="/dashboard/invoices/create" passHref legacyBehavior>
+                        <Button className="mt-2 text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100/50 py-4 rounded-xl">
+                          Create Your First Invoice
+                        </Button>
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                pendingInvoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="py-4.5 px-4 font-mono font-bold text-slate-700">
+                      {inv.invoiceNumber}
+                    </td>
+                    <td className="py-4.5 px-4">
+                      <p className="font-bold text-slate-800">{inv.client.name}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{inv.client.companyName || inv.client.email}</p>
+                    </td>
+                    <td className="py-4.5 px-4 font-mono font-bold text-slate-800">
+                      {formatCurrency(inv.amount)}
+                    </td>
+                    <td className="py-4.5 px-4 text-slate-500 font-medium">
+                      {new Date(inv.dueDate).toLocaleDateString()}
+                    </td>
+                    <td className="py-4.5 px-4">
+                      {getStatusBadge(inv.status)}
+                    </td>
+                    <td className="py-4.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Copy Shareable Link */}
+                        <button
+                          onClick={() => copyShareableLink(inv.id)}
+                          className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-transparent rounded-lg transition-colors"
+                          title="Copy Public Payment Link"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
 
-          <div className="flex-1 overflow-y-auto max-h-[250px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <table className="w-full">
-              <tbody className="divide-y divide-slate-50">
-                {transactions.length === 0 ? (
-                  <tr>
-                    <td>
-                      <div className="py-8 flex flex-col items-center gap-3 text-center">
-                        <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
-                          <BookOpen className="w-5 h-5 text-slate-300" />
-                        </div>
-                        <p className="text-slate-400 text-xs font-semibold">Your ledger is empty</p>
+                        {/* WhatsApp Dropdown Trigger */}
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              triggerWhatsAppNudge(inv, e.target.value);
+                              e.target.value = ""; // Reset dropdown
+                            }
+                          }}
+                          className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
+                        >
+                          <option value="">💬 Nudge Client...</option>
+                          <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
+                          <option value="DUE_TODAY">Nudge: Due Today</option>
+                          <option value="OVERDUE_3D">Nudge: 3 Days Overdue</option>
+                          <option value="OVERDUE_7D">Nudge: Past Due Follow-up</option>
+                        </select>
+
+                        {/* Record manual payment */}
+                        <Button
+                          onClick={() => setSelectedInvoice(inv)}
+                          className="py-1 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg border-none"
+                        >
+                          Log Payment
+                        </Button>
                       </div>
                     </td>
                   </tr>
-                ) : (
-                  transactions.slice(0, 5).map((tx) => (
-                    <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="py-3 pr-2">
-                        <div className="w-7 h-7 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-emerald-500/50 transition-colors">
-                          {getTypeIcon(tx.type, tx.amount)}
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 min-w-0">
-                        <p className="text-slate-700 text-xs font-bold truncate max-w-[120px]">
-                          {tx.description}
-                        </p>
-                        <p className="text-slate-400 text-[10px] font-semibold mt-0.5">
-                          {tx.date ? new Date(tx.date).toLocaleDateString() : ""}
-                        </p>
-                      </td>
-                      <td className="py-3 pl-2 text-right font-mono text-xs font-bold text-slate-800">
-                        <span className={tx.amount > 0 ? "text-emerald-600" : "text-slate-800"}>
-                          {formatCurrency(tx.amount)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="pt-4 border-t border-slate-100">
-            <Link href="/fintech/journals" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1 justify-center no-underline">
-              View All Journals
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-
       </div>
 
-      {/* Row 3: Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Col Span 1: Operating Expense Allocation Donut */}
-        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
-          <ExpenseAllocation transactions={transactions} />
-        </div>
+      {/* Manual Payment Logging Dialog / Modal */}
+      {selectedInvoice && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">Record Manual Payment</h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Log a direct transfer or card payment for invoice <strong>{selectedInvoice.invoiceNumber}</strong>.
+              </p>
+            </div>
 
-        {/* Col Span 1: Account Receivable Aging Table */}
-        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div>
-                <h2 className="text-base font-bold text-slate-800 tracking-tight">Receivables Aging</h2>
-                <p className="text-[10px] text-slate-600 font-bold">As of {todayReadable}</p>
+            <form onSubmit={handleRecordPayment} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Amount Received</label>
+                <Input
+                  type="text"
+                  disabled
+                  value={formatCurrency(selectedInvoice.amount)}
+                  className="rounded-xl border-slate-100 bg-slate-50 text-slate-500 text-xs py-4 font-mono font-bold"
+                />
               </div>
-            </div>
-            
-            <div className="overflow-x-auto w-full mt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50/50">
-                    <th className="text-left py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
-                    <th className="text-right py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
-                    <th className="text-right py-2 px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Overdue</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50 text-[11px]">
-                  {transactions.filter(tx => tx.status === "PENDING" && tx.amount > 0).length === 0 ? (
-                    <tr>
-                      <td colSpan={3}>
-                        <div className="py-8 flex flex-col items-center gap-2 text-center">
-                          <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                          </div>
-                          <p className="text-slate-500 text-xs font-semibold">No unpaid invoices</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    transactions
-                      .filter(tx => tx.status === "PENDING" && tx.amount > 0)
-                      .slice(0, 4)
-                      .map((tx, i) => (
-                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-2.5 px-3 font-mono font-semibold text-slate-600 truncate max-w-[100px]">
-                            {tx.id ? `TX-${tx.id.toString().substring(0, 6).toUpperCase()}` : "TX/SLS/001"}
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-bold text-slate-700">
-                            {formatCurrency(tx.amount)}
-                          </td>
-                          <td className="py-2.5 px-3 text-right font-semibold text-slate-400">
-                            Pending
-                          </td>
-                        </tr>
-                      ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Payment Reference / Bank ID</label>
+                <Input
+                  type="text"
+                  value={paymentReference}
+                  onChange={(e) => setPaymentReference(e.target.value)}
+                  placeholder="e.g. UBA/REF-839210"
+                  className="rounded-xl border-slate-200 text-xs py-4"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Internal Notes</label>
+                <Input
+                  type="text"
+                  value={paymentNotes}
+                  onChange={(e) => setPaymentNotes(e.target.value)}
+                  placeholder="e.g. Paid via bank transfer to NGN account"
+                  className="rounded-xl border-slate-200 text-xs py-4"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedInvoice(null)}
+                  className="rounded-xl px-5 text-xs py-4 border-slate-200 font-semibold"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingPayment}
+                  className="rounded-xl px-5 text-xs py-4 bg-emerald-600 text-white font-bold hover:bg-emerald-500 flex items-center gap-1.5"
+                >
+                  {isSubmittingPayment && <Loader2 className="w-3 h-3 animate-spin" />}
+                  Confirm Payment
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
-
-        {/* Col Span 1: Quick Actions & Tools */}
-        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8 flex flex-col justify-between min-h-[300px]">
-          <div>
-            <h2 className="text-base font-bold text-slate-800 tracking-tight mb-4">Quick Tools</h2>
-            <div className="space-y-3">
-              <Link href="/dashboard/invoices/create" className="no-underline">
-                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
-                  <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
-                    <Plus className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-emerald-500 transition-colors">
-                      New Invoice Factory
-                    </h4>
-                    <p className="text-[10px] text-slate-400">Draft or send a new client invoice</p>
-                  </div>
-                </div>
-              </Link>
-
-              <Link href="/fintech/financial-documents" className="no-underline">
-                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
-                  <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-blue-500 transition-colors">
-                      Financial Documents
-                    </h4>
-                    <p className="text-[10px] text-slate-400">Analyze Profit & Loss statement</p>
-                  </div>
-                </div>
-              </Link>
-
-              <button
-                onClick={exportToCSV}
-                disabled={isExporting}
-                className="w-full text-left bg-transparent border-none p-0 focus:outline-none"
-              >
-                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-50 hover:bg-slate-50 cursor-pointer transition-all group">
-                  <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-purple-500">
-                    {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-700 group-hover:text-purple-500 transition-colors">
-                      Export Verified Audit
-                    </h4>
-                    <p className="text-[10px] text-slate-400">Download ledger details as CSV</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Row 4: Immutable Audit Trail */}
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-sm p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
-          <div>
-            <h2 className="text-base font-bold text-slate-800 tracking-tight">Immutable Audit Trail</h2>
-            <p className="text-xs text-slate-400 mt-1">Cryptographically verified logs & ledger audits</p>
-          </div>
-        </div>
-        <AuditTimeline transactions={transactions} />
-      </div>
+      )}
 
     </div>
   );
