@@ -387,7 +387,7 @@ export default function SettingsPage() {
                       className="py-5 px-6 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-colors shadow-md shadow-emerald-500/10 flex items-center gap-2"
                     >
                       {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Update Database Password
+                      Update Password
                     </Button>
                   </div>
                 </form>
