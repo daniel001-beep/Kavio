@@ -7,7 +7,8 @@ import {
   FileSpreadsheet, 
   Users, 
   TrendingUp,
-  Settings
+  Settings,
+  ArrowLeftRight
 } from "lucide-react";
 
 export default function BottomNav() {
@@ -17,6 +18,7 @@ export default function BottomNav() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
+    { href: "/dashboard/payments", label: "Payments", icon: ArrowLeftRight },
     { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];

@@ -29,12 +29,25 @@ export interface Invoice {
   };
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  companyName: string | null;
+  location: string | null;
+  industry: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
 export function useDashboardData() {
   const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
 
   const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
   const [clientsCount, setClientsCount] = useState(0);
+  const [clientsList, setClientsList] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotifications();
 
@@ -60,7 +73,7 @@ export function useDashboardData() {
     }
   }, []);
 
-  // Fetch clients count
+  // Fetch clients
   const fetchClients = useCallback(async () => {
     try {
       const res = await fetch("/api/clients?_t=" + Date.now(), {
@@ -69,7 +82,9 @@ export function useDashboardData() {
 
       if (res.ok) {
         const data = await res.json();
-        setClientsCount(Array.isArray(data) ? data.length : 0);
+        const list = Array.isArray(data) ? data : [];
+        setClientsList(list);
+        setClientsCount(list.length);
       }
     } catch (err) {
       console.error("Dashboard: Failed to fetch clients:", err);
@@ -181,6 +196,7 @@ export function useDashboardData() {
     userEmail,
     invoices: invoicesList,
     clientsCount,
+    clients: clientsList,
     outstandingSum,
     overdueSum,
     paidSum,

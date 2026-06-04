@@ -184,6 +184,8 @@ export const clients = pgTable("client", {
   phone: text("phone").notNull(),
   companyName: text("company_name"),
   location: text("location"),
+  industry: text("industry"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -203,6 +205,11 @@ export const invoices = pgTable("invoice", {
   status: text("status").notNull().default("DRAFT"), // DRAFT, SENT, VIEWED, OVERDUE, PAID
   paymentInstructions: text("payment_instructions"),
   metadata: jsonb("metadata").default({}),
+  isAutomatedReminderEnabled: boolean("is_automated_reminder_enabled").default(true),
+  lastReminderSentAt: timestamp("last_reminder_sent_at"),
+  viewCount: integer("view_count").default(0),
+  viewedAt: timestamp("viewed_at"),
+  clientPortalToken: text("client_portal_token"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -289,5 +296,84 @@ export const adminNotifications = pgTable("admin_notifications", {
   message: text("message").notNull(),
   category: text("category").notNull(), // USER_SIGNUP, NEW_SUBSCRIPTION, SUPPORT_REQUEST, LARGE_INVOICE, USER_INACTIVE
   isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 6. Client CRM & Relationship Tables
+export const clientNotes = pgTable("client_notes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  note: text("note").notNull(),
+  category: text("category").notNull().default("MEETING"), // MEETING, AGREEMENT, SCOPE_CHANGE, SPECIAL_REQUEST, PAYMENT_AGREEMENT
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const clientTags = pgTable("client_tags", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  tag: text("tag").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const clientActivities = pgTable("client_activities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(), // INVOICE_CREATED, INVOICE_SENT, REMINDER_SENT, INVOICE_PAID, NOTE_ADDED, CLIENT_CREATED
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const clientScores = pgTable("client_scores", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  healthScore: integer("health_score").notNull().default(100),
+  reliabilityStatus: text("reliability_status").notNull().default("Reliable"), // Reliable, Moderate Risk, High Risk
+  paymentSpeed: integer("payment_speed"),
+  completionRate: integer("completion_rate"),
+  outstandingBalance: doublePrecision("outstanding_balance").default(0),
+  overdueBalance: doublePrecision("overdue_balance").default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const clientContacts = pgTable("client_contacts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  contactName: text("contact_name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  role: text("role"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const clientFollowups = pgTable("client_followups", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  followupDate: timestamp("followup_date").notNull(),
+  notes: text("notes"),
+  status: text("status").notNull().default("PENDING"), // PENDING, COMPLETED, CANCELLED
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const clientRelationships = pgTable("client_relationships", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  preferredMethod: text("preferred_method").notNull().default("EMAIL"), // WHATSAPP, EMAIL, PHONE
+  lastContactDate: timestamp("last_contact_date"),
+  nextFollowUpDate: timestamp("next_follow_up_date"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });

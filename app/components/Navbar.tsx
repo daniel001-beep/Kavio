@@ -47,6 +47,7 @@ export default function Navbar() {
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
         { href: "/dashboard/clients", label: "Clients", icon: Users },
+        { href: "/dashboard/payments", label: "Payments", icon: ArrowLeftRight },
         { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
         { href: "/dashboard/settings", label: "Settings", icon: Settings },
         ...(session?.user?.isAdmin ? [{ href: "/fintech/admin", label: "Admin Console", icon: ShieldCheck }] : []),

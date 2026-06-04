@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
   TrendingUp, 
   Activity, 
@@ -37,6 +37,7 @@ export default function DashboardClient() {
     userEmail,
     invoices,
     clientsCount,
+    clients,
     outstandingSum,
     overdueSum,
     paidSum,
@@ -47,11 +48,146 @@ export default function DashboardClient() {
   } = useDashboardData();
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
 
+  // 1. Recent Invoices (limit to 5)
+  const recentInvoices = useMemo(() => {
+    return [...invoices]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+  }, [invoices]);
+
+  // 2. Top Clients (sorted by total billed)
+  const topClients = useMemo(() => {
+    if (!clients || clients.length === 0) return [];
+    return clients
+      .map(client => {
+        const clientInvoices = invoices.filter(inv => inv.client.id === client.id);
+        const totalBilled = clientInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        const totalPaid = clientInvoices.filter(inv => inv.status === "PAID").reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        const outstanding = clientInvoices.filter(inv => ["SENT", "VIEWED", "OVERDUE"].includes(inv.status)).reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        return {
+          ...client,
+          totalBilled,
+          totalPaid,
+          outstanding
+        };
+      })
+      .sort((a, b) => b.totalBilled - a.totalBilled)
+      .slice(0, 5);
+  }, [clients, invoices]);
+
+  // 3. Overdue Clients (with unpaid invoices past due date)
+  const overdueClients = useMemo(() => {
+    if (!clients || clients.length === 0) return [];
+    return clients
+      .map(client => {
+        const clientInvoices = invoices.filter(inv => inv.client.id === client.id);
+        const overdueInvoices = clientInvoices.filter(inv => {
+          const now = new Date();
+          const isOverdueStatus = inv.status === "OVERDUE";
+          const isPastDue = new Date(inv.dueDate) < now && inv.status !== "PAID" && inv.status !== "DRAFT";
+          return isOverdueStatus || isPastDue;
+        });
+        const overdueAmount = overdueInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+        return {
+          ...client,
+          overdueCount: overdueInvoices.length,
+          overdueAmount
+        };
+      })
+      .filter(c => c.overdueCount > 0)
+      .sort((a, b) => b.overdueAmount - a.overdueAmount);
+  }, [clients, invoices]);
+
+  // 4. Upcoming Due Dates (not Paid/Draft and due today or in the future, sorted earliest due first)
+  const upcomingInvoices = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return invoices
+      .filter(inv => {
+        if (inv.status === "PAID" || inv.status === "DRAFT") return false;
+        const due = new Date(inv.dueDate);
+        return due >= today;
+      })
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+      .slice(0, 5);
+  }, [invoices]);
+
+  // 5. Client Reliability Rankings (health score based on overdue invoices)
+  const reliabilityRankings = useMemo(() => {
+    if (!clients || clients.length === 0) return [];
+    return clients
+      .map(client => {
+        const clientInvoices = invoices.filter(inv => inv.client.id === client.id);
+        const totalCount = clientInvoices.length;
+        const overdueInvoices = clientInvoices.filter(inv => {
+          const now = new Date();
+          const isOverdueStatus = inv.status === "OVERDUE";
+          const isPastDue = new Date(inv.dueDate) < now && inv.status !== "PAID" && inv.status !== "DRAFT";
+          return isOverdueStatus || isPastDue;
+        });
+        const overdueCount = overdueInvoices.length;
+
+        let riskStatus: "Reliable" | "Moderate" | "High Risk" = "Reliable";
+        let healthScore = 100;
+
+        if (totalCount === 0) {
+          riskStatus = "Reliable";
+          healthScore = 100;
+        } else if (overdueCount > 1) {
+          riskStatus = "High Risk";
+          healthScore = Math.max(10, 100 - (overdueCount * 25));
+        } else if (overdueCount === 1) {
+          riskStatus = "Moderate";
+          healthScore = 70;
+        } else {
+          riskStatus = "Reliable";
+          healthScore = 95;
+        }
+
+        return {
+          ...client,
+          riskStatus,
+          healthScore,
+          totalCount
+        };
+      })
+      .sort((a, b) => b.healthScore - a.healthScore);
+  }, [clients, invoices]);
+
+  // 6. Outstanding Aging (breakdown of money owed)
+  const outstandingAging = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let withinWeek = 0;
+    let withinMonth = 0;
+    let overdue = 0;
+
+    invoices.forEach(inv => {
+      if (inv.status === "PAID" || inv.status === "DRAFT") return;
+      const due = new Date(inv.dueDate);
+      if (due < today) {
+        overdue += inv.amount || 0;
+      } else {
+        const diffTime = due.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays <= 7) {
+          withinWeek += inv.amount || 0;
+        } else {
+          withinMonth += inv.amount || 0;
+        }
+      }
+    });
+
+    return { withinWeek, withinMonth, overdue };
+  }, [invoices]);
+
   // Payment Modal States
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [paymentReference, setPaymentReference] = useState("");
   const [paymentNotes, setPaymentNotes] = useState("");
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+  const [invoiceTab, setInvoiceTab] = useState<"ALL" | "PENDING" | "PAID">("ALL");
 
   // Manual payment modal handler
   const handleRecordPayment = async (e: React.FormEvent) => {
@@ -279,106 +415,402 @@ export default function DashboardClient() {
         </Card>
       </div>
 
-      {/* Main Action Area: Invoices Registry */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-        <div>
-          <h2 className="text-lg font-bold text-slate-800 tracking-tight">Active Accounts Receivable</h2>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">Politely chase overdue payments and record transfers</p>
+      {/* Bento Layout Grid for Revenue OS Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Columns (Invoices and Top Clients) */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Recent Invoices & Collections */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Recent Invoices & Collections</h2>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">Track, log payments, and nudge client accounts on time</p>
+              </div>
+              
+              {/* Tab Filters */}
+              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl w-fit self-start sm:self-center">
+                <button
+                  onClick={() => setInvoiceTab("ALL")}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                    invoiceTab === "ALL" 
+                      ? "bg-white text-slate-800 shadow-sm" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setInvoiceTab("PENDING")}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                    invoiceTab === "PENDING" 
+                      ? "bg-white text-slate-800 shadow-sm" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Pending
+                </button>
+                <button
+                  onClick={() => setInvoiceTab("PAID")}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                    invoiceTab === "PAID" 
+                      ? "bg-white text-slate-800 shadow-sm" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Paid
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100/40 bg-slate-50/30">
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount Owed</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 text-xs">
+                  {(() => {
+                    const filtered = invoices.filter(inv => {
+                      if (invoiceTab === "PENDING") return inv.status !== "PAID" && inv.status !== "DRAFT";
+                      if (invoiceTab === "PAID") return inv.status === "PAID";
+                      return true; // "ALL"
+                    }).slice(0, 5);
+
+                    if (filtered.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={6}>
+                            <div className="py-12 flex flex-col items-center gap-4 text-center">
+                              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-350">
+                                <CheckCircle className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-slate-700">No invoices in this view</h4>
+                                <p className="text-[10px] text-slate-400 mt-0.5">Use the create invoice action to add collections logs.</p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return filtered.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="py-4 px-4 font-mono font-bold text-slate-700">
+                          {inv.invoiceNumber}
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="font-bold text-slate-800">{inv.client.name}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">{inv.client.companyName || inv.client.email}</p>
+                        </td>
+                        <td className="py-4 px-4 font-mono font-bold text-slate-800">
+                          {formatCurrency(inv.amount)}
+                        </td>
+                        <td className="py-4 px-4 text-slate-500 font-medium">
+                          {new Date(inv.dueDate).toLocaleDateString()}
+                        </td>
+                        <td className="py-4 px-4">
+                          {getStatusBadge(inv.status)}
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Copy Link */}
+                            <button
+                              onClick={() => copyShareableLink(inv.id)}
+                              className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-transparent rounded-lg transition-colors animate-none bg-transparent"
+                              title="Copy Public Link"
+                              type="button"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* WhatsApp Nudge (only if not paid) */}
+                            {inv.status !== "PAID" && (
+                              <select
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    triggerWhatsAppNudge(inv, e.target.value);
+                                    e.target.value = ""; // Reset
+                                  }
+                                }}
+                                className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[10px] font-bold rounded-lg px-1.5 py-1 cursor-pointer focus:outline-none"
+                              >
+                                <option value="">💬 Nudge...</option>
+                                <option value="DUE_TOMORROW">Due Tomorrow</option>
+                                <option value="DUE_TODAY">Due Today</option>
+                                <option value="OVERDUE_3D">3 Days Overdue</option>
+                                <option value="OVERDUE_7D">Past Due Check-in</option>
+                              </select>
+                            )}
+
+                            {/* Log manual payment */}
+                            {inv.status !== "PAID" ? (
+                              <Button
+                                onClick={() => setSelectedInvoice(inv)}
+                                className="py-0.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[9px] rounded-lg border-none"
+                              >
+                                Log Pay
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] text-emerald-650 font-bold px-2 py-0.5 bg-emerald-50 rounded-md">Settled</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="flex justify-end pt-4 border-t border-slate-100/40">
+              <Link href="/dashboard/invoices" passHref legacyBehavior>
+                <a className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5">
+                  View All Invoices Hub
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </a>
+              </Link>
+            </div>
+          </div>
+
+          {/* Top Billing Clients */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Top Billing Clients</h2>
+              <p className="text-xs text-slate-500 font-semibold mt-0.5">Clients sorted by highest volume of total invoices billed</p>
+            </div>
+
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100/40 bg-slate-50/30">
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Company / Country</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Invoiced</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Settled</th>
+                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outstanding Owed</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 text-xs">
+                  {topClients.length === 0 ? (
+                    <tr>
+                      <td colSpan={5}>
+                        <div className="py-12 flex flex-col items-center gap-4 text-center">
+                          <p className="text-[10px] text-slate-400">No client data found. Start by adding a client inside the Clients Directory.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    topClients.map((c) => (
+                      <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-4">
+                          <Link href={`/dashboard/clients/${c.id}`} passHref legacyBehavior>
+                            <a className="font-bold text-slate-805 hover:text-emerald-600 block">{c.name}</a>
+                          </Link>
+                          <span className="text-[10px] text-slate-400 font-semibold">{c.email}</span>
+                        </td>
+                        <td className="py-4 px-4 font-medium text-slate-505">
+                          {c.companyName || "Solo"} {c.location ? `• ${c.location}` : ""}
+                        </td>
+                        <td className="py-4 px-4 font-mono font-bold text-slate-800">
+                          {formatCurrency(c.totalBilled)}
+                        </td>
+                        <td className="py-4 px-4 font-mono font-bold text-emerald-600">
+                          {formatCurrency(c.totalPaid)}
+                        </td>
+                        <td className={`py-4 px-4 font-mono font-bold ${c.outstanding > 0 ? "text-amber-600" : "text-slate-400"}`}>
+                          {formatCurrency(c.outstanding)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-100/40">
+              <Link href="/dashboard/clients" passHref legacyBehavior>
+                <a className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5">
+                  Open Clients Directory
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </a>
+              </Link>
+            </div>
+          </div>
+
         </div>
 
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100/40 bg-slate-50/30">
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount Owed</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Collections & Tracking Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 text-xs">
-              {pendingInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan={6}>
-                    <div className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-350">
-                        <CheckCircle className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-700">No pending collections!</h4>
-                        <p className="text-xs text-slate-400 mt-1">You are 100% paid up. Create an invoice to begin tracking new client payments.</p>
-                      </div>
-                      <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                        <Button className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl">
-                          Create Your First Invoice
-                        </Button>
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
+        {/* Right Column (Side Widgets) */}
+        <div className="space-y-8">
+          
+          {/* Money Owed Breakdown */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Money Owed Breakdown</h3>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Collections aging distribution</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-end justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Outstanding</span>
+                  <span className="text-xl font-mono font-black text-slate-800">{formatCurrency(outstandingSum)}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-bold text-rose-500 uppercase block">Overdue Share</span>
+                  <span className="text-xs font-mono font-bold text-rose-650">
+                    {outstandingSum > 0 ? Math.round((overdueSum / outstandingSum) * 100) : 0}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress bar split */}
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                {outstandingSum > 0 ? (
+                  <>
+                    <div 
+                      style={{ width: `${(outstandingAging.overdue / outstandingSum) * 100}%` }} 
+                      className="bg-rose-500 h-full"
+                      title={`Overdue: ${formatCurrency(outstandingAging.overdue)}`}
+                    />
+                    <div 
+                      style={{ width: `${(outstandingAging.withinWeek / outstandingSum) * 100}%` }} 
+                      className="bg-amber-450 h-full"
+                      title={`Due within 7 days: ${formatCurrency(outstandingAging.withinWeek)}`}
+                    />
+                    <div 
+                      style={{ width: `${(outstandingAging.withinMonth / outstandingSum) * 100}%` }} 
+                      className="bg-emerald-500 h-full"
+                      title={`Due later: ${formatCurrency(outstandingAging.withinMonth)}`}
+                    />
+                  </>
+                ) : (
+                  <div className="bg-emerald-500 w-full h-full" />
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-50 text-[10px] font-semibold text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
+                  <div>
+                    <p className="text-[8px] text-slate-400 uppercase">Overdue</p>
+                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.overdue)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-450 shrink-0" />
+                  <div>
+                    <p className="text-[8px] text-slate-400 uppercase">1-7 Days</p>
+                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.withinWeek)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                  <div>
+                    <p className="text-[8px] text-slate-400 uppercase">8-30 Days</p>
+                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.withinMonth)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Client Reliability Rankings */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Client Reliability Ratings</h3>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Behavior assessment & risk tiers</p>
+            </div>
+
+            <div className="space-y-4">
+              {reliabilityRankings.length === 0 ? (
+                <p className="text-[10px] text-slate-400 py-2">No reliability rankings. Please log invoices to analyze payment speed.</p>
               ) : (
-                pendingInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="py-4.5 px-4 font-mono font-bold text-slate-700">
-                      {inv.invoiceNumber}
-                    </td>
-                    <td className="py-4.5 px-4">
-                      <p className="font-bold text-slate-800">{inv.client.name}</p>
-                      <p className="text-[10px] text-slate-400 font-semibold">{inv.client.companyName || inv.client.email}</p>
-                    </td>
-                    <td className="py-4.5 px-4 font-mono font-bold text-slate-800">
-                      {formatCurrency(inv.amount)}
-                    </td>
-                    <td className="py-4.5 px-4 text-slate-500 font-medium">
-                      {new Date(inv.dueDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-4.5 px-4">
-                      {getStatusBadge(inv.status)}
-                    </td>
-                    <td className="py-4.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* Copy Shareable Link */}
-                        <button
-                          onClick={() => copyShareableLink(inv.id)}
-                          className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-transparent rounded-lg transition-colors"
-                          title="Copy Public Payment Link"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-
-                        {/* WhatsApp Dropdown Trigger */}
-                        <select
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              triggerWhatsAppNudge(inv, e.target.value);
-                              e.target.value = ""; // Reset dropdown
-                            }
-                          }}
-                          className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[11px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
-                        >
-                          <option value="">💬 Nudge Client...</option>
-                          <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
-                          <option value="DUE_TODAY">Nudge: Due Today</option>
-                          <option value="OVERDUE_3D">Nudge: 3 Days Overdue</option>
-                          <option value="OVERDUE_7D">Nudge: Past Due Follow-up</option>
-                        </select>
-
-                        {/* Record manual payment */}
-                        <Button
-                          onClick={() => setSelectedInvoice(inv)}
-                          className="py-1 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg border-none"
-                        >
-                          Log Payment
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
+                reliabilityRankings.slice(0, 5).map((rank) => (
+                  <div key={rank.id} className="flex items-center justify-between gap-4 p-2 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-all">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate">{rank.name}</p>
+                      <p className="text-[9px] text-slate-400 font-semibold truncate">{rank.companyName || "Solo Business"}</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                        rank.riskStatus === "Reliable" 
+                          ? "bg-emerald-50 text-emerald-700" 
+                          : rank.riskStatus === "Moderate" 
+                            ? "bg-amber-50 text-amber-600" 
+                            : "bg-rose-50 text-rose-650 font-black"
+                      }`}>
+                        {rank.riskStatus === "Reliable" ? "🟢 Good" : rank.riskStatus === "Moderate" ? "🟡 Moderate" : "🔴 High Risk"}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-slate-500">{rank.healthScore}%</span>
+                    </div>
+                  </div>
                 ))
               )}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Upcoming Due Dates */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Upcoming Due Dates</h3>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Payments expected this week</p>
+            </div>
+
+            <div className="space-y-3">
+              {upcomingInvoices.length === 0 ? (
+                <div className="py-4 text-center">
+                  <p className="text-[10px] text-emerald-650 font-bold bg-emerald-50 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    No upcoming collections this week
+                  </p>
+                </div>
+              ) : (
+                upcomingInvoices.map((inv) => (
+                  <div key={inv.id} className="flex items-center justify-between gap-3 text-xs border-b border-slate-50 pb-2 last:border-b-0 last:pb-0">
+                    <div>
+                      <p className="font-bold text-slate-800">{inv.client.name}</p>
+                      <p className="text-[9px] text-slate-400 font-mono font-bold">{inv.invoiceNumber}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono font-bold text-slate-800">{formatCurrency(inv.amount)}</p>
+                      <p className="text-[9px] text-slate-550 font-semibold">Due {new Date(inv.dueDate).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Overdue Alerts */}
+          {overdueClients.length > 0 && (
+            <div className="bg-rose-50/40 border border-rose-100/50 rounded-3xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                <h3 className="text-sm font-black text-rose-900 tracking-tight">Overdue Warnings</h3>
+              </div>
+              <p className="text-[10px] text-rose-700 font-medium">The following clients are currently holding outstanding balances past their deadlines. Immediate chase advised:</p>
+              
+              <div className="space-y-2.5">
+                {overdueClients.slice(0, 3).map((oc) => (
+                  <div key={oc.id} className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-800 truncate max-w-[120px]">{oc.name}</span>
+                    <span className="text-rose-650 font-mono font-bold">{formatCurrency(oc.overdueAmount)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
