@@ -491,6 +491,7 @@ export default function Home() {
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security & Compliance</span>
             <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
               <li><Link href="/dashboard/settings" className="hover:text-emerald-650 transition-colors no-underline">Account Security</Link></li>
+              <li><Link href="/privacy" className="hover:text-emerald-650 transition-colors no-underline">Privacy Policy</Link></li>
               <li><Link href="/" className="hover:text-emerald-650 transition-colors no-underline">Terms of Service</Link></li>
             </ul>
           </div>
