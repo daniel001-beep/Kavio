@@ -1,31 +1,26 @@
 'use client';
 
 import { signUpAction } from '@/app/actions/auth';
-import { createClient } from '@/src/lib/supabase-client';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Shield, Sparkles, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { Zap, Sparkles } from 'lucide-react';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [systemTime, setSystemTime] = useState('');
-
-  useEffect(() => {
-    setSystemTime(new Date().toISOString().slice(11, 19));
-    const interval = setInterval(() => {
-      setSystemTime(new Date().toISOString().slice(11, 19));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleCredentialsSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Fill in all credential fields.');
+      setError('Please fill in all fields.');
+      return;
+    }
+    if (!agreed) {
+      setError('You must agree to our Terms & Conditions and Privacy Policy to continue.');
       return;
     }
     setIsLoading(true);
@@ -35,7 +30,6 @@ export default function SignUp() {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-
       const res = await signUpAction(formData);
       if (res?.error) {
         setError(res.error);
@@ -44,77 +38,80 @@ export default function SignUp() {
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      setError('Connection refused.');
+      setError('Connection error. Please try again.');
       setIsLoading(false);
     }
   };
 
+  const canSubmit = email && password && agreed && !isLoading;
+
   return (
-    <div className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-3 md:p-6 font-sans selection:bg-indigo-100 selection:text-indigo-600">
-      
-      {/* Premium Dribbble-style blurred glowing background meshes */}
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/25 to-violet-200/25 blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-emerald-100/25 to-blue-200/25 blur-[110px] pointer-events-none"></div>
+    <div className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
 
-      {/* Compact Main Container */}
-      <div className="w-full max-w-[390px] relative z-10 space-y-4">
+      {/* Background glows */}
+      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-200/20 to-teal-200/20 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-100/20 to-blue-200/20 blur-[110px] pointer-events-none" />
 
-        {/* Elevated Dribbble-Style Compact Card */}
-        <div 
+      <div className="w-full max-w-[400px] relative z-10">
+
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-lg font-black tracking-tight" style={{ color: '#0f172a' }}>
+            Kavio <span style={{ color: '#94a3b8', fontWeight: 600 }}>Finance</span>
+          </span>
+        </div>
+
+        {/* Card */}
+        <div
           style={{
-            border: '1px solid rgba(0, 0, 0, 0.04)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.02), 0 30px 50px -10px rgba(94, 92, 230, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.6)',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)'
+            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.8) inset',
+            background: 'rgba(255,255,255,0.97)',
+            backdropFilter: 'blur(20px)',
           }}
-          className="rounded-2xl p-5 md:p-7 space-y-5"
+          className="rounded-3xl p-7 space-y-6"
         >
-          
-          {/* Card Header */}
-          <div className="text-center space-y-1">
-            <h2 
-              style={{ color: '#0f172a' }} 
-              className="text-2xl font-extrabold tracking-tight"
-            >
+          {/* Header */}
+          <div className="text-center space-y-1.5">
+            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: '#0f172a' }}>
               Create your account
-            </h2>
-            <p 
-              style={{ color: '#64748b' }} 
-              className="text-xs leading-relaxed max-w-[280px] mx-auto font-medium"
-            >
+            </h1>
+            <p className="text-xs leading-relaxed font-medium" style={{ color: '#64748b' }}>
               Get started in seconds and take control of your business finances.
             </p>
           </div>
 
+          {/* Error Banner */}
           {error && (
-            <div 
-              style={{ border: '1px solid rgba(239, 68, 68, 0.1)', background: '#fef2f2' }}
-              className="p-2.5 text-rose-600 rounded-lg text-[11px] font-semibold text-center flex items-center justify-center gap-1.5"
+            <div
+              style={{ border: '1px solid rgba(239,68,68,0.12)', background: '#fef2f2' }}
+              className="p-3 rounded-xl text-[11px] font-semibold text-rose-600 flex items-center gap-2"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
               {error}
             </div>
           )}
 
+          {/* Success Banner */}
           {successMessage && (
-            <div 
-              style={{ border: '1px solid rgba(16, 185, 129, 0.1)', background: '#ecfdf5' }}
-              className="p-2.5 text-emerald-600 rounded-lg text-[11px] font-semibold text-center flex items-center justify-center gap-1.5"
+            <div
+              style={{ border: '1px solid rgba(16,185,129,0.12)', background: '#ecfdf5' }}
+              className="p-3 rounded-xl text-[11px] font-semibold text-emerald-600 flex items-center gap-2"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               {successMessage}
             </div>
           )}
 
-          {/* Credentials Form */}
+          {/* Form */}
           <form onSubmit={handleCredentialsSignUp} className="space-y-4">
-            
-            {/* Work Email Input */}
-            <div className="space-y-1.5 text-left">
-              <label 
-                style={{ color: '#64748b' }} 
-                className="text-[10px] font-bold uppercase tracking-wider block"
-              >
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: '#64748b' }}>
                 Work Email
               </label>
               <input
@@ -122,62 +119,116 @@ export default function SignUp() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@kavio.com"
-                style={{
-                  color: '#0f172a',
-                  backgroundColor: '#f8fafc',
-                  border: '1.5px solid #e2e8f0'
-                }}
-                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans font-medium"
+                required
+                style={{ color: '#0f172a', backgroundColor: '#f8fafc', border: '1.5px solid #e2e8f0' }}
+                className="block w-full px-4 py-3 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-medium"
               />
             </div>
 
-            {/* Password Input */}
-            <div className="space-y-1.5 text-left">
-              <label 
-                style={{ color: '#64748b' }} 
-                className="text-[10px] font-bold uppercase tracking-wider block w-full"
-              >
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: '#64748b' }}>
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  color: '#0f172a',
-                  backgroundColor: '#f8fafc',
-                  border: '1.5px solid #e2e8f0'
-                }}
-                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans"
+                placeholder="Min. 6 characters"
+                required
+                style={{ color: '#0f172a', backgroundColor: '#f8fafc', border: '1.5px solid #e2e8f0' }}
+                className="block w-full px-4 py-3 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all"
               />
             </div>
+
+            {/* ── Terms & Privacy Checkbox ── */}
+            <label
+              htmlFor="agree-terms"
+              className="flex items-start gap-3 cursor-pointer group select-none"
+            >
+              {/* Custom checkbox */}
+              <div className="relative mt-0.5 shrink-0">
+                <input
+                  id="agree-terms"
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => {
+                    setAgreed(e.target.checked);
+                    if (error && e.target.checked) setError('');
+                  }}
+                  className="sr-only"
+                />
+                <div
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '5px',
+                    border: agreed ? '2px solid #10b981' : '2px solid #cbd5e1',
+                    background: agreed ? '#10b981' : '#f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
+                    boxShadow: agreed ? '0 0 0 3px rgba(16,185,129,0.12)' : 'none',
+                  }}
+                >
+                  {agreed && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <span className="text-[11px] leading-relaxed font-medium" style={{ color: '#64748b' }}>
+                I agree to Kavio&apos;s{' '}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="font-bold underline underline-offset-2 transition-colors"
+                  style={{ color: '#10b981' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy
+                </Link>
+                {' '}and{' '}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="font-bold underline underline-offset-2 transition-colors"
+                  style={{ color: '#10b981' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms &amp; Conditions
+                </Link>
+                . I confirm I am 16 years or older.
+              </span>
+            </label>
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={!canSubmit}
               style={{
-                height: '44px',
+                height: '46px',
                 width: '100%',
                 borderRadius: '12px',
-                backgroundColor: '#0f172a',
+                backgroundColor: canSubmit ? '#0f172a' : '#94a3b8',
                 color: '#ffffff',
                 fontWeight: '700',
                 fontSize: '13px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: canSubmit ? 'pointer' : 'not-allowed',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
-                transition: 'all 0.15s ease-in-out'
+                boxShadow: canSubmit ? '0 4px 14px rgba(15,23,42,0.18)' : 'none',
+                transition: 'all 0.15s ease-in-out',
               }}
-              className="hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hover:opacity-90 active:scale-[0.99]"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 'Create Kavio Account'
               )}
@@ -185,20 +236,26 @@ export default function SignUp() {
 
           </form>
 
-          {/* Go back to Sign In */}
-          <div className="text-center pt-1 text-[11px] text-slate-500 font-semibold border-t border-slate-100">
-            <Link 
-              href="/auth/signin" 
-              className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+          {/* Sign in link */}
+          <div className="text-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] font-medium" style={{ color: '#94a3b8' }}>Already have an account?{' '}</span>
+            <Link
+              href="/auth/signin"
+              className="text-[11px] font-bold transition-colors"
+              style={{ color: '#10b981' }}
             >
-              Already registered? Sign In
+              Sign In
             </Link>
           </div>
 
         </div>
 
-      </div>
+        {/* Bottom note */}
+        <p className="text-center text-[10px] font-medium mt-4" style={{ color: '#cbd5e1' }}>
+          🔒 Your data is encrypted and never shared.
+        </p>
 
+      </div>
     </div>
   );
 }
