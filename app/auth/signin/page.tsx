@@ -1,17 +1,25 @@
 'use client';
 
 import { signInAction } from '@/app/actions/auth';
-import { createClient } from '@/src/lib/supabase-client';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Shield, Sparkles, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
+import { Zap, Sparkles } from 'lucide-react';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [systemTime, setSystemTime] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get('error');
+    if (err === 'registration_disabled') {
+      setError('Public registration is disabled. Access is limited to authorized users.');
+    } else if (err === 'unauthorized_admin') {
+      setError('Unauthorized access. Administrative privileges required.');
+    }
+  }, []);
 
   const handleDemoSignIn = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,28 +27,10 @@ export default function SignIn() {
     setPassword('demo1234');
   };
 
-  useEffect(() => {
-    setSystemTime(new Date().toISOString().slice(11, 19));
-    const interval = setInterval(() => {
-      setSystemTime(new Date().toISOString().slice(11, 19));
-    }, 1000);
-
-    // Parse URL error parameter
-    const params = new URLSearchParams(window.location.search);
-    const err = params.get('error');
-    if (err === 'registration_disabled') {
-      setError('Public registration is disabled. Access is limited to authorized enterprise nodes.');
-    } else if (err === 'unauthorized_admin') {
-      setError('Unauthorized access. Administrative privileges required.');
-    }
-
-    return () => clearInterval(interval);
-  }, []);
-
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Fill in all credential fields.');
+      setError('Please fill in all fields.');
       return;
     }
     setIsLoading(true);
@@ -49,78 +39,75 @@ export default function SignIn() {
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
-
       const res = await signInAction(formData);
       if (res?.error) {
         setError(res.error);
         setIsLoading(false);
       } else if (res?.success) {
-        // Force hard redirect to reload app context fully
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      setError('Connection refused.');
+      setError('Connection error. Please try again.');
       setIsLoading(false);
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-3 md:p-6 font-sans selection:bg-indigo-100 selection:text-indigo-600">
-      
-      {/* Premium Dribbble-style blurred glowing background meshes */}
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-indigo-200/25 to-violet-200/25 blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-emerald-100/25 to-blue-200/25 blur-[110px] pointer-events-none"></div>
+    <div className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
 
-      {/* Compact Main Container */}
-      <div className="w-full max-w-[390px] relative z-10 space-y-4">
+      {/* Background glows */}
+      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-200/20 to-teal-200/20 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-100/20 to-blue-200/20 blur-[110px] pointer-events-none" />
 
-        {/* Elevated Dribbble-Style Compact Card */}
-        <div 
+      <div className="w-full max-w-[400px] relative z-10">
+
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-lg font-black tracking-tight" style={{ color: '#0f172a' }}>
+            Kavio <span style={{ color: '#94a3b8', fontWeight: 600 }}>Finance</span>
+          </span>
+        </div>
+
+        {/* Card */}
+        <div
           style={{
-            border: '1px solid rgba(0, 0, 0, 0.04)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.02), 0 30px 50px -10px rgba(94, 92, 230, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.6)',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)'
+            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.8) inset',
+            background: 'rgba(255,255,255,0.97)',
+            backdropFilter: 'blur(20px)',
           }}
-          className="rounded-2xl p-5 md:p-7 space-y-5"
+          className="rounded-3xl p-7 space-y-6"
         >
-          
-          {/* Card Header */}
-          <div className="text-center space-y-1">
-            <h2 
-              style={{ color: '#0f172a' }} 
-              className="text-2xl font-extrabold tracking-tight"
-            >
-              Log in to Kavio
-            </h2>
-            <p 
-              style={{ color: '#64748b' }} 
-              className="text-xs leading-relaxed max-w-[280px] mx-auto font-medium"
-            >
-              Manage your business finances, invoices, and growth in one secure space.
+          {/* Header */}
+          <div className="text-center space-y-1.5">
+            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: '#0f172a' }}>
+              Welcome back
+            </h1>
+            <p className="text-xs leading-relaxed font-medium" style={{ color: '#64748b' }}>
+              Sign in to manage your invoices, clients, and collections.
             </p>
           </div>
 
+          {/* Error Banner */}
           {error && (
-            <div 
-              style={{ border: '1px solid rgba(239, 68, 68, 0.1)', background: '#fef2f2' }}
-              className="p-2.5 text-rose-600 rounded-lg text-[11px] font-semibold text-center flex items-center justify-center gap-1.5"
+            <div
+              style={{ border: '1px solid rgba(239,68,68,0.12)', background: '#fef2f2' }}
+              className="p-3 rounded-xl text-[11px] font-semibold text-rose-600 flex items-center gap-2"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
               {error}
             </div>
           )}
 
-          {/* Credentials Form */}
+          {/* Form */}
           <form onSubmit={handleCredentialsSignIn} className="space-y-4">
-            
-            {/* Work Email Input */}
-            <div className="space-y-1.5 text-left">
-              <label 
-                style={{ color: '#64748b' }} 
-                className="text-[10px] font-bold uppercase tracking-wider block"
-              >
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: '#64748b' }}>
                 Work Email
               </label>
               <input
@@ -128,43 +115,40 @@ export default function SignIn() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@kavio.com"
-                style={{
-                  color: '#0f172a',
-                  backgroundColor: '#f8fafc',
-                  border: '1.5px solid #e2e8f0'
-                }}
-                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans font-medium"
+                required
+                style={{ color: '#0f172a', backgroundColor: '#f8fafc', border: '1.5px solid #e2e8f0' }}
+                className="block w-full px-4 py-3 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-medium"
               />
             </div>
 
-            {/* Password Input */}
-            <div className="space-y-1.5 text-left">
-              <label 
-                style={{ color: '#64748b' }} 
-                className="text-[10px] font-bold uppercase tracking-wider block w-full"
-              >
-                Password
-              </label>
+            {/* Password */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#64748b' }}>
+                  Password
+                </label>
+                {/* Placeholder for future forgot password */}
+                <span className="text-[10px] font-semibold" style={{ color: '#cbd5e1' }}>
+                  Forgot password?
+                </span>
+              </div>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                style={{
-                  color: '#0f172a',
-                  backgroundColor: '#f8fafc',
-                  border: '1.5px solid #e2e8f0'
-                }}
-                className="block w-full px-3.5 py-2.5 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-sans"
+                required
+                style={{ color: '#0f172a', backgroundColor: '#f8fafc', border: '1.5px solid #e2e8f0' }}
+                className="block w-full px-4 py-3 rounded-xl placeholder-slate-400 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all"
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Sign In Button */}
             <button
               type="submit"
               disabled={isLoading}
               style={{
-                height: '44px',
+                height: '46px',
                 width: '100%',
                 borderRadius: '12px',
                 backgroundColor: '#0f172a',
@@ -172,24 +156,31 @@ export default function SignIn() {
                 fontWeight: '700',
                 fontSize: '13px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
-                transition: 'all 0.15s ease-in-out'
+                boxShadow: '0 4px 14px rgba(15,23,42,0.18)',
+                transition: 'all 0.15s ease-in-out',
               }}
-              className="hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hover:opacity-90 active:scale-[0.99] disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 'Launch Kavio Dashboard'
               )}
             </button>
 
-            {/* Premium Ghost Button for Live Demo */}
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px" style={{ background: '#e2e8f0' }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#cbd5e1' }}>or</span>
+              <div className="flex-1 h-px" style={{ background: '#e2e8f0' }} />
+            </div>
+
+            {/* Demo Button */}
             <button
               type="button"
               onClick={handleDemoSignIn}
@@ -207,28 +198,36 @@ export default function SignIn() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
-                transition: 'all 0.15s ease-in-out'
+                transition: 'all 0.15s ease-in-out',
               }}
-              className="hover:bg-slate-50 hover:text-slate-800 hover:border-slate-400 active:scale-[0.99] mt-2"
+              className="hover:bg-slate-50 hover:border-slate-400 hover:text-slate-700 active:scale-[0.99]"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-              New to Kavio? Try the Live Demo
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              Try the Live Demo
             </button>
 
           </form>
 
-          {/* Account Enrollment Link */}
-          <div className="text-center pt-1 text-[11px] text-slate-500 font-semibold border-t border-slate-100">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors">
-              Request enrollment
+          {/* Sign up link */}
+          <div className="text-center pt-1 border-t border-slate-100">
+            <span className="text-[11px] font-medium" style={{ color: '#94a3b8' }}>Don&apos;t have an account?{' '}</span>
+            <Link
+              href="/auth/signup"
+              className="text-[11px] font-bold transition-colors"
+              style={{ color: '#10b981' }}
+            >
+              Create account
             </Link>
           </div>
 
         </div>
 
-      </div>
+        {/* Bottom note */}
+        <p className="text-center text-[10px] font-medium mt-4" style={{ color: '#cbd5e1' }}>
+          🔒 256-bit encrypted. Your data stays private.
+        </p>
 
+      </div>
     </div>
   );
 }
