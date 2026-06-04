@@ -18,19 +18,31 @@ import {
   Share,
   Smartphone,
   PlusSquare,
-  Check
+  Check,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useSession } from "@/app/context/AuthContext";
+import { useSession, useSignOut } from "@/app/context/AuthContext";
 import { usePWAInstall } from "@/app/hooks/usePWAInstall";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const signOut = useSignOut();
   const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER" | "ADMIN" | "PWA">("PROFILE");
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } catch (e) {
+      setIsSigningOut(false);
+    }
+  };
 
   const handleTriggerPWAInstall = async () => {
     setIsLoading(true);
@@ -260,6 +272,21 @@ export default function SettingsPage() {
               Super Admin Console
             </button>
           )}
+
+          {/* Mobile-only Sign Out button inside sidebar */}
+          <button
+            id="mobile-settings-signout"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="lg:hidden flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-60 mt-2"
+          >
+            {isSigningOut ? (
+              <Loader2 className="w-[18px] h-[18px] animate-spin" />
+            ) : (
+              <LogOut className="w-[18px] h-[18px]" />
+            )}
+            {isSigningOut ? "Signing out..." : "Sign Out"}
+          </button>
         </div>
 
         {/* Content Box Panels */}
@@ -672,6 +699,23 @@ export default function SettingsPage() {
           </Card>
         </div>
 
+      </div>
+
+      {/* Mobile-only sticky Sign Out footer strip */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/90 backdrop-blur-md border-t border-rose-100">
+        <button
+          id="mobile-sticky-signout"
+          onClick={handleSignOut}
+          disabled={isSigningOut}
+          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60"
+        >
+          {isSigningOut ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <LogOut className="w-4 h-4" />
+          )}
+          {isSigningOut ? "Signing out..." : "Sign Out of Kavio"}
+        </button>
       </div>
 
     </div>
