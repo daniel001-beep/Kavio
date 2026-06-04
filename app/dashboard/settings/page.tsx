@@ -14,7 +14,11 @@ import {
   MapPin, 
   Loader2, 
   CheckCircle2, 
-  AlertTriangle 
+  AlertTriangle,
+  Share,
+  Smartphone,
+  PlusSquare,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +45,7 @@ export default function SettingsPage() {
   };
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
   // Profile Form States
   const [name, setName] = useState("");
@@ -54,6 +59,10 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Promo Tier States
+  const [totalUsersCount, setTotalUsersCount] = useState(1);
+  const [isFreePromo, setIsFreePromo] = useState(true);
 
   // Load profile data on mount
   useEffect(() => {
@@ -73,6 +82,24 @@ export default function SettingsPage() {
       } catch (e) {
         console.warn("Failed to parse cached profile details", e);
       }
+    }
+
+    const fetchTierDetails = async () => {
+      try {
+        const res = await fetch("/api/user/tier");
+        if (res.ok) {
+          const data = await res.json();
+          setTotalUsersCount(data.totalUsers || 1);
+          setIsFreePromo(data.isFreePromo !== false);
+        }
+      } catch (e) {
+        console.error("Failed to load settings tier details", e);
+      }
+    };
+    fetchTierDetails();
+    if (typeof window !== "undefined") {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      setIsIOS(/iphone|ipad|ipod/.test(userAgent));
     }
   }, [session]);
 
@@ -442,52 +469,66 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    
-                    {/* Active Plan Detail Box */}
+                                      {/* Active Plan Detail Box */}
                     <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Account Status</span>
                         </div>
                         <h3 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                          Kavio Pro Plan
-                          <Badge className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase">Active</Badge>
+                          {isFreePromo ? "Early Adopter Pro" : "Kavio Free"}
+                          <Badge className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase border-none">
+                            {isFreePromo ? "Promo Active" : "Free Tier"}
+                          </Badge>
                         </h3>
-                        <p className="text-xs text-slate-500 font-semibold mt-2">Unlimited double-entry invoices, category budgeting, category-spend charts, and verified P&L PDF reports.</p>
+                        <p className="text-xs text-slate-500 font-semibold mt-2">
+                          {isFreePromo 
+                            ? "Unlimited billing invoices, automated WhatsApp reminders, client directory nesting, and printable P&L reports."
+                            : "Standard freelancer tools, including invoice creation, manual payment logging, and revenue statements."
+                          }
+                        </p>
                       </div>
 
-                      <div className="text-xs text-slate-600 font-bold flex items-center gap-1.5">
+                      <div className="text-xs text-slate-650 font-bold flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
-                        Renews automatically on July 1, 2026
+                        {isFreePromo 
+                          ? `Early Adopter Promotion: Registered user #${totalUsersCount} of 10`
+                          : "Standard plan limits apply."
+                        }
                       </div>
                     </div>
 
                     {/* Features list */}
                     <div className="bg-slate-50/30 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
                       <div>
-                        <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-3">Enterprise Pro Benefits</span>
-                        <ul className="space-y-2.5 text-xs text-slate-650 font-semibold">
+                        <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-3">
+                          {isFreePromo ? "Early Adopter Benefits" : "Standard Plan Features"}
+                        </span>
+                        <ul className="space-y-2.5 text-xs text-slate-655 font-semibold">
                           <li className="flex items-center gap-2.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            Unlimited cryptographically signed ledgers
+                            Unlimited client profiles and connections
                           </li>
                           <li className="flex items-center gap-2.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            Multi-currency bank-mutation reconciliation
+                            WhatsApp invoice link reminders
                           </li>
                           <li className="flex items-center gap-2.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            Remove invoice branding ("Powered by Kavio")
+                            Deductions & dynamic pre-tax reports
                           </li>
                         </ul>
                       </div>
 
-                      <Button
-                        variant="outline"
-                        className="py-4 text-xs font-bold border-slate-200/50 text-slate-655 hover:bg-slate-50 rounded-xl"
-                      >
-                        Manage Billing Portal
-                      </Button>
+                      {isFreePromo ? (
+                        <div className="text-center font-bold text-xs text-emerald-600 bg-emerald-50 py-3 rounded-xl uppercase">
+                          ₦0/month (Free Lifetime Access)
+                        </div>
+                      ) : (
+                        <div className="text-center font-bold text-xs text-slate-500 bg-slate-100 py-3 rounded-xl uppercase">
+                          Standard Plan (Free)
+                        </div>
+                      )}
                     </div>
 
                   </div>
@@ -502,26 +543,99 @@ export default function SettingsPage() {
                     <p className="text-xs text-slate-500 mt-1">Install Kavio directly onto your device for quick startup, native notification hooks, and offline operations.</p>
                   </div>
 
-                  <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="space-y-1.5 max-w-md">
-                      <h4 className="text-sm font-bold text-slate-800">Install Status</h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                        {isPWAInstallable 
-                          ? "Kavio is fully optimized as an installable Progressive Web Application (PWA). You can trigger installation below." 
-                          : "Kavio App is either already installed, or your browser environment does not support automatic prompts. You can also install it manually via your browser's address bar settings."
-                        }
-                      </p>
-                    </div>
+                  {isIOS ? (
+                    <div className="bg-slate-50/50 rounded-3xl p-6 sm:p-8 border border-slate-200/40 space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                          <Smartphone className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-850">iOS Safari Installation Guide</h4>
+                          <p className="text-[11px] text-slate-400 font-semibold">Follow these simple steps to install Kavio on your iPhone or iPad</p>
+                        </div>
+                      </div>
 
-                    <Button
-                      onClick={handleTriggerPWAInstall}
-                      disabled={!isPWAInstallable}
-                      className="bg-emerald-650 hover:bg-emerald-750 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4 text-amber-350" />
-                      Add to Home Screen
-                    </Button>
-                  </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                        {/* Step 1 */}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                          <div className="space-y-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
+                              1
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-850">Open Share Menu</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                              Tap the **Share** button in Safari's bottom toolbar (looks like a square with an upward arrow).
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-center p-3.5 bg-slate-50/50 rounded-xl">
+                            <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm">
+                              <Share className="w-4 h-4 text-emerald-500" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Step 2 */}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                          <div className="space-y-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
+                              2
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-850">Add to Home Screen</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                              Scroll down the Safari action checklist and select **Add to Home Screen** from the choices.
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-center p-3.5 bg-slate-50/50 rounded-xl">
+                            <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-slate-650 shadow-sm">
+                              <PlusSquare className="w-4 h-4 text-emerald-500" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Step 3 */}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                          <div className="space-y-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
+                              3
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-850">Confirm & Launch</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                              Confirm the app details (Kavio) and tap **Add** in the top-right corner. The app will launch directly from your home screen.
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-center p-3.5 bg-slate-50/50 rounded-xl">
+                            <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+                              <Check className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div className="space-y-1.5 max-w-md">
+                        <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                          <Smartphone className="w-4.5 h-4.5 text-slate-500" />
+                          Install Status
+                        </h4>
+                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                          {isPWAInstallable 
+                            ? "Kavio is fully optimized as an installable Progressive Web Application (PWA). You can trigger installation below." 
+                            : "Kavio App is either already installed, or your browser environment does not support automatic prompts. You can also install it manually via your browser's address bar settings."
+                          }
+                        </p>
+                      </div>
+
+                      <Button
+                        onClick={handleTriggerPWAInstall}
+                        disabled={!isPWAInstallable}
+                        className="bg-emerald-650 hover:bg-emerald-750 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-350" />
+                        Add to Home Screen
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 

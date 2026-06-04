@@ -17,7 +17,8 @@ export function BlurredPaywall({
   description,
   children,
 }: BlurredPaywallProps) {
-  if (!isLocked) {
+  // Payment stuff removed for now: always unlocked
+  if (true) {
     return <>{children}</>;
   }
 
