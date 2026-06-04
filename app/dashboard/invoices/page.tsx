@@ -90,6 +90,45 @@ export default function InvoicesPage() {
     }
   };
 
+  const logReminder = async (invoiceId: string, templateType: string, channel: string) => {
+    try {
+      await fetch(`/api/invoices/${invoiceId}/remind`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateType, channel }),
+      });
+      addNotification({
+        type: "SUCCESS",
+        title: "Reminder Logged",
+        message: `Sent ${templateType.replace("_", " ")} nudge tracking status.`,
+      });
+    } catch (e) {
+      console.warn("Failed to log reminder event", e);
+    }
+  };
+
+  const triggerWhatsAppNudge = (invoice: Invoice, templateType: string) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://kavio.finance";
+    const paymentLink = `${origin}/invoice/${invoice.id}`;
+    
+    let textMessage = "";
+    if (templateType === "DUE_TOMORROW") {
+      textMessage = `Hi ${invoice.client.name}, hope you're having a great week! Just a friendly note that invoice ${invoice.invoiceNumber} for NGN ${invoice.amount.toLocaleString()} is due tomorrow. Here is the payment link with bank details: ${paymentLink}. Thank you!`;
+    } else if (templateType === "DUE_TODAY") {
+      textMessage = `Hi ${invoice.client.name}, hope you're doing well. Just a gentle reminder that invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}) is due today. You can complete payment here: ${paymentLink}. Thanks!`;
+    } else if (templateType === "OVERDUE_3D") {
+      textMessage = `Hi ${invoice.client.name}, hope all is well. Just following up on invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}) which is now 3 days overdue. Here is the payment link: ${paymentLink}. Appreciate your help with this!`;
+    } else {
+      textMessage = `Hi ${invoice.client.name}, I hope this message finds you well. I'm checking in on the status of invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}), which is now past due. You can find the payment instructions and bank details here: ${paymentLink}. Thank you!`;
+    }
+
+    logReminder(invoice.id, templateType, "WHATSAPP");
+
+    const cleanPhone = invoice.client.phone.replace(/[^0-9+]/g, "");
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMessage)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   // Filtered invoices
   const filteredInvoices = invoices.filter(inv => {
     const matchesFilter = filter === "ALL" ? true : inv.status === filter;
@@ -332,6 +371,25 @@ export default function InvoicesPage() {
                     </td>
                     <td className="py-4.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {/* WhatsApp Dropdown Trigger */}
+                        {inv.status !== "PAID" && (
+                          <select
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                triggerWhatsAppNudge(inv, e.target.value);
+                                e.target.value = ""; // Reset dropdown
+                              }
+                            }}
+                            className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[10px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
+                          >
+                            <option value="">💬 Nudge Client...</option>
+                            <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
+                            <option value="DUE_TODAY">Nudge: Due Today</option>
+                            <option value="OVERDUE_3D">Nudge: 3 Days Overdue</option>
+                            <option value="OVERDUE_7D">Nudge: Past Due Follow-up</option>
+                          </select>
+                        )}
+
                         <button
                           onClick={() => copyPaymentLink(inv.id)}
                           className="p-2 hover:bg-slate-55 text-slate-400 hover:text-emerald-500 border border-transparent rounded-lg transition-colors"
