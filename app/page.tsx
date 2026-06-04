@@ -13,6 +13,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
 import ScrollReveal3D from "./components/ScrollReveal3D";
 
 export const metadata: Metadata = {
@@ -358,35 +359,88 @@ export default function Home() {
             </ScrollReveal3D>
           </div>
 
-          {/* Code IDE Mockup */}
-          <div className="lg:col-span-7 w-full">
-            <ScrollReveal3D delay={200} duration={0.95} direction="tilt-up">
-              <div className="w-full bg-[#0d131f] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden card-3d-premium">
-                <div className="px-6 py-4.5 bg-[#070b13] border-b border-slate-900 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                    <span className="text-[11px] font-mono font-bold text-slate-500 ml-4">kavio-invoice.ts</span>
+          {/* Visual Invoice Collection Timeline (Replaces Developer Code Mockup) */}
+          <div className="lg:col-span-7 w-full flex justify-center">
+            <ScrollReveal3D delay={200} duration={0.95} direction="tilt-up" className="w-full">
+              <div className="w-full bg-white border border-slate-200/60 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-600" />
+                
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Kavio Auto-Reminders</span>
+                    <h3 className="text-base font-bold text-slate-800 tracking-tight mt-1">Invoice Collection Timeline</h3>
                   </div>
+                  <Badge className="bg-emerald-50 text-emerald-600 font-bold border-none text-[10px] px-2.5 py-0.5 rounded-full uppercase">
+                    Active Pipeline
+                  </Badge>
                 </div>
 
-                <div className="p-6 overflow-x-auto font-mono text-xs text-slate-300 leading-relaxed max-w-full">
-                  <pre className="text-left">
-                    <code>
-<span className="text-emerald-400 font-bold">const</span> invoice = <span className="text-emerald-400 font-bold">await</span> kavio.invoice.create({'{'}
-  clientName: <span className="text-sky-300">"Chioma Nze"</span>,
-  clientEmail: <span className="text-sky-300">"chioma@flutterwavego.com"</span>,
-  amount: <span className="text-amber-400">1200000</span>, <span className="text-slate-500">// ₦ NGN</span>
-  dueDate: <span className="text-sky-300">"2026-06-15"</span>,
-  <span className="text-emerald-400">nudges</span>: {'{'}
-    channel: <span className="text-sky-300">"whatsapp_and_email"</span>,
-    frequency: <span className="text-sky-300">"every_48_hours"</span>,
-    tone: <span className="text-sky-300">"polite_but_persistent"</span>
-  {'}'}
-{'})'};
-                    </code>
-                  </pre>
+                <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                  
+                  {/* Step 1 */}
+                  <div className="flex gap-4 items-start relative z-10">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/10">
+                      ✓
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-850">Invoice Created</span>
+                        <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Day 0</span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                        You send a professional invoice for <strong className="text-slate-800">₦1,200,000</strong> to client **Chioma Nze**.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex gap-4 items-start relative z-10">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/10 animate-pulse">
+                      💬
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-850">Friendly Check-in</span>
+                        <span className="text-[9px] font-mono text-emerald-650 bg-emerald-50 px-1.5 py-0.5 rounded font-black">2 Days Before Due</span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                        Kavio automatically delivers a polite WhatsApp check-in containing a secure payment link directly to Chioma's phone.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex gap-4 items-start relative z-10">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center shrink-0">
+                      ✉️
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-850">Payment Due Date</span>
+                        <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Day 30</span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                        A beautiful email reminder with clear local bank transfer details is delivered automatically.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="flex gap-4 items-start relative z-10">
+                    <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-100">
+                      ₦
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-850">Automatic Pause & Complete</span>
+                        <span className="text-[9px] font-mono text-emerald-650 bg-emerald-50 px-1.5 py-0.5 rounded font-black font-mono">Payment Cleared</span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+                        The client transfers the funds to your account. Kavio immediately detects the transfer and instantly pauses all future nudge schedules.
+                      </p>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </ScrollReveal3D>

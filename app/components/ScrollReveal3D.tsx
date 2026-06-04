@@ -72,8 +72,8 @@ export default function ScrollReveal3D({
     ? "perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0px) translateX(0px) scale(1)"
     : getTransformStart();
 
-  const opacityStyle = isVisible ? 1 : 0;
-  const blurStyle = isVisible ? "blur(0px)" : "blur(4px)";
+  const opacityStyle = 1; // Always visible to ensure content legibility and prevent rendering bugs on mobile/iOS
+  const blurStyle = "blur(0px)";
 
   return (
     <div

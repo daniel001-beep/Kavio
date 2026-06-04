@@ -90,11 +90,27 @@ export default function DashboardClient() {
       textMessage = `Hi ${invoice.client.name}, I hope this message finds you well. I'm checking in on the status of invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}), which is now past due. You can find the payment instructions and bank details here: ${paymentLink}. Thank you!`;
     }
 
+    // Prompt user to verify/enter WhatsApp phone number
+    const targetPhone = prompt(
+      `Confirm WhatsApp Number for ${invoice.client.name} (include country code, e.g. +234):`,
+      invoice.client.phone || "+234"
+    );
+    
+    if (targetPhone === null) {
+      return; // User cancelled
+    }
+    
+    const validatedPhone = targetPhone.trim();
+    if (!validatedPhone) {
+      alert("A valid phone number is required to trigger WhatsApp nudges.");
+      return;
+    }
+
     // Log the reminder event to database
     logReminder(invoice.id, templateType, "WHATSAPP");
 
     // Redirect to WhatsApp
-    const cleanPhone = invoice.client.phone.replace(/[^0-9+]/g, "");
+    const cleanPhone = validatedPhone.replace(/[^0-9+]/g, "");
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMessage)}`;
     window.open(whatsappUrl, "_blank");
   };
