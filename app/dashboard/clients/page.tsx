@@ -577,7 +577,7 @@ export default function ClientsPage() {
                     )}
                   </div>
 
-                  <div className="pt-2 flex items-center justify-between gap-4">
+                  <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100/60 mt-3">
                     <div className="grid grid-cols-3 gap-2 flex-1">
                       <div>
                         <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Total Billed</span>
@@ -597,8 +597,8 @@ export default function ClientsPage() {
                       </div>
                     </div>
 
-                    {/* Action controls */}
-                    <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Action controls - visible always on mobile/touch, hover on desktop */}
+                    <div className="flex items-center gap-1.5 justify-end shrink-0 md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity">
                       <Link href={`/dashboard/clients/${client.id}`} passHref>
                         <Button variant="outline" className="p-2 h-8 rounded-lg" title="Open CRM Profile">
                           <ExternalLink className="w-3.5 h-3.5" />
