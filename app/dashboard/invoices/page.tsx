@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNotifications } from "@/app/context/NotificationContext";
+import WhatsAppNudgeModal, { WhatsAppNudgePayload } from "@/app/components/WhatsAppNudgeModal";
 
 export interface Invoice {
   id: string;
@@ -42,6 +43,9 @@ export default function InvoicesPage() {
   const [filter, setFilter] = useState<"ALL" | "PAID" | "SENT" | "VIEWED" | "OVERDUE">("ALL");
   const [search, setSearch] = useState("");
   const { addNotification } = useNotifications();
+
+  // WhatsApp nudge modal state
+  const [nudgePayload, setNudgePayload] = useState<WhatsAppNudgePayload | null>(null);
 
   // Load invoices
   const fetchInvoices = async () => {
@@ -122,26 +126,22 @@ export default function InvoicesPage() {
       textMessage = `Hi ${invoice.client.name}, I hope this message finds you well. I'm checking in on the status of invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}), which is now past due. You can find the payment instructions and bank details here: ${paymentLink}. Thank you!`;
     }
 
-    // Prompt user to verify/enter WhatsApp phone number
-    const targetPhone = prompt(
-      `Confirm WhatsApp Number for ${invoice.client.name} (include country code, e.g. +234):`,
-      invoice.client.phone || "+234"
-    );
-    
-    if (targetPhone === null) {
-      return; // User cancelled
-    }
-    
-    const validatedPhone = targetPhone.trim();
-    if (!validatedPhone) {
-      alert("A valid phone number is required to trigger WhatsApp nudges.");
-      return;
-    }
+    // Open the styled modal instead of native browser prompt
+    setNudgePayload({
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      clientName: invoice.client.name,
+      clientPhone: invoice.client.phone || "+234",
+      amount: invoice.amount,
+      templateType,
+      messageText: textMessage,
+    });
+  };
 
-    logReminder(invoice.id, templateType, "WHATSAPP");
-
-    const cleanPhone = validatedPhone.replace(/[^0-9+]/g, "");
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMessage)}`;
+  const handleNudgeConfirm = (phone: string, payload: WhatsAppNudgePayload) => {
+    logReminder(payload.invoiceId, payload.templateType, "WHATSAPP");
+    const cleanPhone = phone.replace(/[^0-9+]/g, "");
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(payload.messageText)}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -231,6 +231,13 @@ export default function InvoicesPage() {
 
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
+
+      {/* WhatsApp Nudge Modal */}
+      <WhatsAppNudgeModal
+        payload={nudgePayload}
+        onClose={() => setNudgePayload(null)}
+        onConfirm={handleNudgeConfirm}
+      />
       
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
