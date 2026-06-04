@@ -20,9 +20,11 @@ import {
   Copy,
   ExternalLink,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  Sparkles
 } from "lucide-react";
 import { useDashboardData, Invoice } from "@/app/hooks/useDashboardData";
+import { usePWAInstall } from "@/app/hooks/usePWAInstall";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,7 @@ export default function DashboardClient() {
     recordManualPayment,
     logReminder,
   } = useDashboardData();
+  const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
 
   // Payment Modal States
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -183,6 +186,30 @@ export default function DashboardClient() {
           </Link>
         </div>
       </div>
+
+      {/* PWA App Installation Promotion Banner */}
+      {isPWAInstallable && (
+        <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-55/20 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-4 text-left">
+            <div className="p-3 bg-emerald-500 text-white rounded-2xl">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-800">Install Kavio App</h4>
+              <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                Add Kavio to your home screen for quick offline access and persistent collections tracking.
+              </p>
+            </div>
+          </div>
+          <Button 
+            onClick={triggerPWAInstall}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold px-5 py-4 text-xs shrink-0 flex items-center gap-2 shadow-md shadow-emerald-500/10 border-none"
+          >
+            <Sparkles className="w-4 h-4 text-amber-350" />
+            Add to Home Screen
+          </Button>
+        </div>
+      )}
 
       {/* Aggregate Cards (Outstanding Revenue Dashboard) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -9,7 +9,7 @@ export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [users, setUsers] = useState([
-    { id: 'usr_001', name: 'Daniel Idowu', email: 'admin@velox.com', role: 'Super Admin', status: 'Active', kyc: 'Verified', lastLogin: 'Just now' },
+    { id: 'usr_001', name: 'Daniel Idowu', email: 'daniel@kavio.finance', role: 'Super Admin', status: 'Active', kyc: 'Verified', lastLogin: 'Just now' },
     { id: 'usr_002', name: 'Alice Chen', email: 'alice.c@yc.com', role: 'Investor', status: 'Active', kyc: 'Verified', lastLogin: '2 hours ago' },
     { id: 'usr_003', name: 'Marcus Sterling', email: 'm.sterling@hedge.io', role: 'Trader', status: 'Active', kyc: 'Pending', lastLogin: '1 day ago' },
     { id: 'usr_004', name: 'Elena Rostova', email: 'elena.r@capital.eu', role: 'User', status: 'Suspended', kyc: 'Failed', lastLogin: '5 days ago' },

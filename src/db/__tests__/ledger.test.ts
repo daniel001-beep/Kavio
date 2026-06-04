@@ -78,17 +78,17 @@ describe("Velox Fintech Ledger Engine Unit Tests", () => {
       // Drizzle ORM converts model queries into a safe format: { sql: "...", params: [...] }
       const mockQuery = {
         sql: 'SELECT * FROM "user" WHERE "email" = $1 AND "id" = $2',
-        params: ["admin@velox.com", "usr_admin_112"],
+        params: ["admin@kavio.finance", "usr_admin_112"],
       };
 
       // Ensure data inputs are strictly parameter variables ($1, $2) and never directly concatenated into the SQL statement
       expect(mockQuery.sql).toContain("$1");
       expect(mockQuery.sql).toContain("$2");
-      expect(mockQuery.sql).not.toContain("admin@velox.com");
+      expect(mockQuery.sql).not.toContain("admin@kavio.finance");
       expect(mockQuery.sql).not.toContain("usr_admin_112");
       
       // Ensure the parameter parameters array contains the untouched inputs, protecting against injection
-      expect(mockQuery.params[0]).toBe("admin@velox.com");
+      expect(mockQuery.params[0]).toBe("admin@kavio.finance");
       expect(mockQuery.params[1]).toBe("usr_admin_112");
     });
   });

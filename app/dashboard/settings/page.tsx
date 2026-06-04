@@ -21,10 +21,24 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "@/app/context/AuthContext";
+import { usePWAInstall } from "@/app/hooks/usePWAInstall";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER">("PROFILE");
+  const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER" | "ADMIN" | "PWA">("PROFILE");
+  const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
+
+  const handleTriggerPWAInstall = async () => {
+    setIsLoading(true);
+    setStatusMessage(null);
+    const success = await triggerPWAInstall();
+    setIsLoading(false);
+    if (success) {
+      setStatusMessage({ type: "success", text: "App installation accepted!" });
+    } else {
+      setStatusMessage({ type: "error", text: "App installation declined or failed to trigger." });
+    }
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -193,6 +207,32 @@ export default function SettingsPage() {
             <CreditCard className="w-[18px] h-[18px]" />
             Subscription Plan
           </button>
+
+          <button
+            onClick={() => { setActiveTab("PWA"); setStatusMessage(null); }}
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+              activeTab === "PWA"
+                ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
+                : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+            }`}
+          >
+            <Sparkles className="w-[18px] h-[18px] text-amber-500" />
+            Install App (PWA)
+          </button>
+
+          {session?.user?.isAdmin && (
+            <button
+              onClick={() => { setActiveTab("ADMIN"); setStatusMessage(null); }}
+              className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+                activeTab === "ADMIN"
+                  ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
+                  : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              <ShieldCheck className="w-[18px] h-[18px] text-blue-500" />
+              Super Admin Console
+            </button>
+          )}
         </div>
 
         {/* Content Box Panels */}
@@ -450,6 +490,66 @@ export default function SettingsPage() {
                       </Button>
                     </div>
 
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 4: PWA Installation Options */}
+              {activeTab === "PWA" && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">Kavio Desktop & Mobile App</h2>
+                    <p className="text-xs text-slate-500 mt-1">Install Kavio directly onto your device for quick startup, native notification hooks, and offline operations.</p>
+                  </div>
+
+                  <div className="border border-slate-100 bg-slate-50/50 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-1.5 max-w-md">
+                      <h4 className="text-sm font-bold text-slate-800">Install Status</h4>
+                      <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                        {isPWAInstallable 
+                          ? "Kavio is fully optimized as an installable Progressive Web Application (PWA). You can trigger installation below." 
+                          : "Kavio App is either already installed, or your browser environment does not support automatic prompts. You can also install it manually via your browser's address bar settings."
+                        }
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={handleTriggerPWAInstall}
+                      disabled={!isPWAInstallable}
+                      className="bg-emerald-650 hover:bg-emerald-750 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4 text-amber-350" />
+                      Add to Home Screen
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 5: Admin Panel Launchpad */}
+              {activeTab === "ADMIN" && session?.user?.isAdmin && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">Super Admin Launchpad</h2>
+                    <p className="text-xs text-slate-500 mt-1">Authorized super admin functions. Open the system-wide console to audit transactions and clean database instances.</p>
+                  </div>
+
+                  <div className="border border-slate-100 bg-blue-55/5 border-blue-100 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-1.5 max-w-md">
+                      <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-blue-500" />
+                        Admin Privileges Active
+                      </h4>
+                      <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                        Logged in as super admin <span className="font-mono text-slate-750 font-bold">{session.user.email}</span>. Click below to launch the administrative control center dashboard.
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={() => window.location.href = "/fintech/admin"}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0"
+                    >
+                      Launch Admin Panel
+                    </Button>
                   </div>
                 </div>
               )}

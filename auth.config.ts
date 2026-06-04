@@ -1,7 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
 
-const ADMIN_EMAILS = ["admin@velox.com", "daniel@velox.com"];
-
 export const authConfig = {
   pages: {
     signIn: "/auth/signin",
@@ -20,9 +18,7 @@ export const authConfig = {
       // Always grant admin rights for admin emails — works in both edge middleware and Node.js
       if (token.email) {
         const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
-        const isAdminEmail =
-          ADMIN_EMAILS.includes(token.email) ||
-          (adminEmail && token.email === adminEmail);
+        const isAdminEmail = adminEmail && token.email.toLowerCase().trim() === adminEmail;
         if (isAdminEmail) {
           token.isAdmin = true;
         }

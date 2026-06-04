@@ -35,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             // dynamic registration of new user
             const userId = `usr_${Math.random().toString(36).substring(2, 11)}`;
             const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
-            const isAdmin = (adminEmail && email === adminEmail) || email === "admin@velox.com" || email === "daniel@velox.com";
+            const isAdmin = adminEmail && email === adminEmail;
             
             const bcrypt = await import("bcryptjs");
             const hashedPassword = await bcrypt.hash(password, 12);
@@ -56,7 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             };
           } else {
             const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
-            const shouldBeAdmin = (adminEmail && email === adminEmail) || email === "admin@velox.com" || email === "daniel@velox.com";
+            const shouldBeAdmin = adminEmail && email === adminEmail;
 
             // Sync the admin flag in Drizzle if not set
             if (shouldBeAdmin && !existingUser.isAdmin) {
@@ -171,7 +171,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       // Grant admin rights if the email matches the environment variable or explicit admin accounts
       const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
-      if (token.email && ((adminEmail && token.email === adminEmail) || token.email === "admin@velox.com" || token.email === "daniel@velox.com")) {
+      if (token.email && adminEmail && token.email.toLowerCase().trim() === adminEmail) {
         token.isAdmin = true;
       }
       return token;
