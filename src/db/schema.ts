@@ -167,3 +167,66 @@ export const outboxEvents = pgTable("outbox_event", {
   nextRetryAt: timestamp("next_retry_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// 1. Clients Directory
+export const clients = pgTable("client", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  companyName: text("company_name"),
+  location: text("location"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 2. Invoices (The core ledger source)
+export const invoices = pgTable("invoice", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  invoiceNumber: text("invoice_number").notNull(), // e.g., INV-2026-001
+  projectDescription: text("project_description").notNull(),
+  amount: doublePrecision("amount").notNull(), // Raw floats in NGN/USD
+  dueDate: timestamp("due_date").notNull(),
+  status: text("status").notNull().default("DRAFT"), // DRAFT, SENT, VIEWED, OVERDUE, PAID
+  paymentInstructions: text("payment_instructions"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 3. Payment Collections (Manually recorded payments)
+export const payments = pgTable("payment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  amount: doublePrecision("amount").notNull(),
+  datePaid: timestamp("date_paid").defaultNow(),
+  reference: text("reference"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 4. Automated Reminders Logs & Trackers
+export const reminders = pgTable("reminder", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  templateType: text("template_type").notNull(), // DUE_TOMORROW, DUE_TODAY, OVERDUE_3D, OVERDUE_7D
+  channel: text("channel").notNull(), // WHATSAPP, EMAIL
+  sentDate: timestamp("sent_date").defaultNow(),
+  reminderCount: integer("reminder_count").default(1),
+  status: text("status").default("SENT"), // SENT, FAILED, DELIVERED
+});

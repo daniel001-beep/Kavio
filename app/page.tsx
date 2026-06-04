@@ -2,43 +2,42 @@ import React from "react";
 import Link from "next/link";
 import { 
   ShieldCheck, 
-  Layers, 
   Zap, 
   Terminal, 
-  Cpu, 
   ArrowRight,
-  Database,
-  RefreshCw,
-  GitBranch,
   Lock,
-  Globe
+  MessageSquare,
+  Mail,
+  Clock,
+  Check,
+  CheckCircle2
 } from "lucide-react";
 import type { Metadata } from "next";
 import ScrollReveal3D from "./components/ScrollReveal3D";
 
 export const metadata: Metadata = {
-  title: "Velox Fintech | Production-Ready Ledger Infrastructure",
-  description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams.",
+  title: "Kavio | Automated Payment Collection for Freelancers",
+  description: "Stop chasing clients. Kavio automates polite, persistent WhatsApp and Email nudges so you get paid on time, without the awkward silence.",
 };
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-600 overflow-x-hidden">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-800 overflow-x-hidden">
       
       {/* 1. Header Navigation */}
       <header className="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between border-b border-slate-200/80 sticky top-0 bg-[#f8fafc]/80 backdrop-blur-md z-50">
         <Link href="/" className="flex items-center gap-2 group no-underline">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
-            <Cpu className="w-4.5 h-4.5" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
+            <Zap className="w-4.5 h-4.5 text-white" />
           </div>
           <span className="text-xl font-black bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent tracking-tight">
-            Velox <span className="font-semibold text-slate-500">Fintech</span>
+            Kavio <span className="font-semibold text-slate-500">Finance</span>
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
-          <Link href="#features" className="hover:text-slate-900 transition-colors no-underline">Infrastructure</Link>
-          <Link href="#telemetry" className="hover:text-slate-900 transition-colors no-underline">Telemetry</Link>
-          <Link href="#api" className="hover:text-slate-900 transition-colors no-underline">API Specs</Link>
+          <Link href="#problem" className="hover:text-slate-900 transition-colors no-underline">The Problem</Link>
+          <Link href="#solution" className="hover:text-slate-900 transition-colors no-underline">The Nudge Engine</Link>
+          <Link href="#outcomes" className="hover:text-slate-900 transition-colors no-underline">Outcomes</Link>
         </nav>
         <div>
           <Link 
@@ -46,7 +45,7 @@ export default function Home() {
             href="/dashboard" 
             className="inline-flex items-center gap-1.5 px-4.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] no-underline"
           >
-            Go to Console <ArrowRight className="w-3.5 h-3.5" />
+            Launch Kavio <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </header>
@@ -54,34 +53,34 @@ export default function Home() {
       {/* 2. Hero Section */}
       <section className="relative pt-24 pb-20 px-6 max-w-6xl mx-auto text-center flex flex-col items-center">
         {/* Glow Effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-blue-500/5 to-indigo-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-500/5 to-teal-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
         
         {/* Sub-badge */}
         <ScrollReveal3D delay={50} duration={0.8} direction="down">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-blue-200 bg-blue-50/50 text-blue-700 text-xs font-bold tracking-wide uppercase mb-6 shadow-sm shadow-blue-100/50">
-            <Zap className="w-3.5 h-3.5" /> Core Infrastructure v2.4 Live
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-250 bg-emerald-50/50 text-emerald-700 text-xs font-bold tracking-wide uppercase mb-6 shadow-sm shadow-emerald-100/50">
+            <Zap className="w-3.5 h-3.5" /> Stop Chasing. Start Collecting.
           </div>
         </ScrollReveal3D>
 
-        {/* Centered Glowing Title (Guaranteed Sharp Visible Slate/Black Text) */}
+        {/* Centered Glowing Title */}
         <ScrollReveal3D delay={150} duration={0.9} direction="tilt-up">
           <h1 
             className="text-4xl sm:text-5xl md:text-7.5xl font-black tracking-tight leading-snug sm:leading-[1.1] md:leading-[1.08] max-w-4xl"
             style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none", WebkitBackgroundClip: "unset", backgroundClip: "unset" }}
           >
-            Production-Ready Fintech Infrastructure.<br />
+            Get paid on time,<br />
             <span 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm block sm:inline mt-3.5 sm:mt-0"
+              className="bg-gradient-to-r from-emerald-650 to-emerald-500 bg-clip-text text-transparent drop-shadow-sm block sm:inline mt-3.5 sm:mt-0"
               style={{ WebkitTextFillColor: "transparent" }}
             >
-              Launched in Milliseconds.
+              without the awkward silences.
             </span>
           </h1>
         </ScrollReveal3D>
 
         <ScrollReveal3D delay={250} duration={0.9}>
-          <p className="mt-8 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl font-medium leading-relaxed">
-            The mathematical, high-frequency transactional standard for B2B card issuers, neo-banks, and multi-tenant platforms. Fully compliant double-entry ledger constraints, streaming in sub-milliseconds.
+          <p className="mt-8 text-base sm:text-lg md:text-xl text-slate-650 max-w-2xl font-medium leading-relaxed">
+            Kavio is the polite, persistent collection assistant for freelancers. We handle late invoice follow-ups via automated WhatsApp and Email reminders so you never have to awkwardly chase a client for money again.
           </p>
         </ScrollReveal3D>
 
@@ -93,240 +92,299 @@ export default function Home() {
               href="/dashboard" 
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-xl shadow-slate-800/10 hover:bg-slate-800 transition-all hover:scale-[1.03] active:scale-[0.97] no-underline border border-slate-900/10"
             >
-              Explore Live Dashboard <ArrowRight className="w-4 h-4" />
+              Automate My Collections <ArrowRight className="w-4 h-4" />
             </Link>
             <Link 
               id="hero-cta-docs"
-              href="#api" 
+              href="/auth/signin?demo=true" 
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-sm font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-sm transition-all hover:scale-[1.03] active:scale-[0.97] no-underline"
             >
-              <Terminal className="w-4 h-4 text-slate-500" /> Read API Docs
+              <Zap className="w-4 h-4 text-slate-500" /> Start Free Demo
             </Link>
           </div>
         </ScrollReveal3D>
       </section>
 
+      {/* 3. Problem Section */}
+      <section id="problem" className="py-24 bg-white border-y border-slate-100 px-6 w-full">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 space-y-6">
+              <ScrollReveal3D duration={0.8} direction="left">
+                <span className="text-xs font-bold text-rose-500 uppercase tracking-widest">The Freelancer's Reality</span>
+                <h2 
+                  className="text-3xl font-black text-slate-900 tracking-tight mt-3"
+                  style={{ color: "#0f172a" }}
+                >
+                  The "Awkward Silence" of Unpaid Invoices
+                </h2>
+                <p className="text-slate-655 font-medium text-sm sm:text-base leading-relaxed mt-4">
+                  You completed the project on time. You sent the invoice. And then... nothing. Just absolute silence.
+                </p>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-3">
+                  Now you have to choose between waiting indefinitely or drafting a series of uncomfortable emails, worried about sounding too desperate or damaging the client relationship. 
+                </p>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-3 font-semibold text-rose-600">
+                  Manual chasing kills your creative flow, wastes hours of your week, and strains client relationships.
+                </p>
+              </ScrollReveal3D>
+            </div>
+            
+            <div className="lg:col-span-6">
+              <ScrollReveal3D delay={200} duration={0.9} direction="tilt-up">
+                <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 space-y-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider block">The Friction Checklist</span>
+                    <h4 className="text-sm font-bold text-slate-800">Why manual reminders fail:</h4>
+                  </div>
+                  <ul className="space-y-3.5 text-xs text-slate-650 font-semibold list-none p-0">
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">✕</div>
+                      <span>Reminding clients manually feels uncomfortable and harms client trust.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">✕</div>
+                      <span>Emails easily get buried in inbox clutter or marked as read and forgotten.</span>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">✕</div>
+                      <span>Tracking due dates takes time away from billable design or development work.</span>
+                    </li>
+                  </ul>
+                </div>
+              </ScrollReveal3D>
+            </div>
+          </div>
+        </div>
+      </section>
 
-
-      {/* 3. Features Bento Grid */}
-      <section id="features" className="py-24 px-6 max-w-7xl mx-auto w-full">
+      {/* 4. Solution Section (The Nudge Engine) */}
+      <section id="solution" className="py-24 px-6 max-w-7xl mx-auto w-full">
         <ScrollReveal3D duration={0.8} threshold={0.15}>
           <div className="text-center mb-16">
-            {/* Guaranteed Bold Visible Black feature header */}
             <h2 
-              className="text-3xl font-black tracking-tight text-slate-955 sm:text-4xl"
-              style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
+              className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl"
+              style={{ color: "#090d16" }}
             >
-              Architected for Cryptographic Balance Control
+              Meet Your Collections Assistant
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto font-medium">
-              Velox replaces legacy periodic reconciliation with strict, database-level isolation and atomic constraints.
+              Kavio takes the awkwardness out of getting paid. We act as your sidekick, handling late payments politely and persistently.
             </p>
           </div>
         </ScrollReveal3D>
 
-        {/* Bento Box style 3-column responsive grid layout using white frosted glass */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Double-Entry Engine */}
-          <ScrollReveal3D delay={0} duration={0.85} direction="tilt-up" className="h-full">
-            <div className="h-full p-8 rounded-[24px] bg-white border border-slate-200/80 flex flex-col justify-between group card-3d-premium card-3d-blue relative overflow-hidden shadow-sm shadow-slate-100">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-blue-500/10 transition-all" />
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                  <Database className="w-5 h-5" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Solution Cards */}
+          <div className="lg:col-span-6 space-y-6">
+            {/* Card 1: Polite Automation */}
+            <ScrollReveal3D delay={0} duration={0.8} direction="tilt-up">
+              <div className="p-6 rounded-[24px] bg-white border border-slate-200/80 group card-3d-premium card-3d-emerald relative overflow-hidden shadow-sm shadow-slate-100">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] pointer-events-none" />
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 mb-2">Automated WhatsApp Follow-ups</h3>
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                      Reminders are delivered directly to your client's WhatsApp chat window. Kavio writes polite, contextual reminders using client details so payments are made without delays.
+                    </p>
+                  </div>
                 </div>
-                {/* Guaranteed Sharp Visible Black header */}
-                <h3 
-                  className="text-xl font-bold text-slate-955 mb-3"
-                  style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
-                >
-                  Double-Entry Engine
-                </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-700">
-                  Velox enforces standard mathematical double-entry balance constraints natively at the database schema level. Utilizes atomic transaction isolation so credit and debit events never drift out of sync.
-                </p>
-              </div>
-              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-blue-600 uppercase tracking-widest">
-                <ShieldCheck className="w-3.5 h-3.5" /> 100% ACID Compliant
-              </div>
-            </div>
-          </ScrollReveal3D>
-
-          {/* Card 2: Multi-Tenant Wallets */}
-          <ScrollReveal3D delay={150} duration={0.85} direction="tilt-up" className="h-full">
-            <div className="h-full p-8 rounded-[24px] bg-white border border-slate-200/80 flex flex-col justify-between group card-3d-premium card-3d-indigo relative overflow-hidden shadow-sm shadow-slate-100">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-indigo-500/10 transition-all" />
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                  <GitBranch className="w-5 h-5" />
-                </div>
-                {/* Guaranteed Sharp Visible Black header */}
-                <h3 
-                  className="text-xl font-bold text-slate-955 mb-3"
-                  style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
-                >
-                  Multi-Tenant Wallets
-                </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-700">
-                  Enables dynamic relational database mapping for multi-currency wallets, sub-ledger cards, and isolated tenant schemes. Safely isolate user ledger states while maintaining instant cross-currency conversion capabilities.
-                </p>
-              </div>
-              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-indigo-600 uppercase tracking-widest">
-                <GitBranch className="w-3.5 h-3.5" /> Unlimited Sub-Nesting
-              </div>
-            </div>
-          </ScrollReveal3D>
-
-          {/* Card 3: Real-Time Streams */}
-          <ScrollReveal3D delay={300} duration={0.85} direction="tilt-up" className="h-full">
-            <div className="h-full p-8 rounded-[24px] bg-white border border-slate-200/80 flex flex-col justify-between group card-3d-premium card-3d-emerald relative overflow-hidden shadow-sm shadow-slate-100">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-emerald-500/10 transition-all" />
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                  <RefreshCw className="w-5 h-5" />
-                </div>
-                {/* Guaranteed Sharp Visible Black header */}
-                <h3 
-                  className="text-xl font-bold text-slate-955 mb-3"
-                  style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
-                >
-                  Real-Time Streams
-                </h3>
-                <p className="text-sm font-medium leading-relaxed text-slate-700">
-                  Streams balance mutations and security events natively over persistent, secure WebSocket connections. Eliminate UI polling, layout stutter, and state synchronization lag across global consumer applications.
-                </p>
-              </div>
-              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                <Globe className="w-3.5 h-3.5" /> Persistent WebSockets
-              </div>
-            </div>
-          </ScrollReveal3D>
-        </div>
-      </section>
-
-      {/* 4. Telemetry Board */}
-      <section id="telemetry" className="py-20 bg-white border-y border-slate-200/60 relative">
-        <div className="max-w-7xl mx-auto px-6 w-full">
-          <ScrollReveal3D duration={0.8}>
-            <div className="text-center mb-16">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Global Node Performance</span>
-              {/* Guaranteed Sharp Visible Black Header */}
-              <h2 
-                className="text-2xl sm:text-3xl font-black text-slate-955 mt-2"
-                style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
-              >
-                Telemetry Board
-              </h2>
-            </div>
-          </ScrollReveal3D>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {/* Metric 1 - CDN */}
-            <ScrollReveal3D delay={0} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
-                <img 
-                  src="/cdn.png" 
-                  alt="CDN Performance" 
-                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
-                  style={{ imageRendering: "-webkit-optimize-contrast" }}
-                />
               </div>
             </ScrollReveal3D>
-            {/* Metric 2 - 2ms */}
-            <ScrollReveal3D delay={150} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
-                <img 
-                  src="/2ms.png" 
-                  alt="2ms Response Time" 
-                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
-                  style={{ imageRendering: "-webkit-optimize-contrast" }}
-                />
+
+            {/* Card 2: Email Backup Reminders */}
+            <ScrollReveal3D delay={150} duration={0.8} direction="tilt-up">
+              <div className="p-6 rounded-[24px] bg-white border border-slate-200/80 group card-3d-premium card-3d-blue relative overflow-hidden shadow-sm shadow-slate-100">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] pointer-events-none" />
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 mb-2">Polite Email Sequences</h3>
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                      If WhatsApp isn't preferred, Kavio schedules beautiful, clean billing notifications containing direct links. The email copy is structured as a helpful check-in to preserve client goodwill.
+                    </p>
+                  </div>
+                </div>
               </div>
             </ScrollReveal3D>
-            {/* Metric 3 - ISR */}
-            <ScrollReveal3D delay={300} duration={0.8} direction="tilt-up" className="h-full">
-              <div className="h-full min-h-[160px] flex items-center justify-center rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white p-4">
-                <img 
-                  src="/isr.png" 
-                  alt="ISR Caching" 
-                  className="max-w-full h-auto max-h-[180px] object-contain select-none" 
-                  style={{ imageRendering: "-webkit-optimize-contrast" }}
-                />
+
+            {/* Card 3: Persistence Intervals */}
+            <ScrollReveal3D delay={300} duration={0.8} direction="tilt-up">
+              <div className="p-6 rounded-[24px] bg-white border border-slate-200/80 group card-3d-premium card-3d-indigo relative overflow-hidden shadow-sm shadow-slate-100">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-[40px] pointer-events-none" />
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 mb-2">Smart Reminders Scheduling</h3>
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                      Configure nudges to trigger automatically 3 days before the due date, on the due date, and every 48 hours afterward until the balance is resolved.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal3D>
+          </div>
+
+          {/* Visual Nudge Mockup (WhatsApp preview) */}
+          <div className="lg:col-span-6 w-full flex justify-center">
+            <ScrollReveal3D delay={200} duration={0.9} direction="tilt-up">
+              <div className="w-full max-w-sm bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden relative p-4 font-sans text-xs">
+                
+                {/* Chat Top bar */}
+                <div className="flex items-center gap-3 pb-3 border-b border-slate-900 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-extrabold text-white text-[11px] shadow-sm">
+                    KA
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-xs">Kavio Assistant</h4>
+                    <p className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Active Collection Node
+                    </p>
+                  </div>
+                </div>
+
+                {/* WhatsApp Message Preview Box */}
+                <div className="space-y-3.5">
+                  <div className="bg-[#121b22] text-[#e9edef] p-3.5 rounded-2xl rounded-tl-none border border-slate-800 max-w-[90%] mr-auto shadow-md">
+                    <p className="leading-relaxed text-[11px]">
+                      Hi Chioma, hope you're having a great week! 
+                    </p>
+                    <p className="leading-relaxed text-[11px] mt-1.5">
+                      Just a friendly note that invoice <strong className="text-emerald-400">INV-2026-002</strong> for <strong>Flutterwave Inc.</strong> is due tomorrow. 
+                    </p>
+                    <p className="leading-relaxed text-[11px] mt-1.5">
+                      You can complete payment instantly via bank transfer or card using this secure link:
+                    </p>
+                    <a href="#" className="text-sky-400 underline block mt-2 text-[10px] truncate">
+                      https://kavio.finance/pay/invoice-inv-2026-002
+                    </a>
+                  </div>
+
+                  <div className="bg-[#0b141a]/60 text-slate-500 text-[9px] font-bold text-center py-2.5 uppercase tracking-widest border-t border-slate-900 mt-4">
+                    ⚡ Auto-reminders pause once client pays
+                  </div>
+                </div>
+
               </div>
             </ScrollReveal3D>
           </div>
         </div>
       </section>
 
-      {/* 5. Code Preview / IDE Container */}
-      <section id="api" className="py-24 px-6 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      {/* 5. Outcomes & Metrics Section */}
+      <section id="outcomes" className="py-20 bg-white border-y border-slate-250 relative">
+        <div className="max-w-5xl mx-auto px-6 w-full">
+          <ScrollReveal3D duration={0.8}>
+            <div className="text-center mb-16">
+              <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Proven Outcomes</span>
+              <h2 
+                className="text-2xl sm:text-3xl font-black text-slate-900 mt-2"
+                style={{ color: "#090d16" }}
+              >
+                Collection Analytics & Payout Performance
+              </h2>
+            </div>
+          </ScrollReveal3D>
           
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Metric 1 */}
+            <ScrollReveal3D delay={0} duration={0.8} direction="tilt-up">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Average collection speed</span>
+                <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight font-mono">48 Hours</h3>
+                <p className="text-xs text-slate-550 font-semibold mt-1">Nudges reduce overdue invoices from weeks to days.</p>
+              </div>
+            </ScrollReveal3D>
+
+            {/* Metric 2 */}
+            <ScrollReveal3D delay={150} duration={0.8} direction="tilt-up">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">First-nudge success rate</span>
+                <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight font-mono">94%</h3>
+                <p className="text-xs text-slate-550 font-semibold mt-1">Most clients settle balance instantly upon WhatsApp notification.</p>
+              </div>
+            </ScrollReveal3D>
+
+            {/* Metric 3 */}
+            <ScrollReveal3D delay={300} duration={0.8} direction="tilt-up">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Awkward Conversations Avoided</span>
+                <h3 className="text-4xl font-extrabold text-emerald-600 tracking-tight font-mono">100%</h3>
+                <p className="text-xs text-slate-550 font-semibold mt-1">The system does the chasing, so you stay the creative professional.</p>
+              </div>
+            </ScrollReveal3D>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Integration API Section */}
+      <section className="py-24 px-6 max-w-5xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Text area */}
           <div className="lg:col-span-5">
             <ScrollReveal3D duration={0.8} direction="left">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Seamless Integration</span>
-              {/* Guaranteed Sharp Visible Black Header */}
+              <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Invoice Automation</span>
               <h2 
-                className="text-3xl font-black text-slate-955 tracking-tight mt-3"
-                style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none" }}
+                className="text-3xl font-black text-slate-900 tracking-tight mt-3"
+                style={{ color: "#0f172a" }}
               >
-                Developer-First API Layout
+                Auto-Reminders Setup
               </h2>
               <p className="mt-6 text-sm sm:text-base leading-relaxed text-slate-600 font-medium">
-                Integrate B2B wallet ledgers in seconds using fully documented HTTP protocols. Support for custom metadata parameters, and atomic verification is embedded in every transaction.
+                Configure collection parameters directly when you draft an invoice. Let Kavio monitor dates and handle follow-ups automatically.
               </p>
               <ul className="mt-8 space-y-4 text-xs font-bold uppercase tracking-wider text-slate-700">
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-blue-50/80 flex items-center justify-center text-blue-600 shadow-inner">
-                    <Lock className="w-3.5 h-3.5" />
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-650 shadow-inner">
+                    <Check className="w-3 h-3" />
                   </div>
-                  Idempotency Safe Retries
+                  Polite conversational copy presets
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-blue-50/80 flex items-center justify-center text-blue-600 shadow-inner">
-                    <Terminal className="w-3.5 h-3.5" />
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-655 shadow-inner">
+                    <Check className="w-3 h-3" />
                   </div>
-                  Pure JSON Payloads
+                  Auto-pauses the instant payment clears
                 </li>
               </ul>
             </ScrollReveal3D>
           </div>
 
-          {/* IDE Mockup */}
+          {/* Code IDE Mockup */}
           <div className="lg:col-span-7 w-full">
             <ScrollReveal3D delay={200} duration={0.95} direction="tilt-up">
               <div className="w-full bg-[#0d131f] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden card-3d-premium">
-                {/* IDE Top bar */}
                 <div className="px-6 py-4.5 bg-[#070b13] border-b border-slate-900 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                     <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                     <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                    <span className="text-[11px] font-mono font-bold text-slate-500 ml-4">POST /api/v1/ledger</span>
-                  </div>
-                  <div className="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/5 border border-blue-500/10">
-                    Secure Request
+                    <span className="text-[11px] font-mono font-bold text-slate-500 ml-4">kavio-invoice.ts</span>
                   </div>
                 </div>
 
-                {/* Code Panel */}
                 <div className="p-6 overflow-x-auto font-mono text-xs text-slate-300 leading-relaxed max-w-full">
-                  <pre className="text-left select-all">
+                  <pre className="text-left">
                     <code>
-<span className="text-emerald-400 font-bold">curl</span> -X POST <span className="text-blue-400">"https://api.velox.com/v1/ledger"</span> \
-  -H <span className="text-amber-400">"Authorization: Bearer sec_live_839a2k"</span> \
-  -H <span className="text-amber-400">"Content-Type: application/json"</span> \
-  -H <span className="text-amber-400">"X-Idempotency-Key: tx_idemp_83ha9d"</span> \
-  -d <span className="text-blue-400">'{'{'}
-    <span className="text-purple-400">"user_id"</span>: <span className="text-emerald-300">"usr_6wshej3ht"</span>,
-    <span className="text-purple-400">"amount"</span>: <span className="text-emerald-300">"145000"</span>, <span className="text-slate-500">// BigInt cents/kobo (1,450.00)</span>
-    <span className="text-purple-400">"currency"</span>: <span className="text-emerald-300">"USD"</span>,
-    <span className="text-purple-400">"metadata"</span>: {'{'}
-      <span className="text-purple-400">"client_name"</span>: <span className="text-emerald-300">"Daniel's Laptop"</span>,
-      <span className="text-purple-400">"description"</span>: <span className="text-emerald-300">"Vault Allocation Mutation"</span>
-    {'}'}
-  {'}'}'</span>
+<span className="text-emerald-400 font-bold">const</span> invoice = <span className="text-emerald-400 font-bold">await</span> kavio.invoice.create({'{'}
+  clientName: <span className="text-sky-300">"Chioma Nze"</span>,
+  clientEmail: <span className="text-sky-300">"chioma@flutterwavego.com"</span>,
+  amount: <span className="text-amber-400">1200000</span>, <span className="text-slate-500">// ₦ NGN</span>
+  dueDate: <span className="text-sky-300">"2026-06-15"</span>,
+  <span className="text-emerald-400">nudges</span>: {'{'}
+    channel: <span className="text-sky-300">"whatsapp_and_email"</span>,
+    frequency: <span className="text-sky-300">"every_48_hours"</span>,
+    tone: <span className="text-sky-300">"polite_but_persistent"</span>
+  {'}'}
+{'})'};
                     </code>
                   </pre>
                 </div>
@@ -336,21 +394,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Premium Multi-Column Footer */}
-      <footer className="mt-auto border-t border-slate-205 bg-white pt-16 pb-12 w-full">
+      {/* 7. Footer */}
+      <footer className="mt-auto border-t border-slate-200 bg-white pt-16 pb-12 w-full">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
+          
           {/* Brand Column */}
           <div className="md:col-span-4 flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2 group no-underline">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/10">
-                <Cpu className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/10">
+                <Zap className="w-4 h-4" />
               </div>
               <span className="text-lg font-black text-slate-950 tracking-tight">
-                Velox <span className="font-semibold text-slate-500">Fintech</span>
+                Kavio <span className="font-semibold text-slate-500">Finance</span>
               </span>
             </Link>
             <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm mt-2">
-              High-frequency, double-entry ledger engine and cryptographically isolated multi-tenant wallet systems built for B2B financial operators.
+              The polite, persistent collection assistant for freelancers. Automating late invoice reminders via WhatsApp and Email.
             </p>
           </div>
 
@@ -358,10 +417,9 @@ export default function Home() {
           <div className="md:col-span-2 flex flex-col gap-4">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Product</span>
             <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
-              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Ledger Engine</Link></li>
-              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Wallet Nesting</Link></li>
-              <li><Link href="#features" className="hover:text-blue-600 transition-colors no-underline">Real-Time Streams</Link></li>
-              <li><Link href="#telemetry" className="hover:text-blue-600 transition-colors no-underline">System Performance</Link></li>
+              <li><Link href="#problem" className="hover:text-emerald-650 transition-colors no-underline">The Problem</Link></li>
+              <li><Link href="#solution" className="hover:text-emerald-650 transition-colors no-underline">The Nudge Engine</Link></li>
+              <li><Link href="#outcomes" className="hover:text-emerald-650 transition-colors no-underline">Outcomes</Link></li>
             </ul>
           </div>
 
@@ -369,29 +427,25 @@ export default function Home() {
           <div className="md:col-span-3 flex flex-col gap-4">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resources</span>
             <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
-              <li><Link href="#api" className="hover:text-blue-600 transition-colors no-underline">API Specification</Link></li>
-              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Developer Console</Link></li>
-              <li><Link href="#api" className="hover:text-blue-600 transition-colors no-underline">Integration Guide</Link></li>
-              <li><Link href="#telemetry" className="hover:text-blue-600 transition-colors no-underline">Status Sandbox</Link></li>
+              <li><Link href="/dashboard" className="hover:text-emerald-650 transition-colors no-underline">Launch Dashboard</Link></li>
+              <li><Link href="/auth/signin?demo=true" className="hover:text-emerald-650 transition-colors no-underline">Live Demo</Link></li>
             </ul>
           </div>
 
-          {/* Security & Legal Links */}
+          {/* Legal Links */}
           <div className="md:col-span-3 flex flex-col gap-4">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Security & Compliance</span>
             <ul className="space-y-2 text-xs font-bold text-slate-600 list-none p-0 m-0">
-              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Audit Timelines</Link></li>
-              <li><Link href="/dashboard" className="hover:text-blue-600 transition-colors no-underline">Identity Verification (KYC)</Link></li>
-              <li><Link href="/" className="hover:text-blue-600 transition-colors no-underline">Security Policy</Link></li>
-              <li><Link href="/" className="hover:text-blue-600 transition-colors no-underline">Terms of Service</Link></li>
+              <li><Link href="/dashboard/settings" className="hover:text-emerald-650 transition-colors no-underline">Account Security</Link></li>
+              <li><Link href="/" className="hover:text-emerald-650 transition-colors no-underline">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-slate-505 font-medium m-0">
-            &copy; {new Date().getFullYear()} Velox Fintech. Built by <a href="https://github.com/daniel001-beep" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:text-blue-700 underline underline-offset-2">Daniel</a>.
+          <p className="text-[11px] text-slate-500 font-medium m-0">
+            &copy; {new Date().getFullYear()} Kavio Finance. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

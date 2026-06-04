@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "Kavio | Production-Ready Ledger Infrastructure",
   description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams built for B2B financial operators.",
   keywords: "fintech, ledger, double-entry accounting, B2B payments, financial infrastructure, multi-tenant wallets, realtime APIs",
+  manifest: "/manifest.json",
   openGraph: {
     title: "Kavio",
     description: "Enterprise-grade double-entry ledger engine built for B2B financial operators.",
@@ -56,6 +57,19 @@ export default function RootLayout({
         </Providers>
         <Analytics />
         <SpeedInsights />
+        
+        {/* PWA Service Worker Registration */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                console.log('SW registered successfully:', reg.scope);
+              }).catch(function(err) {
+                console.log('SW registration failed:', err);
+              });
+            });
+          }
+        `}} />
       </body>
     </html>
   );

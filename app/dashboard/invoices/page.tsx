@@ -5,79 +5,88 @@ import Link from "next/link";
 import { 
   Plus, 
   Search, 
-  Filter, 
   FileText, 
   Copy, 
-  MoreVertical, 
   Trash2, 
-  ExternalLink,
   CheckCircle,
   Clock,
   AlertTriangle,
-  ArrowRight,
   TrendingUp,
-  CreditCard,
-  DollarSign
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-
-export interface InvoiceItem {
-  description: string;
-  qty: number;
-  rate: number;
-}
+import { useNotifications } from "@/app/context/NotificationContext";
 
 export interface Invoice {
   id: string;
-  number: string;
-  clientName: string;
-  clientEmail: string;
-  date: string;
+  invoiceNumber: string;
+  amount: number;
   dueDate: string;
-  items: InvoiceItem[];
-  status: "PAID" | "UNPAID" | "OVERDUE" | "DRAFT";
-  notes?: string;
+  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID";
+  projectDescription: string;
+  createdAt: string;
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
 }
-
-const BASELINE_INVOICES: Invoice[] = [];
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [filter, setFilter] = useState<"ALL" | "PAID" | "UNPAID" | "OVERDUE" | "DRAFT">("ALL");
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<"ALL" | "PAID" | "SENT" | "VIEWED" | "OVERDUE">("ALL");
   const [search, setSearch] = useState("");
+  const { addNotification } = useNotifications();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("kavio_invoices");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const filtered = parsed.filter((inv: Invoice) => !["inv-1", "inv-2", "inv-3"].includes(inv.id));
-        setInvoices(filtered);
-        localStorage.setItem("kavio_invoices", JSON.stringify(filtered));
-      } catch (e) {
-        setInvoices([]);
+  // Load invoices
+  const fetchInvoices = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/invoices?_t=" + Date.now(), {
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setInvoices(Array.isArray(data) ? data : []);
       }
-    } else {
-      setInvoices([]);
-      localStorage.setItem("kavio_invoices", JSON.stringify([]));
+    } catch (e) {
+      console.error("Failed to load invoices:", e);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-
-  const calculateTotal = (invoice: Invoice) => {
-    return invoice.items.reduce((sum, item) => sum + (item.qty * item.rate), 0);
   };
 
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
   // Delete invoice
-  const deleteInvoice = (id: string) => {
-    if (confirm("Are you sure you want to delete this invoice?")) {
-      const updated = invoices.filter(inv => inv.id !== id);
-      setInvoices(updated);
-      localStorage.setItem("kavio_invoices", JSON.stringify(updated));
+  const deleteInvoice = async (id: string) => {
+    if (confirm("Are you sure you want to delete this invoice? This will remove all collection logs.")) {
+      try {
+        const res = await fetch(`/api/invoices/${id}`, {
+          method: "DELETE"
+        });
+
+        if (res.ok) {
+          addNotification({
+            type: "SUCCESS",
+            title: "Invoice Deleted",
+            message: "Invoice was successfully removed from registry.",
+          });
+          fetchInvoices();
+        } else {
+          throw new Error("Failed to delete invoice");
+        }
+      } catch (err) {
+        alert("Failed to delete invoice");
+      }
     }
   };
 
@@ -85,8 +94,9 @@ export default function InvoicesPage() {
   const filteredInvoices = invoices.filter(inv => {
     const matchesFilter = filter === "ALL" ? true : inv.status === filter;
     const matchesSearch = 
-      inv.clientName.toLowerCase().includes(search.toLowerCase()) ||
-      inv.number.toLowerCase().includes(search.toLowerCase());
+      inv.client.name.toLowerCase().includes(search.toLowerCase()) ||
+      inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
+      inv.projectDescription.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -94,28 +104,35 @@ export default function InvoicesPage() {
     switch (status) {
       case "PAID":
         return (
-          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
             <CheckCircle className="w-3.5 h-3.5" />
             Paid
           </Badge>
         );
-      case "UNPAID":
+      case "SENT":
         return (
-          <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-600 hover:bg-amber-500/20 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+          <Badge className="bg-blue-500/10 border border-blue-500/20 text-blue-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
             <Clock className="w-3.5 h-3.5" />
             Sent
           </Badge>
         );
+      case "VIEWED":
+        return (
+          <Badge className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-650 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+            <Clock className="w-3.5 h-3.5" />
+            Viewed
+          </Badge>
+        );
       case "OVERDUE":
         return (
-          <Badge className="bg-rose-500/10 border border-rose-500/20 text-rose-600 hover:bg-rose-500/20 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+          <Badge className="bg-rose-500/10 border border-rose-500/20 text-rose-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
             <AlertTriangle className="w-3.5 h-3.5" />
             Overdue
           </Badge>
         );
-      case "DRAFT":
+      default:
         return (
-          <Badge className="bg-slate-500/10 border border-slate-500/20 text-slate-600 hover:bg-slate-500/20 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
+          <Badge className="bg-slate-500/10 border border-slate-500/20 text-slate-655 font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 w-fit">
             <FileText className="w-3.5 h-3.5" />
             Draft
           </Badge>
@@ -124,16 +141,38 @@ export default function InvoicesPage() {
   };
 
   const copyPaymentLink = (id: string) => {
-    const dummyLink = `https://kavio.finance/pay/invoice-${id}`;
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://kavio.finance";
+    const dummyLink = `${origin}/invoice/${id}`;
     navigator.clipboard.writeText(dummyLink);
-    alert(`Payment link copied to clipboard!\n${dummyLink}`);
+    alert(`Public payment link copied to clipboard!\n${dummyLink}`);
   };
 
   // Compute stat aggregates
-  const totalInvoiced = invoices.reduce((sum, inv) => sum + calculateTotal(inv), 0);
-  const settledAmount = invoices.filter(inv => inv.status === "PAID").reduce((sum, inv) => sum + calculateTotal(inv), 0);
-  const outstandingAmount = invoices.filter(inv => inv.status === "UNPAID").reduce((sum, inv) => sum + calculateTotal(inv), 0);
-  const overdueAmount = invoices.filter(inv => inv.status === "OVERDUE").reduce((sum, inv) => sum + calculateTotal(inv), 0);
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0
+    }).format(val);
+  };
+
+  const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+  const settledAmount = invoices.filter(inv => inv.status === "PAID").reduce((sum, inv) => sum + inv.amount, 0);
+  const outstandingAmount = invoices.filter(inv => ["SENT", "VIEWED", "OVERDUE"].includes(inv.status)).reduce((sum, inv) => sum + inv.amount, 0);
+  const overdueAmount = invoices.filter(inv => inv.status === "OVERDUE").reduce((sum, inv) => sum + inv.amount, 0);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+            Loading invoices registry...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
@@ -146,7 +185,7 @@ export default function InvoicesPage() {
         </div>
 
         <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-          <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
+          <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-450 hover:to-emerald-550 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Create Invoice
           </Button>
@@ -155,46 +194,46 @@ export default function InvoicesPage() {
 
       {/* Aggregate Cards (Bento) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border border-slate-100 rounded-2xl shadow-sm">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
               <FileText className="w-4 h-4 text-slate-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">₦ {totalInvoiced.toLocaleString()}</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">All invoices drafted & sent</p>
+            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(totalInvoiced)}</h3>
+            <p className="text-[10px] text-slate-400 font-semibold mt-1">All invoices tracked</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Settled Earnings</span>
               <TrendingUp className="w-4 h-4 text-emerald-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">₦ {settledAmount.toLocaleString()}</h3>
-            <p className="text-[10px] text-emerald-500 font-semibold mt-1">Direct bank transfers confirmed</p>
+            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(settledAmount)}</h3>
+            <p className="text-[10px] text-emerald-500 font-semibold mt-1">Payments confirmed</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding</span>
               <Clock className="w-4 h-4 text-amber-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">₦ {outstandingAmount.toLocaleString()}</h3>
-            <p className="text-[10px] text-amber-600 font-semibold mt-1">Awaiting client payment</p>
+            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(outstandingAmount)}</h3>
+            <p className="text-[10px] text-amber-650 font-semibold mt-1">Awaiting bank details</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overdue Alert</span>
               <AlertTriangle className="w-4 h-4 text-rose-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">₦ {overdueAmount.toLocaleString()}</h3>
+            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(overdueAmount)}</h3>
             <p className="text-[10px] text-rose-500 font-semibold mt-1">Past due invoices</p>
           </CardContent>
         </Card>
@@ -206,7 +245,7 @@ export default function InvoicesPage() {
           
           {/* Tab Filters */}
           <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {(["ALL", "PAID", "UNPAID", "OVERDUE", "DRAFT"] as const).map((t) => (
+            {(["ALL", "PAID", "SENT", "VIEWED", "OVERDUE"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setFilter(t)}
@@ -242,7 +281,7 @@ export default function InvoicesPage() {
               <tr className="border-b border-slate-100 bg-slate-50/50">
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice No.</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sent Date</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project Details</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Amount</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
@@ -273,38 +312,36 @@ export default function InvoicesPage() {
                 filteredInvoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="py-4.5 px-4 font-mono font-bold text-slate-700">
-                      {inv.number}
+                      {inv.invoiceNumber}
                     </td>
                     <td className="py-4.5 px-4">
-                      <p className="font-bold text-slate-800">{inv.clientName}</p>
-                      <p className="text-[10px] text-slate-400 font-semibold">{inv.clientEmail}</p>
+                      <p className="font-bold text-slate-800">{inv.client.name}</p>
+                      <p className="text-[10px] text-slate-450 font-semibold">{inv.client.email}</p>
+                    </td>
+                    <td className="py-4.5 px-4 text-slate-500 font-semibold truncate max-w-[200px]">
+                      {inv.projectDescription}
                     </td>
                     <td className="py-4.5 px-4 text-slate-500 font-medium">
-                      {inv.date}
-                    </td>
-                    <td className="py-4.5 px-4 text-slate-500 font-medium">
-                      {inv.dueDate}
+                      {new Date(inv.dueDate).toLocaleDateString()}
                     </td>
                     <td className="py-4.5 px-4 font-mono font-bold text-slate-800">
-                      ₦ {calculateTotal(inv).toLocaleString()}
+                      {formatCurrency(inv.amount)}
                     </td>
                     <td className="py-4.5 px-4">
                       {getStatusBadge(inv.status)}
                     </td>
                     <td className="py-4.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {inv.status !== "DRAFT" && (
-                          <button
-                            onClick={() => copyPaymentLink(inv.id)}
-                            className="p-2 hover:bg-slate-50 text-slate-400 hover:text-emerald-500 border border-transparent rounded-lg transition-colors"
-                            title="Copy Payment Link"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => copyPaymentLink(inv.id)}
+                          className="p-2 hover:bg-slate-55 text-slate-400 hover:text-emerald-500 border border-transparent rounded-lg transition-colors"
+                          title="Copy Shareable Invoice Link"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => deleteInvoice(inv.id)}
-                          className="p-2 hover:bg-slate-50 text-slate-400 hover:text-rose-500 border border-transparent rounded-lg transition-colors"
+                          className="p-2 hover:bg-slate-55 text-slate-400 hover:text-rose-500 border border-transparent rounded-lg transition-colors"
                           title="Delete Invoice"
                         >
                           <Trash2 className="w-4 h-4" />
