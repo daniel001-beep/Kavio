@@ -124,9 +124,7 @@ export async function middleware(request: NextRequest) {
   if (isAdminRoute) {
     const normalizedEmail = user?.email ? user.email.toLowerCase().trim() : "";
     const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
-    const isUserAdmin = normalizedEmail === adminEmail || 
-                        normalizedEmail === 'admin@velox.com' || 
-                        normalizedEmail === 'daniel@velox.com';
+    const isUserAdmin = adminEmail && normalizedEmail === adminEmail;
     if (!isUserAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';

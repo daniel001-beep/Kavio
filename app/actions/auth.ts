@@ -10,9 +10,6 @@ import bcrypt from 'bcryptjs';
 
 function getDeterministicUserId(email: string): string {
   const lowerEmail = email.toLowerCase().trim();
-  if (lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com') {
-    return 'usr_6wshej3ht';
-  }
   const hash = createHash('sha256').update(lowerEmail).digest('hex').substring(0, 12);
   return `usr_${hash}`;
 }
@@ -28,24 +25,7 @@ export async function signInAction(formData: FormData) {
 
   const lowerEmail = email.toLowerCase().trim();
 
-  // Admin bypass
-  const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@velox.com').toLowerCase().trim();
-  const isAdminBypass = lowerEmail === adminEmail || lowerEmail === 'admin@velox.com' || lowerEmail === 'daniel@velox.com';
-
-  if (isAdminBypass) {
-    cookieStore.set('velox-local-user', encodeURIComponent(JSON.stringify({
-      id: 'usr_6wshej3ht',
-      email: lowerEmail,
-      name: 'Idowu Daniel',
-      isAdmin: true
-    })), {
-      path: '/',
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    });
-    return { success: true };
-  }
+  const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
 
   try {
     const drizzleUser = await db.query.users.findFirst({
@@ -77,7 +57,7 @@ export async function signInAction(formData: FormData) {
       return { error: 'Invalid credentials. Password incorrect.' };
     }
 
-    const isUserAdmin = drizzleUser.isAdmin || lowerEmail === 'admin@velox.com' || (adminEmail ? lowerEmail === adminEmail : false);
+    const isUserAdmin = drizzleUser.isAdmin || (adminEmail ? lowerEmail === adminEmail : false);
     
     cookieStore.set('velox-local-user', encodeURIComponent(JSON.stringify({
       id: drizzleUser.id,

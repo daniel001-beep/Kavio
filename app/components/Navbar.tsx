@@ -49,6 +49,7 @@ export default function Navbar() {
         { href: "/dashboard/clients", label: "Clients", icon: Users },
         { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
         { href: "/dashboard/settings", label: "Settings", icon: Settings },
+        ...(session?.user?.isAdmin ? [{ href: "/fintech/admin", label: "Admin Console", icon: ShieldCheck }] : []),
       ],
     },
   ];
