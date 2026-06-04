@@ -140,7 +140,7 @@ export default function CreateInvoicePage() {
       {/* Top Breadcrumb */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/invoices" passHref legacyBehavior>
-          <button className="p-2.5 rounded-xl border border-slate-200 bg-white shadow-sm hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all flex items-center justify-center cursor-pointer">
+          <button className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all flex items-center justify-center cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
           </button>
         </Link>
@@ -153,7 +153,7 @@ export default function CreateInvoicePage() {
       <form onSubmit={handleSaveInvoice} className="grid grid-cols-1 xl:grid-cols-2 gap-8 flex-1 items-start">
         
         {/* Left Pane: Input Form */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <h2 className="text-base font-bold text-slate-800 tracking-tight">Invoice Details</h2>
           <Separator className="bg-slate-50" />
 
@@ -166,10 +166,10 @@ export default function CreateInvoicePage() {
                 Loading clients directory...
               </div>
             ) : clients.length === 0 ? (
-              <div className="border border-slate-200 rounded-xl p-4 text-center space-y-2.5 bg-slate-50/50">
+              <div className="rounded-xl p-4 text-center space-y-2.5 bg-slate-50/50">
                 <p className="text-xs text-slate-400 font-semibold">Your clients directory is empty.</p>
                 <Link href="/dashboard/clients" className="no-underline block">
-                  <Button type="button" className="text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 rounded-lg py-1 px-3">
+                  <Button type="button" className="text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 rounded-lg py-1 px-3">
                     Add Client Connection
                   </Button>
                 </Link>
@@ -180,7 +180,7 @@ export default function CreateInvoicePage() {
                 <select
                   value={selectedClientId}
                   onChange={(e) => handleClientSelect(e.target.value)}
-                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs cursor-pointer font-semibold text-slate-700"
+                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200/50 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs cursor-pointer font-semibold text-slate-700"
                   required
                 >
                   <option value="">Select a Client...</option>
@@ -202,7 +202,7 @@ export default function CreateInvoicePage() {
               placeholder="e.g. Lead Website UI/UX Design System"
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
-              className="py-5 border-slate-200 focus-visible:ring-emerald-500 rounded-xl text-xs font-semibold"
+              className="py-5 border-slate-200/50 focus-visible:ring-emerald-500 rounded-xl text-xs font-semibold"
               required
             />
           </div>
@@ -216,7 +216,7 @@ export default function CreateInvoicePage() {
                 placeholder="150000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="py-5 border-slate-200 focus-visible:ring-emerald-500 rounded-xl text-xs font-mono font-bold"
+                className="py-5 border-slate-200/50 focus-visible:ring-emerald-500 rounded-xl text-xs font-mono font-bold"
                 required
               />
             </div>
@@ -226,7 +226,7 @@ export default function CreateInvoicePage() {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="py-5 border-slate-200 focus-visible:ring-emerald-500 rounded-xl text-xs font-semibold"
+                className="py-5 border-slate-200/50 focus-visible:ring-emerald-500 rounded-xl text-xs font-semibold"
                 required
               />
             </div>
@@ -239,7 +239,7 @@ export default function CreateInvoicePage() {
               type="text"
               value={invoiceNumber}
               onChange={(e) => setInvoiceNumber(e.target.value)}
-              className="py-5 border-slate-200 focus-visible:ring-emerald-500 rounded-xl font-mono text-xs"
+              className="py-5 border-slate-200/50 focus-visible:ring-emerald-500 rounded-xl font-mono text-xs"
               required
             />
           </div>
@@ -251,7 +251,7 @@ export default function CreateInvoicePage() {
               placeholder="e.g. Please transfer to: Adebayo Design Studio / Wema Bank / Acct: 0123456789"
               value={paymentInstructions}
               onChange={(e) => setPaymentInstructions(e.target.value)}
-              className="w-full h-24 p-4 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-700 font-semibold"
+              className="w-full h-24 p-4 border border-slate-200/50 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-700 font-semibold"
               required
             />
           </div>
@@ -259,13 +259,13 @@ export default function CreateInvoicePage() {
         </div>
 
         {/* Right Pane: Live Mockup Preview */}
-        <div className="bg-slate-100 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col justify-between items-center xl:sticky xl:top-8 min-h-[500px] overflow-hidden relative shadow-inner">
+        <div className="bg-slate-50 rounded-3xl p-6 sm:p-8 flex flex-col justify-between items-center xl:sticky xl:top-8 min-h-[500px] overflow-hidden relative">
           <div className="absolute top-4 left-6 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
             Live preview (updated real-time)
           </div>
 
           {/* Dynamic Invoice sheet */}
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-[24px] shadow-2xl p-8 sm:p-12 space-y-8 my-auto relative overflow-hidden flex flex-col justify-between">
+          <div className="w-full max-w-lg bg-white rounded-[24px] shadow-2xl p-8 sm:p-12 space-y-8 my-auto relative overflow-hidden flex flex-col justify-between">
             <div className="absolute top-0 left-0 right-0 h-2 bg-emerald-500" />
             
             <div className="space-y-6">
@@ -354,7 +354,7 @@ export default function CreateInvoicePage() {
       </form>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 py-4 px-8 flex items-center justify-end gap-3 z-40 md:pl-72 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-900 py-4 px-8 flex items-center justify-end gap-3 z-40 md:pl-72 shadow-2xl">
         <Button
           type="button"
           onClick={handleSaveInvoice}

@@ -174,10 +174,10 @@ export default function SettingsPage() {
         <div className="lg:col-span-1 flex flex-col gap-3">
           <button
             onClick={() => { setActiveTab("PROFILE"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
               activeTab === "PROFILE"
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
-                : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <User className="w-[18px] h-[18px]" />
@@ -186,10 +186,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => { setActiveTab("SECURITY"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
               activeTab === "SECURITY"
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
-                : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <Lock className="w-[18px] h-[18px]" />
@@ -198,10 +198,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => { setActiveTab("TIER"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
               activeTab === "TIER"
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
-                : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <CreditCard className="w-[18px] h-[18px]" />
@@ -210,10 +210,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => { setActiveTab("PWA"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
               activeTab === "PWA"
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
-                : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <Sparkles className="w-[18px] h-[18px] text-amber-500" />
@@ -223,10 +223,10 @@ export default function SettingsPage() {
           {session?.user?.isAdmin && (
             <button
               onClick={() => { setActiveTab("ADMIN"); setStatusMessage(null); }}
-              className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all border shadow-sm ${
+              className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
                 activeTab === "ADMIN"
-                  ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-extrabold"
-                  : "bg-white border-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                  : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
               }`}
             >
               <ShieldCheck className="w-[18px] h-[18px] text-blue-500" />
@@ -237,7 +237,7 @@ export default function SettingsPage() {
 
         {/* Content Box Panels */}
         <div className="lg:col-span-3">
-          <Card className="border border-slate-100 rounded-3xl shadow-sm bg-white overflow-hidden">
+          <Card className="border-none rounded-3xl shadow-sm bg-white overflow-hidden">
             <CardContent className="p-8">
               
               {/* Messages banner */}
@@ -274,7 +274,7 @@ export default function SettingsPage() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Freelancer Full Name"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                           required
                         />
                       </div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                           type="email"
                           value={email}
                           disabled
-                          className="pl-9 py-5 rounded-xl border-slate-100 bg-slate-50 text-slate-400 text-xs cursor-not-allowed"
+                          className="pl-9 py-5 rounded-xl border-transparent bg-slate-50/50 text-slate-450 text-xs cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           placeholder="e.g. Adebayo Design Studio"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                         />
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                         <select
                           value={currency}
                           onChange={(e) => setCurrency(e.target.value)}
-                          className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs cursor-pointer"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200/50 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs cursor-pointer"
                         >
                           <option value="NGN">₦ Nigerian Naira (NGN)</option>
                           <option value="USD">$ United States Dollar (USD)</option>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="e.g. +234 803 123 4567"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                         />
                       </div>
                     </div>
@@ -346,13 +346,13 @@ export default function SettingsPage() {
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
                           placeholder="e.g. Lagos, Nigeria"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
+                  <div className="pt-4 flex items-center justify-end">
                     <Button
                       type="submit"
                       disabled={isLoading}
@@ -383,7 +383,7 @@ export default function SettingsPage() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="Enter current password"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                           required
                         />
                       </div>
@@ -398,7 +398,7 @@ export default function SettingsPage() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Minimum 6 characters"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                           required
                         />
                       </div>
@@ -413,14 +413,14 @@ export default function SettingsPage() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Verify new password"
-                          className="pl-9 py-5 rounded-xl border-slate-200 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
                           required
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
+                  <div className="pt-4 flex items-center justify-end">
                     <Button
                       type="submit"
                       disabled={isLoading}
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                     
                     {/* Active Plan Detail Box */}
-                    <div className="border border-slate-100 bg-slate-50/50 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
+                    <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Account Status</span>
@@ -463,7 +463,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Features list */}
-                    <div className="border border-slate-100 bg-white p-6 rounded-3xl flex flex-col justify-between h-[200px]">
+                    <div className="bg-slate-50/30 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
                       <div>
                         <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-3">Enterprise Pro Benefits</span>
                         <ul className="space-y-2.5 text-xs text-slate-650 font-semibold">
@@ -484,7 +484,7 @@ export default function SettingsPage() {
 
                       <Button
                         variant="outline"
-                        className="py-4 text-xs font-bold border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl"
+                        className="py-4 text-xs font-bold border-slate-200/50 text-slate-655 hover:bg-slate-50 rounded-xl"
                       >
                         Manage Billing Portal
                       </Button>
@@ -502,7 +502,7 @@ export default function SettingsPage() {
                     <p className="text-xs text-slate-500 mt-1">Install Kavio directly onto your device for quick startup, native notification hooks, and offline operations.</p>
                   </div>
 
-                  <div className="border border-slate-100 bg-slate-50/50 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="space-y-1.5 max-w-md">
                       <h4 className="text-sm font-bold text-slate-800">Install Status</h4>
                       <p className="text-xs text-slate-500 font-semibold leading-relaxed">
@@ -533,7 +533,7 @@ export default function SettingsPage() {
                     <p className="text-xs text-slate-500 mt-1">Authorized super admin functions. Open the system-wide console to audit transactions and clean database instances.</p>
                   </div>
 
-                  <div className="border border-slate-100 bg-blue-55/5 border-blue-100 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="bg-blue-500/5 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="space-y-1.5 max-w-md">
                       <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-blue-500" />

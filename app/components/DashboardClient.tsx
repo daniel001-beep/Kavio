@@ -167,7 +167,7 @@ export default function DashboardClient() {
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
       
       {/* Top Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm relative overflow-hidden">
         <div className="space-y-1.5 relative z-10">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Revenue OS Dashboard
@@ -189,7 +189,7 @@ export default function DashboardClient() {
 
       {/* PWA App Installation Promotion Banner */}
       {isPWAInstallable && (
-        <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-55/20 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in slide-in-from-top duration-300">
+        <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-4 text-left">
             <div className="p-3 bg-emerald-500 text-white rounded-2xl">
               <Sparkles className="w-5 h-5" />
@@ -215,7 +215,7 @@ export default function DashboardClient() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Outstanding */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/10 hover:border-amber-500/20 transition-all">
+        <Card className="border-none rounded-2xl shadow-sm bg-amber-500/5 hover:bg-amber-500/10 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Outstanding</span>
@@ -227,7 +227,7 @@ export default function DashboardClient() {
         </Card>
 
         {/* Total Overdue */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/10 hover:border-rose-500/20 transition-all">
+        <Card className="border-none rounded-2xl shadow-sm bg-rose-500/5 hover:bg-rose-500/10 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Overdue</span>
@@ -239,7 +239,7 @@ export default function DashboardClient() {
         </Card>
 
         {/* Total Paid (This month / aggregate) */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-emerald-500/5 hover:bg-emerald-500/10 border-emerald-500/10 hover:border-emerald-500/20 transition-all">
+        <Card className="border-none rounded-2xl shadow-sm bg-emerald-500/5 hover:bg-emerald-500/10 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Recovered</span>
@@ -251,7 +251,7 @@ export default function DashboardClient() {
         </Card>
 
         {/* Total Invoices Count */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/50 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tracked Invoices</span>
@@ -264,7 +264,7 @@ export default function DashboardClient() {
       </div>
 
       {/* Main Action Area: Invoices Registry */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
         <div>
           <h2 className="text-lg font-bold text-slate-800 tracking-tight">Active Accounts Receivable</h2>
           <p className="text-xs text-slate-500 font-medium mt-0.5">Politely chase overdue payments and record transfers</p>
@@ -273,7 +273,7 @@ export default function DashboardClient() {
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
+              <tr className="border-b border-slate-100/40 bg-slate-50/30">
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
                 <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount Owed</th>
@@ -287,7 +287,7 @@ export default function DashboardClient() {
                 <tr>
                   <td colSpan={6}>
                     <div className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-350">
+                      <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-350">
                         <CheckCircle className="w-6 h-6" />
                       </div>
                       <div>
@@ -295,7 +295,7 @@ export default function DashboardClient() {
                         <p className="text-xs text-slate-400 mt-1">You are 100% paid up. Create an invoice to begin tracking new client payments.</p>
                       </div>
                       <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                        <Button className="mt-2 text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100/50 py-4 rounded-xl">
+                        <Button className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl">
                           Create Your First Invoice
                         </Button>
                       </Link>
@@ -340,7 +340,7 @@ export default function DashboardClient() {
                               e.target.value = ""; // Reset dropdown
                             }
                           }}
-                          className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
+                          className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[11px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
                         >
                           <option value="">💬 Nudge Client...</option>
                           <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
@@ -369,7 +369,7 @@ export default function DashboardClient() {
       {/* Manual Payment Logging Dialog / Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Record Manual Payment</h2>
               <p className="text-xs text-slate-500 mt-1">
@@ -384,7 +384,7 @@ export default function DashboardClient() {
                   type="text"
                   disabled
                   value={formatCurrency(selectedInvoice.amount)}
-                  className="rounded-xl border-slate-100 bg-slate-50 text-slate-500 text-xs py-4 font-mono font-bold"
+                  className="rounded-xl border-transparent bg-slate-50 text-slate-500 text-xs py-4 font-mono font-bold"
                 />
               </div>
 
@@ -395,7 +395,7 @@ export default function DashboardClient() {
                   value={paymentReference}
                   onChange={(e) => setPaymentReference(e.target.value)}
                   placeholder="e.g. UBA/REF-839210"
-                  className="rounded-xl border-slate-200 text-xs py-4"
+                  className="rounded-xl border-slate-200/50 text-xs py-4"
                   required
                 />
               </div>
@@ -407,16 +407,16 @@ export default function DashboardClient() {
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
                   placeholder="e.g. Paid via bank transfer to NGN account"
-                  className="rounded-xl border-slate-200 text-xs py-4"
+                  className="rounded-xl border-slate-200/50 text-xs py-4"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100/30">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setSelectedInvoice(null)}
-                  className="rounded-xl px-5 text-xs py-4 border-slate-200 font-semibold"
+                  className="rounded-xl px-5 text-xs py-4 border-slate-200/50 font-semibold"
                 >
                   Cancel
                 </Button>

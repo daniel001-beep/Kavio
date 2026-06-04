@@ -22,7 +22,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 z-50 px-6 pt-3 pb-6 shadow-2xl flex items-center justify-between">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 px-6 pt-3 pb-6 shadow-2xl flex items-center justify-between">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href;
