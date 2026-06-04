@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNotifications } from "@/app/context/NotificationContext";
+import { useSession } from "@/app/context/AuthContext";
 import WhatsAppNudgeModal, { WhatsAppNudgePayload } from "@/app/components/WhatsAppNudgeModal";
 
 export interface Invoice {
@@ -38,6 +39,9 @@ export interface Invoice {
 }
 
 export default function InvoicesPage() {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<"ALL" | "PAID" | "SENT" | "VIEWED" | "OVERDUE">("ALL");
@@ -50,14 +54,17 @@ export default function InvoicesPage() {
   // Load invoices
   const fetchInvoices = async () => {
     try {
-      setIsLoading(true);
       const res = await fetch("/api/invoices?_t=" + Date.now(), {
         cache: "no-store",
       });
 
       if (res.ok) {
         const data = await res.json();
-        setInvoices(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        setInvoices(list);
+        if (userEmail) {
+          localStorage.setItem(`kavio_cached_invoices_${userEmail}`, JSON.stringify(list));
+        }
       }
     } catch (e) {
       console.error("Failed to load invoices:", e);
@@ -66,9 +73,23 @@ export default function InvoicesPage() {
     }
   };
 
+  // Sync cache on mount
   useEffect(() => {
-    fetchInvoices();
-  }, []);
+    if (userEmail) {
+      const cached = localStorage.getItem(`kavio_cached_invoices_${userEmail}`);
+      if (cached) {
+        try {
+          setInvoices(JSON.parse(cached));
+          setIsLoading(false);
+        } catch (e) {
+          console.warn("Failed to parse cached invoices in registry", e);
+        }
+      }
+      fetchInvoices();
+    } else {
+      fetchInvoices();
+    }
+  }, [userEmail]);
 
   // Delete invoice
   const deleteInvoice = async (id: string) => {
@@ -216,18 +237,7 @@ export default function InvoicesPage() {
   const outstandingAmount = invoices.filter(inv => ["SENT", "VIEWED", "OVERDUE"].includes(inv.status)).reduce((sum, inv) => sum + inv.amount, 0);
   const overdueAmount = invoices.filter(inv => inv.status === "OVERDUE").reduce((sum, inv) => sum + inv.amount, 0);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Loading invoices registry...
-          </p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
@@ -242,7 +252,12 @@ export default function InvoicesPage() {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Invoice Factory</h1>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+            Invoice Factory
+            {isLoading && invoices.length > 0 && (
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+            )}
+          </h1>
           <p className="text-slate-400 text-sm font-medium mt-1">Draft, send, and collect client payments instantly</p>
         </div>
 
@@ -351,7 +366,16 @@ export default function InvoicesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 text-xs">
-              {filteredInvoices.length === 0 ? (
+              {isLoading && filteredInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="py-16 flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading invoices...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
                     <div className="py-16 flex flex-col items-center gap-4 text-center">

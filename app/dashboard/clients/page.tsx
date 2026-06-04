@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNotifications } from "@/app/context/NotificationContext";
+import { useSession } from "@/app/context/AuthContext";
 
 export interface Client {
   id: string;
@@ -54,6 +55,9 @@ export interface Invoice {
 }
 
 export default function ClientsPage() {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clientTagsList, setClientTagsList] = useState<Record<string, string[]>>({});
@@ -81,7 +85,6 @@ export default function ClientsPage() {
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
       const [clientsRes, invoicesRes] = await Promise.all([
         fetch("/api/clients"),
         fetch("/api/invoices")
@@ -93,7 +96,7 @@ export default function ClientsPage() {
         setClients(clientsData);
         setInvoices(invoicesData);
 
-        // Fetch tags for each client in parallel to resolve the 5 second navigation delay
+        // Fetch tags for each client in parallel
         const tagsMap: Record<string, string[]> = {};
         await Promise.all(
           clientsData.map(async (client: any) => {
@@ -109,6 +112,16 @@ export default function ClientsPage() {
           })
         );
         setClientTagsList(tagsMap);
+
+        // Update local storage cache
+        if (userEmail) {
+          const cachePayload = {
+            clients: clientsData,
+            invoices: invoicesData,
+            tagsMap
+          };
+          localStorage.setItem(`kavio_cached_clients_data_${userEmail}`, JSON.stringify(cachePayload));
+        }
       }
     } catch (e) {
       console.error("Failed to load clients data:", e);
@@ -117,9 +130,26 @@ export default function ClientsPage() {
     }
   };
 
+  // Sync cache on mount
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (userEmail) {
+      const cached = localStorage.getItem(`kavio_cached_clients_data_${userEmail}`);
+      if (cached) {
+        try {
+          const { clients: cData, invoices: iData, tagsMap } = JSON.parse(cached);
+          setClients(cData || []);
+          setInvoices(iData || []);
+          setClientTagsList(tagsMap || {});
+          setIsLoading(false);
+        } catch (e) {
+          console.warn("Failed to parse cached clients details", e);
+        }
+      }
+      fetchData();
+    } else {
+      fetchData();
+    }
+  }, [userEmail]);
 
   const openEditModal = (client: Client) => {
     setEditingClient(client);
@@ -350,18 +380,7 @@ export default function ClientsPage() {
   const clientsOutstandingCount = clientsWithOutstanding.length;
   const clientsOverdueCount = clients.filter(c => getClientData(c.id).overdue > 0).length;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Booting collections database...
-          </p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
@@ -372,6 +391,9 @@ export default function ClientsPage() {
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Users className="w-8 h-8 text-emerald-600" />
             Clients & CRM
+            {isLoading && clients.length > 0 && (
+              <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+            )}
           </h1>
           <p className="text-slate-600 text-sm font-semibold mt-1">Know who owes you money, assess risk, and preserve scope notes</p>
         </div>

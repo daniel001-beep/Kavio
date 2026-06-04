@@ -51,10 +51,43 @@ export function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotifications();
 
+  // Synchronously load cache on mount if available
+  useEffect(() => {
+    if (userEmail) {
+      const cachedInvoices = localStorage.getItem(`kavio_cached_invoices_${userEmail}`);
+      const cachedClients = localStorage.getItem(`kavio_cached_clients_${userEmail}`);
+
+      let hasCache = false;
+      if (cachedInvoices) {
+        try {
+          setInvoicesList(JSON.parse(cachedInvoices));
+          hasCache = true;
+        } catch (e) {
+          console.warn("Failed to parse cached invoices", e);
+        }
+      }
+
+      if (cachedClients) {
+        try {
+          const parsedClients = JSON.parse(cachedClients);
+          setClientsList(parsedClients);
+          setClientsCount(parsedClients.length);
+          hasCache = true;
+        } catch (e) {
+          console.warn("Failed to parse cached clients", e);
+        }
+      }
+
+      // If cache is present, bypass the initial full screen layout loading states
+      if (hasCache) {
+        setIsLoading(false);
+      }
+    }
+  }, [userEmail]);
+
   // Fetch all collection invoices
   const fetchInvoices = useCallback(async () => {
     try {
-      setIsLoading(true);
       const res = await fetch("/api/invoices?_t=" + Date.now(), {
         cache: "no-store",
       });
@@ -65,13 +98,19 @@ export function useDashboardData() {
       }
 
       const data = await res.json();
-      setInvoicesList(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setInvoicesList(list);
+
+      // Update local storage cache
+      if (userEmail) {
+        localStorage.setItem(`kavio_cached_invoices_${userEmail}`, JSON.stringify(list));
+      }
     } catch (err) {
       console.error("Dashboard: Failed to fetch invoices:", err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userEmail]);
 
   // Fetch clients
   const fetchClients = useCallback(async () => {
@@ -85,11 +124,16 @@ export function useDashboardData() {
         const list = Array.isArray(data) ? data : [];
         setClientsList(list);
         setClientsCount(list.length);
+
+        // Update local storage cache
+        if (userEmail) {
+          localStorage.setItem(`kavio_cached_clients_${userEmail}`, JSON.stringify(list));
+        }
       }
     } catch (err) {
       console.error("Dashboard: Failed to fetch clients:", err);
     }
-  }, []);
+  }, [userEmail]);
 
   useEffect(() => {
     if (userEmail) {
@@ -192,7 +236,8 @@ export function useDashboardData() {
   }, [addNotification]);
 
   return {
-    status: status === "loading" || (status === "authenticated" && isLoading) ? "loading" : "authenticated",
+    status,
+    isLoading,
     userEmail,
     invoices: invoicesList,
     clientsCount,
