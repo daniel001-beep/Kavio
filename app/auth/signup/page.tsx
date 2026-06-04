@@ -212,8 +212,9 @@ export default function SignUp() {
                 height: '46px',
                 width: '100%',
                 borderRadius: '12px',
-                backgroundColor: canSubmit ? '#0f172a' : '#94a3b8',
+                backgroundColor: canSubmit ? '#10b981' : '#cbd5e1',
                 color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
                 fontWeight: '700',
                 fontSize: '13px',
                 border: 'none',
@@ -222,7 +223,7 @@ export default function SignUp() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: canSubmit ? '0 4px 14px rgba(15,23,42,0.18)' : 'none',
+                boxShadow: canSubmit ? '0 4px 14px rgba(16,185,129,0.3)' : 'none',
                 transition: 'all 0.15s ease-in-out',
               }}
               className="hover:opacity-90 active:scale-[0.99]"

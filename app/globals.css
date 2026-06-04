@@ -975,8 +975,7 @@ h1 {
    Auth pages (signin/signup) use explicit inline colors.
    Reset the global h1 gradient so headings render correctly. */
 [data-page="auth"] h1,
-[data-page="auth"] h2,
-[data-page="auth"] button {
+[data-page="auth"] h2 {
     background: none !important;
     -webkit-background-clip: unset !important;
     background-clip: unset !important;
@@ -991,10 +990,12 @@ h1 {
     line-height: 1.3 !important;
 }
 
-[data-page="auth"] button {
+/* Only reset text-fill on buttons — do NOT touch background */
+[data-page="auth"] button,
+[data-page="auth"] a {
     -webkit-text-fill-color: inherit !important;
-    color: inherit !important;
 }
+
 
 h2 {
     font-size: 2.5rem;
