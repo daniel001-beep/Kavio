@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useSession } from "@/app/context/AuthContext";
 
 interface Payment {
   id: string;
@@ -26,14 +27,18 @@ interface Payment {
 }
 
 export default function PaymentsPage() {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
   const [paymentsList, setPaymentsList] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   const fetchPayments = async () => {
     try {
-      setLoading(true);
-      const res = await fetch("/api/invoices");
+      const res = await fetch("/api/invoices?_t=" + Date.now(), {
+        cache: "no-store",
+      });
       if (res.ok) {
         const invoices = await res.json();
         // Extract paid invoices and map to payments structure
@@ -50,6 +55,9 @@ export default function PaymentsPage() {
             notes: inv.paymentInstructions || "Collections payment settled."
           }));
         setPaymentsList(paidInvs);
+        if (userEmail) {
+          localStorage.setItem(`kavio_cached_payments_${userEmail}`, JSON.stringify(paidInvs));
+        }
       }
     } catch (e) {
       console.error(e);
@@ -59,8 +67,21 @@ export default function PaymentsPage() {
   };
 
   useEffect(() => {
-    fetchPayments();
-  }, []);
+    if (userEmail) {
+      const cached = localStorage.getItem(`kavio_cached_payments_${userEmail}`);
+      if (cached) {
+        try {
+          setPaymentsList(JSON.parse(cached));
+          setLoading(false);
+        } catch (e) {
+          console.warn("Failed to parse cached payments", e);
+        }
+      }
+      fetchPayments();
+    } else {
+      fetchPayments();
+    }
+  }, [userEmail]);
 
   const totalCollected = paymentsList.reduce((sum, p) => sum + p.amount, 0);
 
@@ -70,25 +91,19 @@ export default function PaymentsPage() {
            (p.reference || "").toLowerCase().includes(search.toLowerCase());
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Loading payments history...
-          </p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Payments Ledger</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            Payments Ledger
+            {loading && paymentsList.length > 0 && (
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+            )}
+          </h1>
           <p className="text-slate-600 text-sm font-semibold mt-1">Audit manual collection receipts and paid invoices</p>
         </div>
       </div>
@@ -143,9 +158,18 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-655">
-              {filteredPayments.length === 0 ? (
+              {loading && filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-450">
+                  <td colSpan={5} className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading payments...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredPayments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-slate-455">
                     No paid transactions matching search.
                   </td>
                 </tr>

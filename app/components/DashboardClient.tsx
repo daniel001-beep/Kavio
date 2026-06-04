@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 export default function DashboardClient() {
   const {
     status,
+    isLoading,
     userEmail,
     invoices,
     clientsCount,
@@ -483,6 +484,19 @@ export default function DashboardClient() {
                       if (invoiceTab === "PAID") return inv.status === "PAID";
                       return true; // "ALL"
                     }).slice(0, 5);
+
+                    if (isLoading) {
+                      return (
+                        <tr>
+                          <td colSpan={6}>
+                            <div className="py-12 flex flex-col items-center justify-center gap-2">
+                              <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading invoices...</p>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
 
                     if (filtered.length === 0) {
                       return (
