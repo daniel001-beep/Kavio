@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-800 overflow-x-hidden">
+    <div data-page="landing" className="min-h-screen flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-800 overflow-x-hidden" style={{ background: "#f8fafc", color: "#0f172a" }}>
       
       {/* 1. Header Navigation */}
       <header className="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between border-b border-slate-200/80 sticky top-0 bg-[#f8fafc]/80 backdrop-blur-md z-50">
@@ -187,7 +187,7 @@ export default function Home() {
                     <MessageSquare className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 mb-2">Automated WhatsApp Follow-ups</h3>
+                  <h3 className="text-base font-bold mb-2" style={{ color: "#0f172a" }}>Automated WhatsApp Follow-ups</h3>
                     <p className="text-xs font-semibold leading-relaxed text-slate-600">
                       Reminders are delivered directly to your client's WhatsApp chat window. Kavio writes polite, contextual reminders using client details so payments are made without delays.
                     </p>
@@ -205,7 +205,7 @@ export default function Home() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 mb-2">Polite Email Sequences</h3>
+                  <h3 className="text-base font-bold mb-2" style={{ color: "#0f172a" }}>Polite Email Sequences</h3>
                     <p className="text-xs font-semibold leading-relaxed text-slate-600">
                       If WhatsApp isn't preferred, Kavio schedules beautiful, clean billing notifications containing direct links. The email copy is structured as a helpful check-in to preserve client goodwill.
                     </p>
@@ -223,7 +223,7 @@ export default function Home() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 mb-2">Smart Reminders Scheduling</h3>
+                  <h3 className="text-base font-bold mb-2" style={{ color: "#0f172a" }}>Smart Reminders Scheduling</h3>
                     <p className="text-xs font-semibold leading-relaxed text-slate-600">
                       Configure nudges to trigger automatically 3 days before the due date, on the due date, and every 48 hours afterward until the balance is resolved.
                     </p>
@@ -300,7 +300,7 @@ export default function Home() {
             <ScrollReveal3D delay={0} duration={0.8} direction="tilt-up">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Average collection speed</span>
-                <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight font-mono">48 Hours</h3>
+                <h3 className="text-4xl font-extrabold tracking-tight font-mono" style={{ color: "#0f172a" }}>48 Hours</h3>
                 <p className="text-xs text-slate-550 font-semibold mt-1">Nudges reduce overdue invoices from weeks to days.</p>
               </div>
             </ScrollReveal3D>
@@ -309,7 +309,7 @@ export default function Home() {
             <ScrollReveal3D delay={150} duration={0.8} direction="tilt-up">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">First-nudge success rate</span>
-                <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight font-mono">94%</h3>
+                <h3 className="text-4xl font-extrabold tracking-tight font-mono" style={{ color: "#0f172a" }}>94%</h3>
                 <p className="text-xs text-slate-550 font-semibold mt-1">Most clients settle balance instantly upon WhatsApp notification.</p>
               </div>
             </ScrollReveal3D>
@@ -318,7 +318,7 @@ export default function Home() {
             <ScrollReveal3D delay={300} duration={0.8} direction="tilt-up">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Awkward Conversations Avoided</span>
-                <h3 className="text-4xl font-extrabold text-emerald-600 tracking-tight font-mono">100%</h3>
+                <h3 className="text-4xl font-extrabold tracking-tight font-mono" style={{ color: "#10b981" }}>100%</h3>
                 <p className="text-xs text-slate-550 font-semibold mt-1">The system does the chasing, so you stay the creative professional.</p>
               </div>
             </ScrollReveal3D>

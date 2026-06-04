@@ -197,6 +197,29 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* ===== LANDING PAGE LIGHT MODE OVERRIDE =====
+   The body uses a dark fintech theme. The landing page (app/page.tsx)
+   is a light-mode page. This scoped override ensures all text inside
+   the landing wrapper renders correctly against the light background. */
+[data-page="landing"],
+[data-page="landing"] h1,
+[data-page="landing"] h2,
+[data-page="landing"] h3,
+[data-page="landing"] h4,
+[data-page="landing"] h5,
+[data-page="landing"] h6,
+[data-page="landing"] p,
+[data-page="landing"] span,
+[data-page="landing"] a {
+    color: inherit;
+}
+
+[data-page="landing"] {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+
 /* Typography: Headers use Geist Sans Bold, Ledger Data uses Geist Mono */
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
