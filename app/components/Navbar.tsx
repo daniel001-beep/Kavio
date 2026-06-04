@@ -48,7 +48,7 @@ export default function Navbar() {
         { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
         { href: "/dashboard/clients", label: "Clients", icon: Users },
         { href: "/dashboard/payments", label: "Payments", icon: ArrowLeftRight },
-        { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
+        { href: "/dashboard/report", label: "Reports", icon: TrendingUp },
         { href: "/dashboard/settings", label: "Settings", icon: Settings },
         ...(session?.user?.isAdmin ? [{ href: "/fintech/admin", label: "Admin Console", icon: ShieldCheck }] : []),
       ],
@@ -57,7 +57,7 @@ export default function Navbar() {
 
   return (
     <aside
-      className={`hidden md:flex flex-col bg-white shrink-0 h-screen sticky top-0 transition-all duration-300 ${
+      className={`hidden md:flex flex-col bg-white shrink-0 h-full transition-all duration-300 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >
@@ -68,7 +68,7 @@ export default function Navbar() {
             href="/dashboard"
             className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
           >
-            <span className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent tracking-tight">
+            <span className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent tracking-tight py-1">
               Kavio
             </span>
             <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-2">

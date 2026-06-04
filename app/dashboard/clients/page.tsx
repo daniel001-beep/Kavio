@@ -93,19 +93,21 @@ export default function ClientsPage() {
         setClients(clientsData);
         setInvoices(invoicesData);
 
-        // Fetch tags for each client
+        // Fetch tags for each client in parallel to resolve the 5 second navigation delay
         const tagsMap: Record<string, string[]> = {};
-        for (const client of clientsData) {
-          try {
-            const tagsRes = await fetch(`/api/clients/${client.id}`);
-            if (tagsRes.ok) {
-              const detail = await tagsRes.json();
-              tagsMap[client.id] = (detail.tags || []).map((t: any) => t.tag);
+        await Promise.all(
+          clientsData.map(async (client: any) => {
+            try {
+              const tagsRes = await fetch(`/api/clients/${client.id}`);
+              if (tagsRes.ok) {
+                const detail = await tagsRes.json();
+                tagsMap[client.id] = (detail.tags || []).map((t: any) => t.tag);
+              }
+            } catch (e) {
+              console.error("Failed to load tags for client " + client.id, e);
             }
-          } catch (e) {
-            console.error("Failed to load tags for client " + client.id, e);
-          }
-        }
+          })
+        );
         setClientTagsList(tagsMap);
       }
     } catch (e) {

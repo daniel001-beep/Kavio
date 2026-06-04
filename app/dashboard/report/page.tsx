@@ -20,7 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export default function FinancialDocumentsPage() {
+export default function ReportPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
@@ -149,7 +149,7 @@ export default function FinancialDocumentsPage() {
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight print:text-xl">
             Profitability & Tax Hub
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm font-semibold print:hidden">
+          <p className="text-slate-505 text-xs sm:text-sm font-semibold print:hidden">
             Dynamic cash-basis statements calculated directly from your real client billing records.
           </p>
         </div>
@@ -205,13 +205,13 @@ export default function FinancialDocumentsPage() {
         </div>
 
         {/* Net Reconciled Difference */}
-        <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-lg">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-200/40">
           <div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Disposable Net Income</span>
-            <h2 className="text-2xl font-black text-emerald-400 font-mono">{formatCurrency(netDisposableProfit)}</h2>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Disposable Net Income</span>
+            <h2 className="text-2xl font-black text-emerald-600 font-mono">{formatCurrency(netDisposableProfit)}</h2>
             <p className="text-[10px] text-slate-400 font-semibold mt-1">Cash profit minus estimated taxes</p>
           </div>
-          <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/30">
+          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0">
             <Calculator className="w-5 h-5" />
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function FinancialDocumentsPage() {
           <div className="w-full border border-slate-200/60 rounded-2xl p-6 sm:p-8 space-y-6 bg-white print:border-none print:p-0">
             <div className="flex justify-between items-start border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-sm font-black text-slate-800">Kavio Freelancer Ledger</h3>
+                <h3 className="text-sm font-black text-slate-850">Kavio Freelancer Ledger</h3>
                 <p className="text-[10px] text-slate-400 font-semibold mt-1">Account Holder: {userEmail || "Registered User"}</p>
               </div>
               <Badge className="bg-emerald-500/10 text-emerald-600 font-black px-2 py-0.5 rounded-full text-[9px] uppercase border-none">
@@ -356,7 +356,7 @@ export default function FinancialDocumentsPage() {
                     <tr key={inv.id} className="hover:bg-slate-50/50 transition-all">
                       <td className="py-4 px-4 font-mono font-bold text-slate-700">{inv.invoiceNumber}</td>
                       <td className="py-4 px-4">{inv.client?.name || "Client"}</td>
-                      <td className="py-4 px-4 text-slate-500 font-medium">{inv.projectDescription}</td>
+                      <td className="py-4 px-4 text-slate-505 font-medium">{inv.projectDescription}</td>
                       <td className="py-4 px-4 text-slate-400 font-medium">
                         {inv.updatedAt ? new Date(inv.updatedAt).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}
                       </td>
