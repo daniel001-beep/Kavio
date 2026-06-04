@@ -19,12 +19,12 @@ export default function BottomNav() {
     { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
     { href: "/dashboard/payments", label: "Payments", icon: ArrowLeftRight },
-    { href: "/fintech/financial-documents", label: "Reports", icon: TrendingUp },
+    { href: "/dashboard/report", label: "Reports", icon: TrendingUp },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 px-6 pt-3 pb-6 shadow-2xl flex items-center justify-between">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 py-2.5 pb-5 shadow-2xl grid grid-cols-6 justify-items-center w-full">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href;
@@ -33,20 +33,20 @@ export default function BottomNav() {
           <Link
             key={tab.label}
             href={tab.href}
-            className="flex flex-col items-center gap-1.5 transition-all no-underline shrink-0 group relative py-1 px-3"
+            className="w-full flex flex-col items-center gap-0.5 transition-all no-underline group relative py-0.5 px-0.5"
           >
             <div
-              className={`p-1.5 rounded-full transition-all ${
+              className={`p-1 rounded-full transition-all ${
                 isActive 
                   ? "bg-emerald-500/10 text-emerald-400" 
                   : "text-slate-400 group-hover:text-white"
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4.5 h-4.5" />
             </div>
             
             <span
-              className={`text-[10px] font-bold tracking-tight transition-colors ${
+              className={`text-[8.5px] font-bold tracking-tighter transition-colors text-center whitespace-nowrap ${
                 isActive ? "text-emerald-400" : "text-slate-400 group-hover:text-white"
               }`}
             >

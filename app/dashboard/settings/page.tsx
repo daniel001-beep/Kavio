@@ -31,7 +31,7 @@ import { usePWAInstall } from "@/app/hooks/usePWAInstall";
 export default function SettingsPage() {
   const { data: session } = useSession();
   const signOut = useSignOut();
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER" | "ADMIN" | "PWA">("PROFILE");
+  const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER" | "ADMIN" | "PWA" | "SUPPORT">("PROFILE");
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
 
@@ -257,6 +257,18 @@ export default function SettingsPage() {
           >
             <Sparkles className="w-[18px] h-[18px] text-amber-500" />
             Install App (PWA)
+          </button>
+
+          <button
+            onClick={() => { setActiveTab("SUPPORT"); setStatusMessage(null); }}
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+              activeTab === "SUPPORT"
+                ? "bg-emerald-50 text-emerald-600 font-extrabold"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+            }`}
+          >
+            <Phone className="w-[18px] h-[18px] text-emerald-500" />
+            Contact & Support
           </button>
 
           {session?.user?.isAdmin && (
@@ -691,6 +703,43 @@ export default function SettingsPage() {
                     >
                       Launch Admin Panel
                     </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 6: Contact & Support */}
+              {activeTab === "SUPPORT" && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">Contact & Support</h2>
+                    <p className="text-xs text-slate-500 mt-1">Get in touch with the Kavio founder directly for support, feature requests, or partnerships.</p>
+                  </div>
+
+                  <div className="bg-emerald-500/5 rounded-3xl p-6 border border-emerald-500/10 space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shadow-sm shrink-0 border border-emerald-100/40">
+                        💬
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-850">Direct WhatsApp Support</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold">Message the founder directly on WhatsApp for instant assistance</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                      <div className="text-left w-full sm:w-auto">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</span>
+                        <span className="text-sm font-mono font-bold text-slate-700">07011755321</span>
+                      </div>
+                      
+                      <Button
+                        onClick={() => window.open("https://wa.me/2347011755321", "_blank")}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2 border-none shadow-md shadow-emerald-500/10 w-full sm:w-auto justify-center"
+                      >
+                        <Phone className="w-4 h-4" />
+                        Chat on WhatsApp
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
