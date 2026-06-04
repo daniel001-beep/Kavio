@@ -43,46 +43,7 @@ export interface Invoice {
   notes?: string;
 }
 
-const BASELINE_INVOICES: Invoice[] = [
-  {
-    id: "inv-1",
-    number: "INV-2026-001",
-    clientName: "Paystack Nigeria",
-    clientEmail: "billing@paystack.com",
-    date: "2026-05-15",
-    dueDate: "2026-06-15",
-    status: "UNPAID",
-    items: [
-      { description: "Lead UI/UX Redesign - Kavio Command Center", qty: 1, rate: 850000 },
-      { description: "Frontend Architecture Consultation", qty: 10, rate: 25000 },
-    ],
-    notes: "Please process via direct bank transfer to our NGN ledger."
-  },
-  {
-    id: "inv-2",
-    number: "INV-2026-002",
-    clientName: "Flutterwave Inc.",
-    clientEmail: "finance@flutterwavego.com",
-    date: "2026-05-01",
-    dueDate: "2026-05-15",
-    status: "PAID",
-    items: [
-      { description: "Mobile App Design System & Styleguide", qty: 1, rate: 1200000 },
-    ],
-  },
-  {
-    id: "inv-3",
-    number: "INV-2026-003",
-    clientName: "Brass Banking",
-    clientEmail: "accounts@brass.co",
-    date: "2026-04-10",
-    dueDate: "2026-05-10",
-    status: "OVERDUE",
-    items: [
-      { description: "Dribble Visual Mockups & Brand Assets", qty: 1, rate: 450000 },
-    ],
-  },
-];
+const BASELINE_INVOICES: Invoice[] = [];
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -94,13 +55,16 @@ export default function InvoicesPage() {
     const saved = localStorage.getItem("kavio_invoices");
     if (saved) {
       try {
-        setInvoices(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const filtered = parsed.filter((inv: Invoice) => !["inv-1", "inv-2", "inv-3"].includes(inv.id));
+        setInvoices(filtered);
+        localStorage.setItem("kavio_invoices", JSON.stringify(filtered));
       } catch (e) {
-        setInvoices(BASELINE_INVOICES);
+        setInvoices([]);
       }
     } else {
-      setInvoices(BASELINE_INVOICES);
-      localStorage.setItem("kavio_invoices", JSON.stringify(BASELINE_INVOICES));
+      setInvoices([]);
+      localStorage.setItem("kavio_invoices", JSON.stringify([]));
     }
   }, []);
 

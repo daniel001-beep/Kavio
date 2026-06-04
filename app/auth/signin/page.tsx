@@ -74,14 +74,6 @@ export default function SignIn() {
 
       {/* Compact Main Container */}
       <div className="w-full max-w-[390px] relative z-10 space-y-4">
-        
-        {/* Top Logo & Header */}
-        <div className="text-center space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/60 shadow-sm">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 animate-pulse"></div>
-            <span className="text-[10px] font-extrabold text-slate-800 tracking-wide font-mono">KAVIO SECURE ACCESS</span>
-          </div>
-        </div>
 
         {/* Elevated Dribbble-Style Compact Card */}
         <div 
@@ -233,12 +225,6 @@ export default function SignIn() {
             </Link>
           </div>
 
-        </div>
-
-        {/* Security Badge */}
-        <div className="flex items-center justify-center gap-1.5 text-slate-500 text-[10px] font-bold">
-          <Lock className="w-3.5 h-3.5 text-slate-450" />
-          <span>Secured by AES-256 Encryption</span>
         </div>
 
       </div>

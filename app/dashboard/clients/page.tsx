@@ -34,56 +34,7 @@ export interface Client {
   status: "ACTIVE" | "INACTIVE";
 }
 
-const BASELINE_CLIENTS: Client[] = [
-  {
-    id: "c-1",
-    name: "Tunde Adebayo",
-    company: "Paystack Nigeria",
-    email: "tunde@paystack.com",
-    phone: "+234 803 123 4567",
-    location: "Lagos, Nigeria",
-    activeProjects: 2,
-    totalBilled: 1100000,
-    outstanding: 850000,
-    status: "ACTIVE",
-  },
-  {
-    id: "c-2",
-    name: "Chioma Nze",
-    company: "Flutterwave Inc.",
-    email: "chioma@flutterwavego.com",
-    phone: "+234 812 345 6789",
-    location: "Lagos, Nigeria",
-    activeProjects: 0,
-    totalBilled: 1200000,
-    outstanding: 0,
-    status: "ACTIVE",
-  },
-  {
-    id: "c-3",
-    name: "Akpan Udoh",
-    company: "Brass Banking",
-    email: "akpan@brass.co",
-    phone: "+234 901 234 5678",
-    location: "Abuja, Nigeria",
-    activeProjects: 1,
-    totalBilled: 450000,
-    outstanding: 450000,
-    status: "ACTIVE",
-  },
-  {
-    id: "c-4",
-    name: "Sarah Jenkins",
-    company: "Stitch Tech",
-    email: "sarah@stitch.money",
-    phone: "+27 21 987 6543",
-    location: "Cape Town, South Africa",
-    activeProjects: 0,
-    totalBilled: 950000,
-    outstanding: 0,
-    status: "INACTIVE",
-  }
-];
+const BASELINE_CLIENTS: Client[] = [];
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -103,13 +54,16 @@ export default function ClientsPage() {
     const saved = localStorage.getItem("kavio_clients");
     if (saved) {
       try {
-        setClients(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const filtered = parsed.filter((c: Client) => !["c-1", "c-2", "c-3", "c-4"].includes(c.id));
+        setClients(filtered);
+        localStorage.setItem("kavio_clients", JSON.stringify(filtered));
       } catch (e) {
-        setClients(BASELINE_CLIENTS);
+        setClients([]);
       }
     } else {
-      setClients(BASELINE_CLIENTS);
-      localStorage.setItem("kavio_clients", JSON.stringify(BASELINE_CLIENTS));
+      setClients([]);
+      localStorage.setItem("kavio_clients", JSON.stringify([]));
     }
   }, []);
 
