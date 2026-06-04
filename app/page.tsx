@@ -44,7 +44,8 @@ export default function Home() {
           <Link 
             id="nav-cta-dashboard"
             href="/dashboard" 
-            className="inline-flex items-center gap-1.5 px-4.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] no-underline"
+            style={{ backgroundColor: '#10b981', color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-all shadow-md shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] no-underline"
           >
             Launch Kavio <ArrowRight className="w-3.5 h-3.5" />
           </Link>
