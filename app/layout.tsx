@@ -16,21 +16,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kavio | Production-Ready Ledger Infrastructure",
-  description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams built for B2B financial operators.",
-  keywords: "fintech, ledger, double-entry accounting, B2B payments, financial infrastructure, multi-tenant wallets, realtime APIs",
+  title: "Kavio | Automated Payment Collection for Freelancers",
+  description: "Stop chasing clients. Kavio automates polite, persistent WhatsApp and Email nudges so you get paid on time, without the awkward silence.",
+  keywords: "freelancer, invoice automation, payment collection, WhatsApp reminders, auto reminders, client nudges, kavio, bookkeeping",
   manifest: "/manifest.json",
-  openGraph: {
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
     title: "Kavio",
-    description: "Enterprise-grade double-entry ledger engine built for B2B financial operators.",
+  },
+  icons: {
+    icon: "/kavio_pwa_icon.png",
+    shortcut: "/kavio_pwa_icon.png",
+    apple: "/kavio_pwa_icon.png",
+  },
+  openGraph: {
+    title: "Kavio | Automated Payment Collection for Freelancers",
+    description: "Stop chasing clients. Kavio automates polite, persistent WhatsApp and Email nudges so you get paid on time, without the awkward silence.",
     url: "https://kavio.vercel.app",
     siteName: "Kavio",
     images: [
       {
-        url: "https://kavio.vercel.app/cdn.png",
-        width: 1200,
-        height: 630,
-        alt: "Kavio Architecture",
+        url: "https://kavio.vercel.app/kavio.jpg",
+        width: 1024,
+        height: 1024,
+        alt: "Kavio App Icon",
       },
     ],
     locale: "en_US",
@@ -38,9 +48,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kavio | Production-Ready Ledger Infrastructure",
-    description: "Enterprise-grade double-entry ledger engine, multi-tenant wallet nesting, and high-frequency real-time event streams.",
-    images: ["https://kavio.vercel.app/cdn.png"],
+    title: "Kavio | Automated Payment Collection for Freelancers",
+    description: "Stop chasing clients. Kavio automates polite, persistent WhatsApp and Email nudges so you get paid on time, without the awkward silence.",
+    images: ["https://kavio.vercel.app/kavio.jpg"],
   }
 };
 

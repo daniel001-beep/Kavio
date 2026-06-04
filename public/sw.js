@@ -39,8 +39,8 @@ self.addEventListener("activate", (e) => {
 
 // Network first, falling back to cache
 self.addEventListener("fetch", (e) => {
-  // Only intercept HTTP requests (ignore chrome-extension, internal schemes)
-  if (!e.request.url.startsWith("http")) return;
+  // Only intercept HTTP GET requests (ignore POST, PUT, DELETE, and internal schemes)
+  if (e.request.method !== "GET" || !e.request.url.startsWith("http")) return;
 
   e.respondWith(
     fetch(e.request)
