@@ -44,7 +44,8 @@ export default function Home() {
           <Link 
             id="nav-cta-dashboard"
             href="/dashboard" 
-            className="inline-flex items-center gap-1.5 px-4.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] no-underline"
+            style={{ backgroundColor: '#10b981', color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-all shadow-md shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] no-underline"
           >
             Launch Kavio <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -91,16 +92,18 @@ export default function Home() {
             <Link 
               id="hero-cta-dashboard"
               href="/dashboard" 
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-xl shadow-slate-800/10 hover:bg-slate-800 transition-all hover:scale-[1.03] active:scale-[0.97] no-underline border border-slate-900/10"
+              style={{ backgroundColor: '#10b981', color: '#ffffff', WebkitTextFillColor: '#ffffff' }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-sm font-bold shadow-xl shadow-emerald-500/20 hover:opacity-90 transition-all hover:scale-[1.03] active:scale-[0.97] no-underline"
             >
               Automate My Collections <ArrowRight className="w-4 h-4" />
             </Link>
             <Link 
               id="hero-cta-docs"
               href="/auth/signin?demo=true" 
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-sm font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-sm transition-all hover:scale-[1.03] active:scale-[0.97] no-underline"
+              style={{ color: '#0f172a', WebkitTextFillColor: '#0f172a' }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-sm font-bold bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 shadow-sm transition-all hover:scale-[1.03] active:scale-[0.97] no-underline"
             >
-              <Zap className="w-4 h-4 text-slate-500" /> Start Free Demo
+              <Zap className="w-4 h-4 text-emerald-500" /> Start Free Demo
             </Link>
           </div>
         </ScrollReveal3D>

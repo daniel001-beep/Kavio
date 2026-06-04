@@ -53,7 +53,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
+    <div data-page="auth" className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
 
       {/* Background glows */}
       <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-200/20 to-teal-200/20 blur-[100px] pointer-events-none" />
@@ -151,8 +151,9 @@ export default function SignIn() {
                 height: '46px',
                 width: '100%',
                 borderRadius: '12px',
-                backgroundColor: '#0f172a',
+                backgroundColor: '#10b981',
                 color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
                 fontWeight: '700',
                 fontSize: '13px',
                 border: 'none',
@@ -161,7 +162,7 @@ export default function SignIn() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 14px rgba(15,23,42,0.18)',
+                boxShadow: '0 4px 14px rgba(16,185,129,0.3)',
                 transition: 'all 0.15s ease-in-out',
               }}
               className="hover:opacity-90 active:scale-[0.99] disabled:opacity-50"
@@ -188,11 +189,12 @@ export default function SignIn() {
                 height: '44px',
                 width: '100%',
                 borderRadius: '12px',
-                backgroundColor: 'transparent',
-                color: '#64748b',
+                backgroundColor: '#f0fdf4',
+                color: '#059669',
+                WebkitTextFillColor: '#059669',
                 fontWeight: '700',
                 fontSize: '12px',
-                border: '1.5px dashed #cbd5e1',
+                border: '1.5px solid #a7f3d0',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -200,7 +202,7 @@ export default function SignIn() {
                 gap: '6px',
                 transition: 'all 0.15s ease-in-out',
               }}
-              className="hover:bg-slate-50 hover:border-slate-400 hover:text-slate-700 active:scale-[0.99]"
+              className="hover:bg-emerald-50 active:scale-[0.99]"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               Try the Live Demo
