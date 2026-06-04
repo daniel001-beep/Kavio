@@ -256,6 +256,22 @@ export default function CreateInvoicePage() {
             />
           </div>
 
+          {/* Form flow Save Action Button */}
+          <div className="pt-4">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !selectedClientId}
+              className="w-full py-6 font-bold text-xs bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-450 hover:to-emerald-550 text-white rounded-xl border-none shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              Save & Log Invoice
+            </Button>
+          </div>
+
         </div>
 
         {/* Right Pane: Live Mockup Preview */}
