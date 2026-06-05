@@ -180,7 +180,7 @@ export default function PublicInvoicePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+      <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
@@ -193,8 +193,8 @@ export default function PublicInvoicePage() {
 
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-rose-55 border border-rose-100 flex items-center justify-center text-rose-500 mb-4">
+      <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col items-center justify-center font-sans p-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-4">
           <AlertTriangle className="w-6 h-6" />
         </div>
         <h1 className="text-base font-bold text-slate-800">Invoice not found</h1>
@@ -207,7 +207,7 @@ export default function PublicInvoicePage() {
   const isSubmissionCompleted = ["PAID", "VERIFIED", "UNDER_REVIEW"].includes(invoice.status);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
+    <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
       
       {/* Decorative meshes */}
       <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-100/10 to-teal-200/10 blur-[100px] pointer-events-none" />
@@ -286,7 +286,7 @@ export default function PublicInvoicePage() {
             </div>
           ) : invoice.status === "VERIFIED" ? (
             <div className="pt-8 border-t border-slate-100 mt-4">
-              <div className="bg-emerald-55 border border-emerald-100 text-emerald-700 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-2.5">
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-2.5">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-1">
                   <CheckCircle2 className="w-6 h-6 animate-bounce" />
                 </div>
@@ -309,7 +309,7 @@ export default function PublicInvoicePage() {
                 <p className="text-xs text-slate-600 font-semibold leading-relaxed">
                   We're reviewing your payment information.
                 </p>
-                <div className="text-[9px] bg-amber-500/15 text-amber-750 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
+                <div className="text-[9px] bg-amber-500/15 text-amber-800 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
                   Status: UNDER REVIEW
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function PublicInvoicePage() {
               {/* Upload Receipt Panel */}
               <div className="space-y-2.5">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Upload Payment Receipt</span>
-                <div className="border border-dashed border-slate-200 hover:border-emerald-500/40 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-55 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
+                <div className="border border-dashed border-slate-200 hover:border-emerald-500/40 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-100 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
                   <input
                     type="file"
                     accept="image/*,application/pdf"
