@@ -206,11 +206,11 @@ export default function PublicInvoicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafbfe] font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#fafbfe] dark:bg-slate-950 font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
       
       {/* Decorative meshes */}
-      <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-100/20 to-teal-200/20 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-100/10 to-blue-200/10 blur-[110px] pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-100/10 to-teal-200/10 dark:from-emerald-950/20 dark:to-teal-950/20 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-100/10 to-blue-200/10 dark:from-indigo-950/10 dark:to-blue-950/10 blur-[110px] pointer-events-none" />
 
       {/* Main Card Shell */}
       <div className="w-full max-w-xl mx-auto space-y-6 relative z-10">
@@ -219,25 +219,20 @@ export default function PublicInvoicePage() {
         <div className="flex items-center justify-between px-3">
           <div className="flex items-center gap-1.5">
             <Zap className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-extrabold tracking-widest uppercase text-slate-400 font-mono">Kavio Collections</span>
+            <span className="text-xs font-extrabold tracking-widest uppercase text-slate-500 dark:text-slate-400 font-mono">Kavio Collections</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
         </div>
 
         {/* Invoice Container */}
         <div 
-          style={{
-            border: "1px solid rgba(0, 0, 0, 0.04)",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.01), 0 20px 40px -5px rgba(16, 185, 129, 0.04)",
-            background: "#ffffff"
-          }}
-          className="rounded-3xl p-6 sm:p-10 space-y-6"
+          className="rounded-3xl p-6 sm:p-10 space-y-6 bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800/80 shadow-xl shadow-slate-100/40 dark:shadow-black/20 transition-all duration-300"
         >
           {/* Top Status and ID */}
-          <div className="flex items-start justify-between gap-4 pb-6 border-b border-slate-100">
+          <div className="flex items-start justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800/80">
             <div>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Invoice Reference</span>
-              <h2 className="text-lg font-mono font-bold text-slate-700 mt-1">{invoice.invoiceNumber}</h2>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Invoice Reference</span>
+              <h2 className="text-lg font-mono font-bold text-slate-900 dark:text-slate-100 mt-1">{invoice.invoiceNumber}</h2>
             </div>
             {getStatusBadge(invoice.status)}
           </div>
@@ -245,33 +240,33 @@ export default function PublicInvoicePage() {
           {/* Billing Overview */}
           <div className="grid grid-cols-2 gap-6 text-xs leading-normal">
             <div>
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Freelancer</span>
-              <p className="font-extrabold text-slate-900 text-sm">{invoice.user.name}</p>
-              <p className="text-slate-500 font-semibold mt-0.5">{invoice.user.email}</p>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Freelancer</span>
+              <p className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">{invoice.user.name}</p>
+              <p className="text-slate-600 dark:text-slate-400 font-semibold mt-0.5">{invoice.user.email}</p>
             </div>
             <div className="text-right">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Prepared For</span>
-              <p className="font-extrabold text-slate-800 text-sm">{invoice.client.name}</p>
-              <p className="text-slate-500 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Prepared For</span>
+              <p className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">{invoice.client.name}</p>
+              <p className="text-slate-600 dark:text-slate-400 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
             </div>
           </div>
 
           {/* Project description items */}
-          <div className="pt-6 border-t border-slate-100/60">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2.5">Project Scope</span>
-            <div className="bg-slate-50 border border-slate-100/80 rounded-2xl p-4 flex items-center justify-between">
-              <p className="font-bold text-slate-700 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
-              <p className="font-mono font-bold text-slate-900 text-xs pl-4">{formatCurrency(invoice.amount)}</p>
+          <div className="pt-6 border-t border-slate-100/80 dark:border-slate-800/80">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-2.5">Project Scope</span>
+            <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100/80 dark:border-slate-800/60 rounded-2xl p-4 flex items-center justify-between transition-colors duration-300">
+              <p className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
+              <p className="font-mono font-bold text-slate-900 dark:text-white text-xs pl-4">{formatCurrency(invoice.amount)}</p>
             </div>
           </div>
 
           {/* Bank transfer payment instructions box */}
           {invoice.status !== "PAID" && (
-            <div className="pt-6 border-t border-slate-100/60 space-y-3">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Payment instructions</span>
-              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 space-y-3">
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Direct Bank Transfer</span>
-                <p className="text-xs text-slate-700 font-mono font-bold leading-relaxed whitespace-pre-line">
+            <div className="pt-6 border-t border-slate-100/80 dark:border-slate-800/80 space-y-3">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Payment instructions</span>
+              <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/25 rounded-2xl p-5 space-y-3 transition-colors duration-300">
+                <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Direct Bank Transfer</span>
+                <p className="text-xs text-slate-800 dark:text-slate-200 font-mono font-bold leading-relaxed whitespace-pre-line">
                   {invoice.paymentInstructions || "Please contact the freelancer directly for payment rails."}
                 </p>
               </div>
@@ -280,12 +275,12 @@ export default function PublicInvoicePage() {
 
           {/* Action triggers */}
           {invoice.status !== "PAID" ? (
-            <div className="pt-8 border-t border-slate-150 mt-4 space-y-5">
+            <div className="pt-8 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-5">
               
               {/* Upload Receipt Panel */}
               <div className="space-y-2.5">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Upload Payment Receipt</span>
-                <div className="border border-dashed border-slate-200/80 hover:border-emerald-500/40 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-50 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Upload Payment Receipt</span>
+                <div className="border border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 dark:hover:border-emerald-500/50 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -298,24 +293,24 @@ export default function PublicInvoicePage() {
                     }}
                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
                   />
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-450 group-hover:bg-emerald-55 group-hover:text-emerald-600 flex items-center justify-center transition-all mb-2 border border-slate-200/20">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 flex items-center justify-center transition-all mb-2 border border-slate-200/20">
                     <FileText className="w-4.5 h-4.5" />
                   </div>
                   {receiptFile ? (
                     <div className="space-y-1 z-30 pointer-events-none">
-                      <p className="text-xs font-bold text-slate-700">{receiptFile.name}</p>
-                      <p className="text-[10px] text-slate-400 font-semibold font-mono">{(receiptFile.size / 1024).toFixed(0)} KB · Change receipt</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{receiptFile.name}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">{(receiptFile.size / 1024).toFixed(0)} KB · Change receipt</p>
                     </div>
                   ) : (
                     <div className="space-y-1 z-30 pointer-events-none">
-                      <p className="text-xs font-bold text-slate-600">Select receipt image or PDF</p>
-                      <p className="text-[10px] text-slate-450 font-semibold">Gemini AI will verify the date, reference, and amount</p>
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Select receipt image or PDF</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Gemini AI will verify the payee name, amount, date, and project</p>
                     </div>
                   )}
                 </div>
                 {receiptError && (
-                  <div className="flex items-start gap-1.5 text-rose-600 text-[11px] font-semibold bg-rose-50 border border-rose-100 p-3.5 rounded-xl">
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2 text-rose-600 dark:text-rose-400 text-[11.5px] font-bold bg-rose-55 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 p-4 rounded-xl shadow-sm leading-relaxed">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500 dark:text-rose-450" />
                     <span>{receiptError}</span>
                   </div>
                 )}
@@ -330,7 +325,7 @@ export default function PublicInvoicePage() {
                 <Button
                   onClick={handleClientPaidConfirmation}
                   disabled={isConfirming}
-                  className="w-full py-6 font-bold text-xs bg-slate-950 text-white rounded-2xl hover:bg-slate-800 transition-all border-none flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                  className="w-full py-6 font-extrabold text-xs bg-slate-950 dark:bg-emerald-600 text-white dark:text-slate-950 rounded-2xl hover:bg-slate-850 dark:hover:bg-emerald-500 transition-all border-none flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                 >
                   {isConfirming ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -342,7 +337,7 @@ export default function PublicInvoicePage() {
               )}
             </div>
           ) : (
-            <div className="pt-8 border-t border-slate-150 mt-4">
+            <div className="pt-8 border-t border-slate-100 dark:border-slate-800 mt-4">
               <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4.5 rounded-2xl text-xs font-bold text-center flex flex-col items-center justify-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-1">
                   <CheckCircle2 className="w-5 h-5" />
@@ -355,9 +350,9 @@ export default function PublicInvoicePage() {
         </div>
 
         {/* Security / Badge footer */}
-        <div className="flex items-center justify-between text-[10px] text-slate-400 px-3">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-3">
           <span className="font-semibold flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             End-to-End Encrypted Invoice Node
           </span>
           <span className="font-bold uppercase tracking-wider">Powered by Kavio</span>

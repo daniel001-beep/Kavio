@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { invoices, payments } from "@/src/db/schema";
+import { invoices, payments, clients, users } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, and } from "drizzle-orm";
 import { google } from "@ai-sdk/google";
@@ -15,18 +15,38 @@ export async function POST(
   try {
     const { id } = await props.params;
     
-    // Fetch the invoice
-    const invoiceRecord = await db
-      .select()
+    // Fetch the invoice with client and user details
+    const invoiceRecords = await db
+      .select({
+        id: invoices.id,
+        invoiceNumber: invoices.invoiceNumber,
+        amount: invoices.amount,
+        dueDate: invoices.dueDate,
+        status: invoices.status,
+        projectDescription: invoices.projectDescription,
+        paymentInstructions: invoices.paymentInstructions,
+        createdAt: invoices.createdAt,
+        client: {
+          name: clients.name,
+          email: clients.email,
+          companyName: clients.companyName
+        },
+        user: {
+          name: users.name,
+          email: users.email
+        }
+      })
       .from(invoices)
+      .innerJoin(clients, eq(invoices.clientId, clients.id))
+      .innerJoin(users, eq(invoices.userId, users.id))
       .where(eq(invoices.id, id))
       .limit(1);
 
-    if (invoiceRecord.length === 0) {
+    if (invoiceRecords.length === 0) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    const invoice = invoiceRecord[0];
+    const invoice = invoiceRecords[0];
 
     // Grab file from request
     const formData = await req.formData();
@@ -53,30 +73,45 @@ export async function POST(
 
     if (apiKey) {
       try {
-        const prompt = `You are a payment verification assistant. Analyze the provided bank transfer receipt and verify it against these invoice details:
-- Invoice Reference / ID: ${invoice.invoiceNumber}
+        const prompt = `You are a strict payment verification auditor. Your task is to analyze the uploaded document and verify if it is a genuine bank transfer receipt/proof of payment for a specific invoice.
+
+Invoice Details:
+- Invoice Reference Number: ${invoice.invoiceNumber}
 - Invoice Amount: ${invoice.amount} NGN
-- Recipient Bank Details / Payment Instructions: ${invoice.paymentInstructions || "Not specified"}
+- Project Description / Scope: ${invoice.projectDescription}
+- Freelancer / Payee Name: ${invoice.user.name}
+- Freelancer Email: ${invoice.user.email}
+- Client / Payer Name: ${invoice.client.name}
+- Client Company: ${invoice.client.companyName || "N/A"}
+- Payment Instructions (Payee Bank details): ${invoice.paymentInstructions || "Not specified"}
 - Current Date/Time: ${new Date().toISOString()}
 
-Please analyze the receipt image or document and extract:
-1. Transaction Date and Time
-2. Transaction Amount (in NGN)
-3. Reference Number / Session ID
-4. Recipient Name or Account Number (if visible)
+Verification Instructions:
+1. RECEIPT TYPE VALIDATION:
+   - Check if the uploaded image or document is a genuine bank transfer receipt, transaction success screen, or proof of payment.
+   - If the document is NOT a bank transfer receipt (e.g., it is a photo of a person, animal, scenery, text message screenshot, website logo, dashboard, or a store/restaurant checkout receipt for physical goods), it is INVALID. Mark "isValid": false and set "reason" to "The uploaded file does not appear to be a valid bank transfer receipt or proof of payment. Please upload a valid bank transfer receipt."
 
-Determine if the transfer is valid. The transfer is INVALID if:
-- The transfer amount is significantly less than the invoice amount (${invoice.amount} NGN).
-- The payment was made more than 48 hours ago (reused receipt).
-- The recipient details do not match the payment instructions.
+2. AMOUNT VALIDATION:
+   - Extract the transaction amount.
+   - The transaction amount must exactly or very closely match the invoice amount (${invoice.amount} NGN). If the receipt amount is different, it is INVALID.
 
-Return ONLY a JSON object with this exact structure (no markdown code blocks, no backticks, just raw JSON):
+3. RECIPIENT / PAYEE VALIDATION:
+   - The recipient's name or bank account details on the receipt must match the Freelancer's Name ("${invoice.user.name}") or the account details/bank instructions provided in the Payment Instructions ("${invoice.paymentInstructions}").
+   - If the receipt shows a different recipient name or bank details completely unrelated to the freelancer, it is INVALID.
+
+4. REUSED RECEIPT VALIDATION:
+   - The receipt transaction date must be close to the current date and time. If the receipt transaction date is more than 48 hours ago relative to ${new Date().toISOString()}, or is in the future, it is INVALID (flagged as a reused or forged receipt).
+
+5. PAYER / SENDER VALIDATION:
+   - The sender name or description/notes in the receipt should ideally match or relate to the Client's Name ("${invoice.client.name}") or Client Company ("${invoice.client.companyName || ''}").
+
+Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do NOT include backticks, do NOT include any prefix/suffix text, just return the raw JSON string):
 {
   "isValid": true/false,
-  "reason": "explanation of what you found, or details about the mismatch if invalid",
-  "extractedAmount": 1200000,
-  "extractedDate": "2026-06-05",
-  "extractedRef": "SESSION-ID-12345"
+  "reason": "Clear explanation of why it is valid, or specific details of what parameters mismatched if it is invalid",
+  "extractedAmount": number,
+  "extractedDate": "YYYY-MM-DD",
+  "extractedRef": "Transaction reference number or session ID"
 }`;
 
         const { text } = await generateText({
