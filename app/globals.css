@@ -219,6 +219,26 @@ body {
     color: #0f172a !important;
 }
 
+/* ===== PUBLIC INVOICE PAGE LIGHT MODE OVERRIDE ===== */
+[data-page="public-invoice"],
+[data-page="public-invoice"] h1,
+[data-page="public-invoice"] h2,
+[data-page="public-invoice"] h3,
+[data-page="public-invoice"] h4,
+[data-page="public-invoice"] h5,
+[data-page="public-invoice"] h6,
+[data-page="public-invoice"] p,
+[data-page="public-invoice"] span,
+[data-page="public-invoice"] a {
+    color: inherit !important;
+}
+
+[data-page="public-invoice"] {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+
 
 /* Typography: Headers use Geist Sans Bold, Ledger Data uses Geist Mono */
 h1, h2, h3, h4, h5, h6 {
