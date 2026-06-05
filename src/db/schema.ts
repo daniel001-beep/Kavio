@@ -377,3 +377,24 @@ export const clientRelationships = pgTable("client_relationships", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// 7. Client Receipt Submissions for Freelancer Review
+export const receiptSubmissions = pgTable("receipt_submission", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  userId: text("user_id") // Freelancer ID
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("UNDER_REVIEW"), // 'VERIFIED', 'UNDER_REVIEW', 'FAILED', 'APPROVED', 'REJECTED'
+  confidenceScore: doublePrecision("confidence_score").notNull().default(0),
+  fraudFlags: jsonb("fraud_flags").default([]),
+  receiptImageBase64: text("receipt_image_base64"),
+  extractedAmount: doublePrecision("extracted_amount"),
+  extractedDate: text("extracted_date"),
+  extractedRef: text("extracted_ref"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

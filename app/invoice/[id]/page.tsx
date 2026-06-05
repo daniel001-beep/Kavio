@@ -7,12 +7,10 @@ import {
   Clock, 
   AlertTriangle,
   FileText,
-  CreditCard,
   CheckCircle2,
   Loader2,
   ShieldCheck,
-  Zap,
-  ArrowRight
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,7 +19,7 @@ interface InvoiceData {
   invoiceNumber: string;
   amount: number;
   dueDate: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID";
+  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW";
   projectDescription: string;
   paymentInstructions?: string;
   createdAt: string;
@@ -87,7 +85,7 @@ export default function PublicInvoicePage() {
   const handleClientPaidConfirmation = async () => {
     if (!invoice) return;
     if (!receiptFile) {
-      setReceiptError("Please upload your transfer receipt first so we can verify it.");
+      setReceiptError("Please select a transfer receipt file to verify.");
       return;
     }
 
@@ -109,30 +107,16 @@ export default function PublicInvoicePage() {
 
       const verifyData = await verifyRes.json();
       if (!verifyData.success) {
-        setReceiptError(verifyData.error || "Receipt verification failed. Please make sure the receipt is correct.");
+        setReceiptError(verifyData.reason || "We couldn't verify this payment. Please upload a clearer receipt or contact the business owner.");
         setIsConfirming(false);
         return;
       }
 
-      // 2. Perform payment transaction record
-      const res = await fetch(`/api/invoices/${invoice.id}/pay`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reference: verifyData.extractedRef || "AI-VERIFIED",
-          notes: `Verified by Gemini AI. Ref: ${verifyData.extractedRef || "N/A"}. Date: ${verifyData.extractedDate || "N/A"}. Amount: NGN ${verifyData.extractedAmount?.toLocaleString() || "N/A"}.`
-        })
-      });
-
-      if (res.ok) {
-        setIsConfirmedSuccessfully(true);
-        // Refresh local display status to PAID
-        setInvoice(prev => prev ? { ...prev, status: "PAID" } : null);
-      } else {
-        alert("Failed to register check-in. Please try again.");
-      }
+      // Success, local reload of status
+      setIsConfirmedSuccessfully(true);
+      await loadInvoice(); // Re-pull status to render the correct confirmed card state
     } catch (e: any) {
-      setReceiptError(e.message || "Failed to connect to collections rails.");
+      setReceiptError(e.message || "Failed to connect to collections rails. Please check your network.");
     } finally {
       setIsConfirming(false);
     }
@@ -145,6 +129,20 @@ export default function PublicInvoicePage() {
           <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
             <CheckCircle className="w-4 h-4" />
             Paid & Cleared
+          </Badge>
+        );
+      case "VERIFIED":
+        return (
+          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            Verified · Awaiting Approval
+          </Badge>
+        );
+      case "UNDER_REVIEW":
+        return (
+          <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-700 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
+            <Clock className="w-4 h-4 text-amber-500" />
+            Under Review
           </Badge>
         );
       case "SENT":
@@ -196,7 +194,7 @@ export default function PublicInvoicePage() {
   if (!invoice) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-4">
+        <div className="w-12 h-12 rounded-full bg-rose-55 border border-rose-100 flex items-center justify-center text-rose-500 mb-4">
           <AlertTriangle className="w-6 h-6" />
         </div>
         <h1 className="text-base font-bold text-slate-800">Invoice not found</h1>
@@ -205,12 +203,15 @@ export default function PublicInvoicePage() {
     );
   }
 
+  // Determine if check-out actions are completed/frozen
+  const isSubmissionCompleted = ["PAID", "VERIFIED", "UNDER_REVIEW"].includes(invoice.status);
+
   return (
-    <div className="min-h-screen bg-[#fafbfe] dark:bg-slate-950 font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
       
       {/* Decorative meshes */}
-      <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-100/10 to-teal-200/10 dark:from-emerald-950/20 dark:to-teal-950/20 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-100/10 to-blue-200/10 dark:from-indigo-950/10 dark:to-blue-950/10 blur-[110px] pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-emerald-100/10 to-teal-200/10 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-100/10 to-blue-200/10 blur-[110px] pointer-events-none" />
 
       {/* Main Card Shell */}
       <div className="w-full max-w-xl mx-auto space-y-6 relative z-10">
@@ -219,20 +220,20 @@ export default function PublicInvoicePage() {
         <div className="flex items-center justify-between px-3">
           <div className="flex items-center gap-1.5">
             <Zap className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-extrabold tracking-widest uppercase text-slate-500 dark:text-slate-400 font-mono">Kavio Collections</span>
+            <span className="text-xs font-extrabold tracking-widest uppercase text-slate-500 font-mono">Kavio Collections</span>
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
+          <span className="text-[10px] text-slate-500 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
         </div>
 
         {/* Invoice Container */}
         <div 
-          className="rounded-3xl p-6 sm:p-10 space-y-6 bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800/80 shadow-xl shadow-slate-100/40 dark:shadow-black/20 transition-all duration-300"
+          className="rounded-3xl p-6 sm:p-10 space-y-6 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 transition-all duration-300"
         >
           {/* Top Status and ID */}
-          <div className="flex items-start justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-start justify-between gap-4 pb-6 border-b border-slate-100">
             <div>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Invoice Reference</span>
-              <h2 className="text-lg font-mono font-bold text-slate-900 dark:text-slate-100 mt-1">{invoice.invoiceNumber}</h2>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Invoice Reference</span>
+              <h2 className="text-lg font-mono font-bold text-slate-900 mt-1">{invoice.invoiceNumber}</h2>
             </div>
             {getStatusBadge(invoice.status)}
           </div>
@@ -240,33 +241,33 @@ export default function PublicInvoicePage() {
           {/* Billing Overview */}
           <div className="grid grid-cols-2 gap-6 text-xs leading-normal">
             <div>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Freelancer</span>
-              <p className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">{invoice.user.name}</p>
-              <p className="text-slate-600 dark:text-slate-400 font-semibold mt-0.5">{invoice.user.email}</p>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Freelancer</span>
+              <p className="font-extrabold text-slate-900 text-sm">{invoice.user.name}</p>
+              <p className="text-slate-600 font-semibold mt-0.5">{invoice.user.email}</p>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-1.5">Prepared For</span>
-              <p className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">{invoice.client.name}</p>
-              <p className="text-slate-600 dark:text-slate-400 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Prepared For</span>
+              <p className="font-extrabold text-slate-900 text-sm">{invoice.client.name}</p>
+              <p className="text-slate-600 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
             </div>
           </div>
 
           {/* Project description items */}
-          <div className="pt-6 border-t border-slate-100/80 dark:border-slate-800/80">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block mb-2.5">Project Scope</span>
-            <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100/80 dark:border-slate-800/60 rounded-2xl p-4 flex items-center justify-between transition-colors duration-300">
-              <p className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
-              <p className="font-mono font-bold text-slate-900 dark:text-white text-xs pl-4">{formatCurrency(invoice.amount)}</p>
+          <div className="pt-6 border-t border-slate-100">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2.5">Project Scope</span>
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-between transition-colors duration-300">
+              <p className="font-bold text-slate-800 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
+              <p className="font-mono font-bold text-slate-900 text-xs pl-4">{formatCurrency(invoice.amount)}</p>
             </div>
           </div>
 
           {/* Bank transfer payment instructions box */}
-          {invoice.status !== "PAID" && (
-            <div className="pt-6 border-t border-slate-100/80 dark:border-slate-800/80 space-y-3">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Payment instructions</span>
-              <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/15 dark:border-emerald-500/25 rounded-2xl p-5 space-y-3 transition-colors duration-300">
-                <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Direct Bank Transfer</span>
-                <p className="text-xs text-slate-800 dark:text-slate-200 font-mono font-bold leading-relaxed whitespace-pre-line">
+          {!isSubmissionCompleted && (
+            <div className="pt-6 border-t border-slate-100 space-y-3">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Payment instructions</span>
+              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 space-y-3 transition-colors duration-300">
+                <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Direct Bank Transfer</span>
+                <p className="text-xs text-slate-800 font-mono font-bold leading-relaxed whitespace-pre-line">
                   {invoice.paymentInstructions || "Please contact the freelancer directly for payment rails."}
                 </p>
               </div>
@@ -274,13 +275,52 @@ export default function PublicInvoicePage() {
           )}
 
           {/* Action triggers */}
-          {invoice.status !== "PAID" ? (
-            <div className="pt-8 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-5">
+          {invoice.status === "PAID" ? (
+            <div className="pt-8 border-t border-slate-100 mt-4">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4.5 rounded-2xl text-xs font-bold text-center flex flex-col items-center justify-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-1">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <span>Thank you! This invoice has been marked as fully PAID.</span>
+              </div>
+            </div>
+          ) : invoice.status === "VERIFIED" ? (
+            <div className="pt-8 border-t border-slate-100 mt-4">
+              <div className="bg-emerald-55 border border-emerald-100 text-emerald-700 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-2.5">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-1">
+                  <CheckCircle2 className="w-6 h-6 animate-bounce" />
+                </div>
+                <h3 className="text-sm font-black text-slate-900">Payment Successfully Verified ✅</h3>
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                  We've confirmed your receipt details and notified the business owner.
+                </p>
+                <div className="text-[9px] bg-emerald-500/15 text-emerald-700 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
+                  Status: VERIFIED - Awaiting Business Confirmation
+                </div>
+              </div>
+            </div>
+          ) : invoice.status === "UNDER_REVIEW" ? (
+            <div className="pt-8 border-t border-slate-100 mt-4">
+              <div className="bg-amber-50 border border-amber-100 text-amber-700 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-2.5">
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 mb-1">
+                  <Clock className="w-6 h-6 animate-pulse" />
+                </div>
+                <h3 className="text-sm font-black text-slate-900">Receipt Received ⏳</h3>
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                  We're reviewing your payment information.
+                </p>
+                <div className="text-[9px] bg-amber-500/15 text-amber-750 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
+                  Status: UNDER REVIEW
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-8 border-t border-slate-100 mt-4 space-y-5">
               
               {/* Upload Receipt Panel */}
               <div className="space-y-2.5">
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Upload Payment Receipt</span>
-                <div className="border border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 dark:hover:border-emerald-500/50 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Upload Payment Receipt</span>
+                <div className="border border-dashed border-slate-200 hover:border-emerald-500/40 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-55 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
                   <input
                     type="file"
                     accept="image/*,application/pdf"
@@ -293,25 +333,30 @@ export default function PublicInvoicePage() {
                     }}
                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
                   />
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 flex items-center justify-center transition-all mb-2 border border-slate-200/20">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 flex items-center justify-center transition-all mb-2 border border-slate-200/20">
                     <FileText className="w-4.5 h-4.5" />
                   </div>
                   {receiptFile ? (
                     <div className="space-y-1 z-30 pointer-events-none">
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{receiptFile.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">{(receiptFile.size / 1024).toFixed(0)} KB · Change receipt</p>
+                      <p className="text-xs font-bold text-slate-800">{receiptFile.name}</p>
+                      <p className="text-[10px] text-slate-500 font-semibold font-mono">{(receiptFile.size / 1024).toFixed(0)} KB · Change receipt</p>
                     </div>
                   ) : (
                     <div className="space-y-1 z-30 pointer-events-none">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Select receipt image or PDF</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Gemini AI will verify the payee name, amount, date, and project</p>
+                      <p className="text-xs font-bold text-slate-700">Select receipt image or PDF</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">Gemini AI will verify the payee name, amount, date, and project</p>
                     </div>
                   )}
                 </div>
                 {receiptError && (
-                  <div className="flex items-start gap-2 text-rose-600 dark:text-rose-400 text-[11.5px] font-bold bg-rose-55 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 p-4 rounded-xl shadow-sm leading-relaxed">
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500 dark:text-rose-450" />
-                    <span>{receiptError}</span>
+                  <div className="flex flex-col gap-1.5 text-rose-600 bg-rose-50 border border-rose-100 p-4 rounded-2xl shadow-sm text-left leading-relaxed">
+                    <div className="flex items-center gap-1.5 text-xs font-black">
+                      <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+                      Verification Failed ❌
+                    </div>
+                    <p className="text-[11px] text-slate-600 font-semibold pl-5">
+                      {receiptError}
+                    </p>
                   </div>
                 )}
               </div>
@@ -325,7 +370,7 @@ export default function PublicInvoicePage() {
                 <Button
                   onClick={handleClientPaidConfirmation}
                   disabled={isConfirming}
-                  className="w-full py-6 font-extrabold text-xs bg-slate-950 dark:bg-emerald-600 text-white dark:text-slate-950 rounded-2xl hover:bg-slate-850 dark:hover:bg-emerald-500 transition-all border-none flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                  className="w-full py-6 font-extrabold text-xs bg-slate-950 text-white rounded-2xl hover:bg-slate-850 transition-all border-none flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                 >
                   {isConfirming ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -336,23 +381,14 @@ export default function PublicInvoicePage() {
                 </Button>
               )}
             </div>
-          ) : (
-            <div className="pt-8 border-t border-slate-100 dark:border-slate-800 mt-4">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4.5 rounded-2xl text-xs font-bold text-center flex flex-col items-center justify-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-1">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <span>Thank you! This invoice has been marked as fully PAID.</span>
-              </div>
-            </div>
           )}
 
         </div>
 
         {/* Security / Badge footer */}
-        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-3">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 px-3">
           <span className="font-semibold flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
             End-to-End Encrypted Invoice Node
           </span>
           <span className="font-bold uppercase tracking-wider">Powered by Kavio</span>

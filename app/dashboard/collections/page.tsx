@@ -15,7 +15,11 @@ import {
   Calendar,
   ExternalLink,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Eye,
+  CheckCircle,
+  XCircle,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,7 +33,7 @@ interface Invoice {
   invoiceNumber: string;
   amount: number;
   dueDate: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID";
+  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW";
   projectDescription: string;
   createdAt: string;
   client: {
@@ -65,8 +69,19 @@ export default function CollectionsPage() {
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [reminders, setReminders] = useState<ReminderLog[]>([]);
+  const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [aiMetrics, setAiMetrics] = useState({
+    pendingVerification: 0,
+    awaitingApproval: 0,
+    verifiedToday: 0,
+    rejectedReceipts: 0,
+    fraudAlerts: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotifications();
+
+  // Modal preview state
+  const [selectedReceiptImage, setSelectedReceiptImage] = useState<string | null>(null);
 
   // WhatsApp nudge modal state
   const [nudgePayload, setNudgePayload] = useState<WhatsAppNudgePayload | null>(null);
@@ -74,21 +89,32 @@ export default function CollectionsPage() {
   // Fetch initial data
   const fetchData = async () => {
     try {
-      const [invRes, remRes] = await Promise.all([
+      const [invRes, remRes, queueRes] = await Promise.all([
         fetch("/api/invoices?_t=" + Date.now(), { cache: "no-store" }),
-        fetch("/api/reminders?_t=" + Date.now(), { cache: "no-store" })
+        fetch("/api/reminders?_t=" + Date.now(), { cache: "no-store" }),
+        fetch("/api/invoices/payments-queue?_t=" + Date.now(), { cache: "no-store" })
       ]);
 
-      if (invRes.ok && remRes.ok) {
+      if (invRes.ok && remRes.ok && queueRes.ok) {
         const invoicesData = await invRes.json();
         const remindersData = await remRes.json();
+        const queueData = await queueRes.json();
 
         setInvoices(invoicesData);
         setReminders(remindersData);
+        setQueueItems(queueData.queueItems || []);
+        setAiMetrics(queueData.metrics || {
+          pendingVerification: 0,
+          awaitingApproval: 0,
+          verifiedToday: 0,
+          rejectedReceipts: 0,
+          fraudAlerts: 0
+        });
 
         if (userEmail) {
           localStorage.setItem(`kavio_cached_invoices_${userEmail}`, JSON.stringify(invoicesData));
           localStorage.setItem(`kavio_cached_reminders_${userEmail}`, JSON.stringify(remindersData));
+          localStorage.setItem(`kavio_cached_queue_${userEmail}`, JSON.stringify(queueData));
         }
       }
     } catch (e) {
@@ -103,6 +129,7 @@ export default function CollectionsPage() {
     if (userEmail) {
       const cachedInvoices = localStorage.getItem(`kavio_cached_invoices_${userEmail}`);
       const cachedReminders = localStorage.getItem(`kavio_cached_reminders_${userEmail}`);
+      const cachedQueue = localStorage.getItem(`kavio_cached_queue_${userEmail}`);
 
       let hasCache = false;
       if (cachedInvoices) {
@@ -121,6 +148,22 @@ export default function CollectionsPage() {
           console.warn("Failed to parse cached reminders", e);
         }
       }
+      if (cachedQueue) {
+        try {
+          const parsed = JSON.parse(cachedQueue);
+          setQueueItems(parsed.queueItems || []);
+          setAiMetrics(parsed.metrics || {
+            pendingVerification: 0,
+            awaitingApproval: 0,
+            verifiedToday: 0,
+            rejectedReceipts: 0,
+            fraudAlerts: 0
+          });
+          hasCache = true;
+        } catch (e) {
+          console.warn("Failed to parse cached queue", e);
+        }
+      }
 
       if (hasCache) {
         setIsLoading(false);
@@ -134,7 +177,7 @@ export default function CollectionsPage() {
   // Compute metrics
   const outstandingSum = useMemo(() => {
     return invoices
-      .filter((inv) => ["SENT", "VIEWED", "OVERDUE"].includes(inv.status))
+      .filter((inv) => ["SENT", "VIEWED", "OVERDUE", "VERIFIED", "UNDER_REVIEW"].includes(inv.status))
       .reduce((acc, inv) => acc + (inv.amount || 0), 0);
   }, [invoices]);
 
@@ -143,7 +186,7 @@ export default function CollectionsPage() {
     return invoices
       .filter((inv) => {
         const isOverdueStatus = inv.status === "OVERDUE";
-        const isPastDue = new Date(inv.dueDate) < now && inv.status !== "PAID" && inv.status !== "DRAFT";
+        const isPastDue = new Date(inv.dueDate) < now && !["PAID", "DRAFT", "VERIFIED", "UNDER_REVIEW"].includes(inv.status);
         return isOverdueStatus || isPastDue;
       })
       .reduce((acc, inv) => acc + (inv.amount || 0), 0);
@@ -160,7 +203,7 @@ export default function CollectionsPage() {
     const now = new Date();
     return invoices.filter(inv => {
       const isOverdueStatus = inv.status === "OVERDUE";
-      const isPastDue = new Date(inv.dueDate) < now && inv.status !== "PAID" && inv.status !== "DRAFT";
+      const isPastDue = new Date(inv.dueDate) < now && !["PAID", "DRAFT", "VERIFIED", "UNDER_REVIEW"].includes(inv.status);
       return isOverdueStatus || isPastDue;
     });
   }, [invoices]);
@@ -172,7 +215,7 @@ export default function CollectionsPage() {
     endOfWeek.setDate(today.getDate() + 7);
 
     return invoices.filter(inv => {
-      if (inv.status === "PAID" || inv.status === "DRAFT") return false;
+      if (["PAID", "DRAFT", "VERIFIED", "UNDER_REVIEW"].includes(inv.status)) return false;
       const due = new Date(inv.dueDate);
       return due >= today && due <= endOfWeek;
     });
@@ -286,6 +329,52 @@ export default function CollectionsPage() {
     }
   };
 
+  // Process Payments Queue AI decisions
+  const handleQueueAction = async (invoiceId: string, submissionId: string, action: "APPROVE" | "REJECT" | "REQUEST_NEW") => {
+    let confirmMsg = "Are you sure you want to approve this receipt and settle the invoice?";
+    if (action === "REJECT") confirmMsg = "Are you sure you want to reject this receipt? The client will need to upload it again.";
+    if (action === "REQUEST_NEW") confirmMsg = "Are you sure you want to reject this receipt and request a new one?";
+
+    if (!confirm(confirmMsg)) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}/confirm-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, submissionId })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        addNotification({
+          type: "SUCCESS",
+          title: action === "APPROVE" ? "Payment Confirmed! ✅" : "Receipt Rejected ❌",
+          message: data.message
+        });
+
+        // Copy confirmation alert to clipboard
+        if (action === "APPROVE" && data.notificationText) {
+          navigator.clipboard.writeText(data.notificationText);
+          addNotification({
+            type: "SUCCESS",
+            title: "Notification Copied",
+            message: "Confirmation message copied to clipboard. Ready to send!"
+          });
+          alert(`Success! Settle notification text copied to clipboard:\n\n"${data.notificationText}"`);
+        }
+
+        fetchData();
+      } else {
+        alert("Failed to complete action. Please try again.");
+      }
+    } catch (e) {
+      console.error("Queue Action error:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-20">
       
@@ -303,6 +392,32 @@ export default function CollectionsPage() {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Recovered</p>
             <h4 className="text-base font-black text-emerald-600 font-mono">{formatCurrency(recoveredSum)}</h4>
           </div>
+        </div>
+      </div>
+
+      {/* AI Verification Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+        <div className="text-center p-3.5 bg-white rounded-xl shadow-sm border border-slate-100/50">
+          <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Pending Verification</p>
+          <h4 className="text-xl font-black text-amber-55 mt-1 font-mono">{aiMetrics.pendingVerification}</h4>
+        </div>
+        <div className="text-center p-3.5 bg-white rounded-xl shadow-sm border border-slate-100/50">
+          <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Awaiting Approval</p>
+          <h4 className="text-xl font-black text-emerald-600 mt-1 font-mono">{aiMetrics.awaitingApproval}</h4>
+        </div>
+        <div className="text-center p-3.5 bg-white rounded-xl shadow-sm border border-slate-100/50">
+          <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Verified Today</p>
+          <h4 className="text-xl font-black text-blue-600 mt-1 font-mono">{aiMetrics.verifiedToday}</h4>
+        </div>
+        <div className="text-center p-3.5 bg-white rounded-xl shadow-sm border border-slate-100/50">
+          <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Rejected Receipts</p>
+          <h4 className="text-xl font-black text-rose-600 mt-1 font-mono">{aiMetrics.rejectedReceipts}</h4>
+        </div>
+        <div className="text-center p-3.5 bg-white rounded-xl shadow-sm border border-slate-100/50 col-span-2 md:col-span-1">
+          <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Fraud Alerts</p>
+          <h4 className="text-xl font-black text-red-650 mt-1 font-mono flex items-center justify-center gap-1.5">
+            {aiMetrics.fraudAlerts} {aiMetrics.fraudAlerts > 0 && "🚨"}
+          </h4>
         </div>
       </div>
 
@@ -346,6 +461,120 @@ export default function CollectionsPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Payments Queue Panel (AI Verification pipeline review) */}
+      <div className="bg-white border border-slate-150 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            AI Payments Queue Awaiting Freelancer Approval
+          </h3>
+          <p className="text-[10px] text-slate-400 mt-1">
+            Receipts uploaded by clients. Review AI authenticity confidence scores, fraud indicators, and authorize settlement.
+          </p>
+        </div>
+
+        {queueItems.length === 0 ? (
+          <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+            <p className="text-slate-400 text-xs font-bold">No payments in the approval queue. Client receipt submissions will appear here. ⏳</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                  <th className="py-3 px-4">Client</th>
+                  <th className="py-3 px-4">Invoice</th>
+                  <th className="py-3 px-4">Amount</th>
+                  <th className="py-3 px-4">Uploaded</th>
+                  <th className="py-3 px-4">AI Score</th>
+                  <th className="py-3 px-4 text-center">Receipt</th>
+                  <th className="py-3 px-4">Status & Flags</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                {queueItems.map((item) => {
+                  const hasFlags = item.fraudFlags && item.fraudFlags.length > 0;
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/45 transition-colors">
+                      <td className="py-4 px-4 font-bold text-slate-900">{item.client.name}</td>
+                      <td className="py-4 px-4 font-mono font-bold text-slate-500">{item.invoice.invoiceNumber}</td>
+                      <td className="py-4 px-4 font-mono font-bold text-slate-800">{formatCurrency(item.invoice.amount)}</td>
+                      <td className="py-4 px-4 text-slate-450">{new Date(item.createdAt).toLocaleDateString()}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2 py-0.5 rounded-md font-bold font-mono text-[10px] ${
+                          item.confidenceScore > 95 
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                            : "bg-amber-50 text-amber-600 border border-amber-100"
+                        }`}>
+                          {item.confidenceScore}%
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        {item.receiptImageBase64 ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setSelectedReceiptImage(item.receiptImageBase64)}
+                            className="h-8 px-2.5 rounded-lg border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-[10px] flex items-center gap-1 w-fit mx-auto"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            View
+                          </Button>
+                        ) : (
+                          <span className="text-slate-400">None</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-4 space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          {item.status === "VERIFIED" && (
+                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase border border-emerald-100">Verified</span>
+                          )}
+                          {item.status === "UNDER_REVIEW" && (
+                            <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase border border-amber-100">Review</span>
+                          )}
+                          {item.status === "FAILED" && (
+                            <span className="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full uppercase border border-rose-100">Failed</span>
+                          )}
+                        </div>
+                        {hasFlags && (
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {item.fraudFlags.map((flag: string) => (
+                              <span key={flag} className="text-[8px] font-extrabold text-rose-650 bg-rose-50 border border-rose-100 px-1 py-0.5 rounded-sm uppercase flex items-center gap-0.5">
+                                ⚠️ {flag.replace("_", " ")}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            onClick={() => handleQueueAction(item.invoice.id, item.id, "APPROVE")}
+                            className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 border-none shadow-sm cursor-pointer"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Confirm
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleQueueAction(item.invoice.id, item.id, "REJECT")}
+                            className="h-8 px-2.5 rounded-lg border-slate-200 text-rose-650 hover:text-rose-700 hover:bg-rose-50 text-[10px] font-bold flex items-center gap-1"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Reject
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Main Layout Grid */}
@@ -548,9 +777,9 @@ export default function CollectionsPage() {
               </div>
               <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400">Recovery Tips</h3>
               <ul className="space-y-3.5 text-[11px] font-semibold text-slate-300 leading-relaxed list-disc pl-4">
-                <li>Send reminders 1 day before due date (due tomorrow nudge).</li>
-                <li>Polite but direct follow-up on WhatsApp has a 3x higher response rate than email.</li>
-                <li>Once paid, mark invoice paid instantly to trigger client score positive updates.</li>
+                <li>Double check the uploaded transfer receipt using the preview modal before confirming.</li>
+                <li>Verify the sender and recipient banks details in the Payments Queue list.</li>
+                <li>Gemini flags potential frauds automatically (mismatched names, dates, or duplicate references).</li>
               </ul>
             </CardContent>
           </Card>
@@ -566,6 +795,30 @@ export default function CollectionsPage() {
           onClose={() => setNudgePayload(null)}
           onConfirm={handleNudgeConfirm}
         />
+      )}
+
+      {/* Receipt Image Preview Modal */}
+      {selectedReceiptImage && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl relative">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Receipt Document Preview</h3>
+              <button 
+                onClick={() => setSelectedReceiptImage(null)}
+                className="text-slate-400 hover:text-slate-700 font-bold text-xs bg-slate-150 p-2 rounded-xl transition-all"
+              >
+                Close
+              </button>
+            </div>
+            <div className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-200/80 flex items-center justify-center max-h-[420px]">
+              <img 
+                src={`data:image/jpeg;base64,${selectedReceiptImage}`} 
+                alt="Uploaded Payment Receipt" 
+                className="object-contain max-h-[400px] w-full"
+              />
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
