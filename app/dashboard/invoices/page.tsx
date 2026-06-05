@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { 
   Plus, 
@@ -12,7 +12,12 @@ import {
   Clock,
   AlertTriangle,
   TrendingUp,
-  Loader2
+  Loader2,
+  ArrowLeftRight,
+  DollarSign,
+  Calendar,
+  User,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +55,43 @@ export default function InvoicesPage() {
 
   // WhatsApp nudge modal state
   const [nudgePayload, setNudgePayload] = useState<WhatsAppNudgePayload | null>(null);
+
+  const [activeSubTab, setActiveSubTab] = useState<"INVOICES" | "PAYMENTS">("INVOICES");
+  const [paymentSearch, setPaymentSearch] = useState("");
+
+  // Sync tab from URL query on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "payments") {
+        setActiveSubTab("PAYMENTS");
+      }
+    }
+  }, []);
+
+  // Compute payments list in-memory from paid invoices
+  const paymentsList = useMemo(() => {
+    return invoices
+      .filter((inv) => inv.status === "PAID")
+      .map((inv) => ({
+        id: inv.id,
+        invoiceId: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        clientName: inv.client?.name || "Freelance Client",
+        amount: inv.amount,
+        datePaid: inv.createdAt, // fallback to createdAt if no payment log exists
+        reference: inv.metadata?.paymentReference || "Manual Bank Transfer",
+        notes: inv.paymentInstructions || "Collections payment settled."
+      }));
+  }, [invoices]);
+
+  const filteredPayments = useMemo(() => {
+    return paymentsList.filter(p => {
+      return p.clientName.toLowerCase().includes(paymentSearch.toLowerCase()) || 
+             p.invoiceNumber.toLowerCase().includes(paymentSearch.toLowerCase()) ||
+             (p.reference || "").toLowerCase().includes(paymentSearch.toLowerCase());
+    });
+  }, [paymentsList, paymentSearch]);
 
   // Load invoices
   const fetchInvoices = async () => {
@@ -269,198 +311,327 @@ export default function InvoicesPage() {
         </Link>
       </div>
 
-      {/* Aggregate Cards (Bento) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
-              <FileText className="w-4 h-4 text-slate-400" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(totalInvoiced)}</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">All invoices tracked</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Settled Earnings</span>
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(settledAmount)}</h3>
-            <p className="text-[10px] text-emerald-500 font-semibold mt-1">Payments confirmed</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding</span>
-              <Clock className="w-4 h-4 text-amber-500" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(outstandingAmount)}</h3>
-            <p className="text-[10px] text-amber-650 font-semibold mt-1">Awaiting bank details</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overdue Alert</span>
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(overdueAmount)}</h3>
-            <p className="text-[10px] text-rose-500 font-semibold mt-1">Past due invoices</p>
-          </CardContent>
-        </Card>
+      {/* Tab Switcher: Invoices vs Payments */}
+      <div className="flex items-center gap-6 border-b border-slate-100 pb-1 mt-2">
+        <button
+          onClick={() => setActiveSubTab("INVOICES")}
+          className={`pb-2.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            activeSubTab === "INVOICES"
+              ? "border-emerald-500 text-emerald-600 font-extrabold"
+              : "border-transparent text-slate-400 hover:text-slate-700"
+          }`}
+        >
+          Invoices Registry
+        </button>
+        <button
+          onClick={() => setActiveSubTab("PAYMENTS")}
+          className={`pb-2.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            activeSubTab === "PAYMENTS"
+              ? "border-emerald-500 text-emerald-600 font-extrabold"
+              : "border-transparent text-slate-400 hover:text-slate-700"
+          }`}
+        >
+          Payments Ledger
+        </button>
       </div>
 
+      {/* Aggregate Cards */}
+      {activeSubTab === "INVOICES" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
+                <FileText className="w-4 h-4 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(totalInvoiced)}</h3>
+              <p className="text-[10px] text-slate-400 font-semibold mt-1">All invoices tracked</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Settled Earnings</span>
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(settledAmount)}</h3>
+              <p className="text-[10px] text-emerald-500 font-semibold mt-1">Payments confirmed</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding</span>
+                <Clock className="w-4 h-4 text-amber-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(outstandingAmount)}</h3>
+              <p className="text-[10px] text-amber-650 font-semibold mt-1">Awaiting bank details</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overdue Alert</span>
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(overdueAmount)}</h3>
+              <p className="text-[10px] text-rose-500 font-semibold mt-1">Past due invoices</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-550 uppercase tracking-wider">Total Revenue Paid</span>
+                <DollarSign className="w-4 h-4 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 font-mono">{formatCurrency(settledAmount)}</h3>
+              <p className="text-[10px] text-emerald-650 font-semibold mt-1">Settled collection receipts</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/55 transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-slate-550 uppercase tracking-wider">Transactions Count</span>
+                <ArrowLeftRight className="w-4 h-4 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">{paymentsList.length} Payments</h3>
+              <p className="text-[10px] text-slate-500 font-semibold mt-1">All-time collection count</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
-          {/* Tab Filters */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {(["ALL", "PAID", "SENT", "VIEWED", "OVERDUE"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setFilter(t)}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shrink-0 ${
-                  filter === t
-                    ? "bg-white text-slate-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                {t.charAt(0) + t.slice(1).toLowerCase()}
-              </button>
-            ))}
+      {/* Filter and Search Bar + Lists */}
+      {activeSubTab === "INVOICES" ? (
+        <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            {/* Tab Filters */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {(["ALL", "PAID", "SENT", "VIEWED", "OVERDUE"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setFilter(t)}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shrink-0 ${
+                    filter === t
+                      ? "bg-white text-slate-800 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {t.charAt(0) + t.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                type="text"
+                placeholder="Search invoice or client name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+              />
+            </div>
+
           </div>
 
-          {/* Search Input */}
+          {/* Invoice Table list */}
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100/40 bg-slate-50/30">
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice No.</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project Details</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Amount</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-xs">
+                {isLoading && filteredInvoices.length === 0 ? (
+                  <tr>
+                    <td colSpan={7}>
+                      <div className="py-16 flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading invoices...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredInvoices.length === 0 ? (
+                  <tr>
+                    <td colSpan={7}>
+                      <div className="py-16 flex flex-col items-center gap-4 text-center">
+                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-700">No invoices found</h4>
+                          <p className="text-xs text-slate-400 mt-1">Create a new invoice and share payment link with clients.</p>
+                        </div>
+                        <Link href="/dashboard/invoices/create" passHref legacyBehavior>
+                          <Button className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl">
+                            Create Your First Invoice
+                          </Button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredInvoices.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="py-4.5 px-4 font-mono font-bold text-slate-700">
+                        {inv.invoiceNumber}
+                      </td>
+                      <td className="py-4.5 px-4">
+                        <p className="font-bold text-slate-800">{inv.client.name}</p>
+                        <p className="text-[10px] text-slate-450 font-semibold">{inv.client.email}</p>
+                      </td>
+                      <td className="py-4.5 px-4 text-slate-500 font-semibold truncate max-w-[200px]">
+                        {inv.projectDescription}
+                      </td>
+                      <td className="py-4.5 px-4 text-slate-500 font-medium">
+                        {new Date(inv.dueDate).toLocaleDateString()}
+                      </td>
+                      <td className="py-4.5 px-4 font-mono font-bold text-slate-800">
+                        {formatCurrency(inv.amount)}
+                      </td>
+                      <td className="py-4.5 px-4">
+                        {getStatusBadge(inv.status)}
+                      </td>
+                      <td className="py-4.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* WhatsApp Dropdown Trigger */}
+                          {inv.status !== "PAID" && (
+                            <select
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  triggerWhatsAppNudge(inv, e.target.value);
+                                  e.target.value = ""; // Reset dropdown
+                                }
+                              }}
+                              className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[10px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
+                            >
+                              <option value="">💬 Nudge Client...</option>
+                              <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
+                              <option value="DUE_TODAY">Nudge: Due Today</option>
+                              <option value="OVERDUE_3D">Nudge: 3 Days Overdue</option>
+                              <option value="OVERDUE_7D">Nudge: Past Due Follow-up</option>
+                            </select>
+                          )}
+
+                          <button
+                            onClick={() => copyPaymentLink(inv.id)}
+                            className="p-2 hover:bg-slate-55 text-slate-400 hover:text-emerald-500 border border-transparent rounded-lg transition-colors"
+                            title="Copy Shareable Invoice Link"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteInvoice(inv.id)}
+                            className="p-2 hover:bg-slate-55 text-slate-400 hover:text-rose-500 border border-transparent rounded-lg transition-colors"
+                            title="Delete Invoice"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      ) : (
+        <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               type="text"
-              placeholder="Search invoice or client name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search payments by client, invoice number..."
+              value={paymentSearch}
+              onChange={(e) => setPaymentSearch(e.target.value)}
               className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
             />
           </div>
 
-        </div>
-
-        {/* Invoice Table list */}
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100/40 bg-slate-50/30">
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice No.</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project Details</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Amount</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 text-xs">
-              {isLoading && filteredInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>
-                    <div className="py-16 flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading invoices...</p>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <th className="py-4 px-4">Client / Tenant</th>
+                  <th className="py-4 px-4">Invoice details</th>
+                  <th className="py-4 px-4">Payment Method</th>
+                  <th className="py-4 px-4">Settlement Date</th>
+                  <th className="py-4 px-4 text-right">Amount Settled</th>
                 </tr>
-              ) : filteredInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>
-                    <div className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-                        <FileText className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-700">No invoices found</h4>
-                        <p className="text-xs text-slate-400 mt-1">Create a new invoice and share payment link with clients.</p>
-                      </div>
-                      <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                        <Button className="mt-2 text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100/50 py-4 rounded-xl">
-                          Create Your First Invoice
-                        </Button>
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="py-4.5 px-4 font-mono font-bold text-slate-700">
-                      {inv.invoiceNumber}
-                    </td>
-                    <td className="py-4.5 px-4">
-                      <p className="font-bold text-slate-800">{inv.client.name}</p>
-                      <p className="text-[10px] text-slate-450 font-semibold">{inv.client.email}</p>
-                    </td>
-                    <td className="py-4.5 px-4 text-slate-500 font-semibold truncate max-w-[200px]">
-                      {inv.projectDescription}
-                    </td>
-                    <td className="py-4.5 px-4 text-slate-500 font-medium">
-                      {new Date(inv.dueDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-4.5 px-4 font-mono font-bold text-slate-800">
-                      {formatCurrency(inv.amount)}
-                    </td>
-                    <td className="py-4.5 px-4">
-                      {getStatusBadge(inv.status)}
-                    </td>
-                    <td className="py-4.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* WhatsApp Dropdown Trigger */}
-                        {inv.status !== "PAID" && (
-                          <select
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                triggerWhatsAppNudge(inv, e.target.value);
-                                e.target.value = ""; // Reset dropdown
-                              }
-                            }}
-                            className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[10px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none"
-                          >
-                            <option value="">💬 Nudge Client...</option>
-                            <option value="DUE_TOMORROW">Nudge: Due Tomorrow</option>
-                            <option value="DUE_TODAY">Nudge: Due Today</option>
-                            <option value="OVERDUE_3D">Nudge: 3 Days Overdue</option>
-                            <option value="OVERDUE_7D">Nudge: Past Due Follow-up</option>
-                          </select>
-                        )}
-
-                        <button
-                          onClick={() => copyPaymentLink(inv.id)}
-                          className="p-2 hover:bg-slate-55 text-slate-400 hover:text-emerald-500 border border-transparent rounded-lg transition-colors"
-                          title="Copy Shareable Invoice Link"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteInvoice(inv.id)}
-                          className="p-2 hover:bg-slate-55 text-slate-400 hover:text-rose-500 border border-transparent rounded-lg transition-colors"
-                          title="Delete Invoice"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-655">
+                {isLoading && filteredPayments.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Loading payments...</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filteredPayments.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-slate-450">
+                      No paid transactions matching search.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPayments.map((pay) => (
+                    <tr key={pay.id} className="hover:bg-slate-50/20 transition-all">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            <User className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-bold text-slate-800">{pay.clientName}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{pay.invoiceNumber}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-slate-500 font-medium">
+                        {pay.reference}
+                      </td>
+                      <td className="py-4 px-4 text-slate-400 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(pay.datePaid).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-right font-black text-emerald-600 font-mono">
+                        ₦ {pay.amount.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-      </div>
+      )}
 
     </div>
   );
