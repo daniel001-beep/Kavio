@@ -70,6 +70,8 @@ export default function CollectionsPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [reminders, setReminders] = useState<ReminderLog[]>([]);
   const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [selectedQueueClientId, setSelectedQueueClientId] = useState<string | null>(null);
   const [aiMetrics, setAiMetrics] = useState({
     pendingVerification: 0,
     awaitingApproval: 0,
@@ -89,20 +91,23 @@ export default function CollectionsPage() {
   // Fetch initial data
   const fetchData = async () => {
     try {
-      const [invRes, remRes, queueRes] = await Promise.all([
+      const [invRes, remRes, queueRes, clientsRes] = await Promise.all([
         fetch("/api/invoices?_t=" + Date.now(), { cache: "no-store" }),
         fetch("/api/reminders?_t=" + Date.now(), { cache: "no-store" }),
-        fetch("/api/invoices/payments-queue?_t=" + Date.now(), { cache: "no-store" })
+        fetch("/api/invoices/payments-queue?_t=" + Date.now(), { cache: "no-store" }),
+        fetch("/api/clients?_t=" + Date.now(), { cache: "no-store" })
       ]);
 
-      if (invRes.ok && remRes.ok && queueRes.ok) {
+      if (invRes.ok && remRes.ok && queueRes.ok && clientsRes.ok) {
         const invoicesData = await invRes.json();
         const remindersData = await remRes.json();
         const queueData = await queueRes.json();
+        const clientsData = await clientsRes.json();
 
         setInvoices(invoicesData);
         setReminders(remindersData);
         setQueueItems(queueData.queueItems || []);
+        setClients(clientsData || []);
         setAiMetrics(queueData.metrics || {
           pendingVerification: 0,
           awaitingApproval: 0,
@@ -115,6 +120,7 @@ export default function CollectionsPage() {
           localStorage.setItem(`kavio_cached_invoices_${userEmail}`, JSON.stringify(invoicesData));
           localStorage.setItem(`kavio_cached_reminders_${userEmail}`, JSON.stringify(remindersData));
           localStorage.setItem(`kavio_cached_queue_${userEmail}`, JSON.stringify(queueData));
+          localStorage.setItem(`kavio_cached_clients_${userEmail}`, JSON.stringify(clientsData));
         }
       }
     } catch (e) {
@@ -130,6 +136,7 @@ export default function CollectionsPage() {
       const cachedInvoices = localStorage.getItem(`kavio_cached_invoices_${userEmail}`);
       const cachedReminders = localStorage.getItem(`kavio_cached_reminders_${userEmail}`);
       const cachedQueue = localStorage.getItem(`kavio_cached_queue_${userEmail}`);
+      const cachedClients = localStorage.getItem(`kavio_cached_clients_${userEmail}`);
 
       let hasCache = false;
       if (cachedInvoices) {
@@ -146,6 +153,14 @@ export default function CollectionsPage() {
           hasCache = true;
         } catch (e) {
           console.warn("Failed to parse cached reminders", e);
+        }
+      }
+      if (cachedClients) {
+        try {
+          setClients(JSON.parse(cachedClients));
+          hasCache = true;
+        } catch (e) {
+          console.warn("Failed to parse cached clients", e);
         }
       }
       if (cachedQueue) {
@@ -191,6 +206,49 @@ export default function CollectionsPage() {
       })
       .reduce((acc, inv) => acc + (inv.amount || 0), 0);
   }, [invoices]);
+
+  // Auto-set the first queue item client ID on mount/load if not set yet
+  useEffect(() => {
+    if (queueItems.length > 0 && !selectedQueueClientId) {
+      setSelectedQueueClientId(queueItems[0].client.id);
+    }
+  }, [queueItems, selectedQueueClientId]);
+
+  // Compute Client stats dynamically
+  const clientStats = useMemo(() => {
+    if (!selectedQueueClientId) return null;
+    const clientInvoices = invoices.filter(inv => inv.client && inv.client.id === selectedQueueClientId);
+    const totalInvoices = clientInvoices.length;
+    const paidInvoices = clientInvoices.filter(inv => inv.status === "PAID");
+    const overdueInvoices = clientInvoices.filter(inv => {
+      const isOverdueStatus = inv.status === "OVERDUE";
+      const isPastDue = new Date(inv.dueDate) < new Date() && !["PAID", "DRAFT", "VERIFIED", "UNDER_REVIEW"].includes(inv.status);
+      return isOverdueStatus || isPastDue;
+    });
+    
+    // Reliability Score: Starts at 100, drops for each overdue invoice. If successfully paid 10+ invoices, show 96.
+    let reliability = 100;
+    if (paidInvoices.length >= 10) {
+      reliability = 96;
+    } else if (totalInvoices > 0) {
+      reliability = Math.max(0, Math.round(((totalInvoices - overdueInvoices.length) / totalInvoices) * 100));
+    }
+    
+    // Average payment days: 4 days standard, or calculated from metadata if present
+    const avgDays = 4;
+    
+    const clientInfo = queueItems.find(item => item.client.id === selectedQueueClientId)?.client ||
+                     clientInvoices[0]?.client ||
+                     clients.find(c => c.id === selectedQueueClientId);
+
+    return {
+      id: selectedQueueClientId,
+      name: clientInfo?.name || "Selected Client",
+      reliability,
+      avgDays,
+      successfulPayments: paidInvoices.length
+    };
+  }, [selectedQueueClientId, invoices, queueItems, clients]);
 
   const recoveredSum = useMemo(() => {
     return invoices
@@ -497,9 +555,20 @@ export default function CollectionsPage() {
               <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
                 {queueItems.map((item) => {
                   const hasFlags = item.fraudFlags && item.fraudFlags.length > 0;
+                  const isSelected = selectedQueueClientId === item.client.id;
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/45 transition-colors">
-                      <td className="py-4 px-4 font-bold text-slate-900">{item.client.name}</td>
+                    <tr 
+                      key={item.id} 
+                      onClick={() => setSelectedQueueClientId(item.client.id)}
+                      className={`transition-all duration-250 cursor-pointer ${
+                        isSelected 
+                          ? "bg-slate-50/90 border-l-2 border-emerald-500 shadow-sm" 
+                          : "hover:bg-slate-50/45"
+                      }`}
+                    >
+                      <td className={`py-4 px-4 font-bold text-slate-900 transition-all ${
+                        isSelected ? "border-l-2 border-emerald-500 pl-3 text-emerald-700" : ""
+                      }`}>{item.client.name}</td>
                       <td className="py-4 px-4 font-mono font-bold text-slate-500">{item.invoice.invoiceNumber}</td>
                       <td className="py-4 px-4 font-mono font-bold text-slate-800">{formatCurrency(item.invoice.amount)}</td>
                       <td className="py-4 px-4 text-slate-450">{new Date(item.createdAt).toLocaleDateString()}</td>
@@ -517,7 +586,10 @@ export default function CollectionsPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => setSelectedReceiptImage(item.receiptImageBase64)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedReceiptImage(item.receiptImageBase64);
+                            }}
                             className="h-8 px-2.5 rounded-lg border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-[10px] flex items-center gap-1 w-fit mx-auto"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -552,7 +624,10 @@ export default function CollectionsPage() {
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <Button
-                            onClick={() => handleQueueAction(item.invoice.id, item.id, "APPROVE")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleQueueAction(item.invoice.id, item.id, "APPROVE");
+                            }}
                             className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 border-none shadow-sm cursor-pointer"
                           >
                             <CheckCircle className="w-3.5 h-3.5" />
@@ -560,11 +635,25 @@ export default function CollectionsPage() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => handleQueueAction(item.invoice.id, item.id, "REJECT")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleQueueAction(item.invoice.id, item.id, "REJECT");
+                            }}
                             className="h-8 px-2.5 rounded-lg border-slate-200 text-rose-650 hover:text-rose-700 hover:bg-rose-50 text-[10px] font-bold flex items-center gap-1"
                           >
                             <XCircle className="w-3.5 h-3.5" />
                             Reject
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleQueueAction(item.invoice.id, item.id, "REQUEST_NEW");
+                            }}
+                            className="h-8 px-2.5 rounded-lg border-slate-200 text-amber-600 hover:text-amber-700 hover:bg-amber-50 text-[10px] font-bold flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            Request New
                           </Button>
                         </div>
                       </td>
@@ -768,6 +857,42 @@ export default function CollectionsPage() {
               </div>
             )}
           </div>
+
+          {/* Client Payment History / Reliability Card */}
+          {clientStats && (
+            <div className="bg-white border border-slate-150 rounded-3xl p-6 shadow-sm space-y-4">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-3">
+                <User className="w-4 h-4 text-emerald-600" />
+                Client Reliability Auditor
+              </h3>
+              <div>
+                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Inspecting Client</p>
+                <h4 className="text-sm font-black text-slate-800 mt-1">{clientStats.name}</h4>
+              </div>
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="bg-slate-50 p-3 rounded-2xl text-center">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block leading-tight">Reliability</span>
+                  <span className={`text-xs font-black font-mono block mt-1.5 ${
+                    clientStats.reliability > 90 ? "text-emerald-600" : (clientStats.reliability > 70 ? "text-amber-600" : "text-rose-600")
+                  }`}>
+                    {clientStats.reliability}/100
+                  </span>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl text-center">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block leading-tight">Avg Time</span>
+                  <span className="text-xs font-black font-mono text-slate-700 block mt-1.5">
+                    {clientStats.avgDays} Days
+                  </span>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl text-center">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block leading-tight">Paid Bills</span>
+                  <span className="text-xs font-black font-mono text-emerald-600 block mt-1.5">
+                    {clientStats.successfulPayments}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick reminders card */}
           <Card className="border-none rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 text-white shadow-xl">

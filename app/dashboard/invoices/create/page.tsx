@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useNotifications } from "@/app/context/NotificationContext";
+import { useSession } from "@/app/context/AuthContext";
 
 interface Client {
   id: string;
@@ -29,6 +30,7 @@ interface Client {
 export default function CreateInvoicePage() {
   const router = useRouter();
   const { addNotification } = useNotifications();
+  const { data: session } = useSession();
 
   // Database clients lists
   const [clients, setClients] = useState<Client[]>([]);
@@ -47,33 +49,65 @@ export default function CreateInvoicePage() {
   const [clientName, setClientName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch clients lists on mount
+  // Fetch clients and invoices lists on mount
   useEffect(() => {
-    const loadClients = async () => {
+    const loadData = async () => {
       try {
         setIsLoadingClients(true);
-        const res = await fetch("/api/clients");
-        if (res.ok) {
-          const data = await res.json();
+        const [clientsRes, invoicesRes] = await Promise.all([
+          fetch("/api/clients"),
+          fetch("/api/invoices")
+        ]);
+
+        if (clientsRes.ok) {
+          const data = await clientsRes.json();
           setClients(Array.isArray(data) ? data : []);
         }
+
+        let nextNumber = "KAV-2026-001";
+        if (invoicesRes.ok) {
+          const data = await invoicesRes.json();
+          // Filter numbers starting with "KAV-"
+          const kavioInvoices = Array.isArray(data) 
+            ? data.filter((inv: any) => inv.invoiceNumber && inv.invoiceNumber.startsWith("KAV-"))
+            : [];
+          
+          let maxSeq = 0;
+          kavioInvoices.forEach((inv: any) => {
+            const parts = inv.invoiceNumber.split("-");
+            if (parts.length === 3) {
+              const seqNum = parseInt(parts[2], 10);
+              if (!isNaN(seqNum) && seqNum > maxSeq) {
+                maxSeq = seqNum;
+              }
+            }
+          });
+          const nextSeq = maxSeq + 1;
+          const seqStr = String(nextSeq).padStart(3, "0");
+          nextNumber = `KAV-2026-${seqStr}`;
+        }
+        setInvoiceNumber(nextNumber);
+
+        // Autofill payment instructions with Narration reminder
+        const freelancerName = session?.user?.name || "Freelancer";
+        setPaymentInstructions(
+          `Please transfer to:\n${freelancerName} Studio / Wema Bank / Acct: 0123456789\n\nWhen making payment, include ${nextNumber} in your transfer narration/reference.`
+        );
+
       } catch (e) {
-        console.error("Failed to load clients:", e);
+        console.error("Failed to load initial data:", e);
       } finally {
         setIsLoadingClients(false);
       }
     };
 
-    loadClients();
+    loadData();
 
-    // Default dates and numbers
+    // Default dates
     const today = new Date();
     const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     setDueDate(thirtyDaysLater.toISOString().split("T")[0]);
-
-    const rand = Math.floor(100 + Math.random() * 900);
-    setInvoiceNumber(`INV-2026-${rand}`);
-  }, []);
+  }, [session]);
 
   // Update email/name when client is selected
   const handleClientSelect = (clientId: string) => {

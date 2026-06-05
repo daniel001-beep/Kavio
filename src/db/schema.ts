@@ -387,7 +387,7 @@ export const receiptSubmissions = pgTable("receipt_submission", {
   userId: text("user_id") // Freelancer ID
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  status: text("status").notNull().default("UNDER_REVIEW"), // 'VERIFIED', 'UNDER_REVIEW', 'FAILED', 'APPROVED', 'REJECTED'
+  status: text("status").notNull().default("UNDER_REVIEW"), // 'VERIFIED', 'NEEDS_REVIEW', 'FAILED', 'APPROVED', 'REJECTED'
   confidenceScore: doublePrecision("confidence_score").notNull().default(0),
   fraudFlags: jsonb("fraud_flags").default([]),
   receiptImageBase64: text("receipt_image_base64"),
@@ -395,6 +395,39 @@ export const receiptSubmissions = pgTable("receipt_submission", {
   extractedDate: text("extracted_date"),
   extractedRef: text("extracted_ref"),
   reason: text("reason"),
+  
+  // New OCR and Client Input fields
+  senderName: text("sender_name"),
+  receiverName: text("receiver_name"),
+  transactionTime: text("transaction_time"),
+  narration: text("narration"),
+  bankName: text("bank_name"),
+  sessionId: text("session_id"),
+  senderAccountLast4: text("sender_account_last4"),
+  submittedRef: text("submitted_ref"),
+  ocrResult: jsonb("ocr_result").default({}),
+  imageHash: text("image_hash"),
+  receiptHash: text("receipt_hash"),
+  freelancerDecision: text("freelancer_decision"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// 8. Payment Audit Logs (Immutable)
+export const paymentAuditLogs = pgTable("payment_audit_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
+  receiptImageBase64: text("receipt_image_base64"),
+  ocrResult: jsonb("ocr_result").default({}),
+  trustScore: doublePrecision("trust_score").notNull().default(0),
+  fraudFlags: jsonb("fraud_flags").default([]),
+  freelancerDecision: text("freelancer_decision"), // APPROVED, REJECTED, REQUEST_NEW
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
