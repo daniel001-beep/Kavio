@@ -46,6 +46,10 @@ export default function PublicInvoicePage() {
   const [isConfirming, setIsConfirming] = useState(false);
   const [isConfirmedSuccessfully, setIsConfirmedSuccessfully] = useState(false);
 
+  // Receipt states
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+
   // Load invoice data
   const loadInvoice = async () => {
     try {
@@ -82,14 +86,41 @@ export default function PublicInvoicePage() {
 
   const handleClientPaidConfirmation = async () => {
     if (!invoice) return;
+    if (!receiptFile) {
+      setReceiptError("Please upload your transfer receipt first so we can verify it.");
+      return;
+    }
 
     setIsConfirming(true);
+    setReceiptError(null);
     try {
+      // 1. Verify receipt via Gemini API
+      const formData = new FormData();
+      formData.append("file", receiptFile);
+
+      const verifyRes = await fetch(`/api/invoices/${invoice.id}/verify-receipt`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!verifyRes.ok) {
+        throw new Error("Unable to connect to Kavio verification engine.");
+      }
+
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        setReceiptError(verifyData.error || "Receipt verification failed. Please make sure the receipt is correct.");
+        setIsConfirming(false);
+        return;
+      }
+
+      // 2. Perform payment transaction record
       const res = await fetch(`/api/invoices/${invoice.id}/pay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          notes: "Confirmed by client from public invoice page"
+          reference: verifyData.extractedRef || "AI-VERIFIED",
+          notes: `Verified by Gemini AI. Ref: ${verifyData.extractedRef || "N/A"}. Date: ${verifyData.extractedDate || "N/A"}. Amount: NGN ${verifyData.extractedAmount?.toLocaleString() || "N/A"}.`
         })
       });
 
@@ -100,8 +131,8 @@ export default function PublicInvoicePage() {
       } else {
         alert("Failed to register check-in. Please try again.");
       }
-    } catch (e) {
-      alert("Failed to connect to collections rails.");
+    } catch (e: any) {
+      setReceiptError(e.message || "Failed to connect to collections rails.");
     } finally {
       setIsConfirming(false);
     }
@@ -216,12 +247,12 @@ export default function PublicInvoicePage() {
             <div>
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Freelancer</span>
               <p className="font-extrabold text-slate-900 text-sm">{invoice.user.name}</p>
-              <p className="text-slate-450 font-semibold mt-0.5">{invoice.user.email}</p>
+              <p className="text-slate-500 font-semibold mt-0.5">{invoice.user.email}</p>
             </div>
             <div className="text-right">
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Prepared For</span>
               <p className="font-extrabold text-slate-800 text-sm">{invoice.client.name}</p>
-              <p className="text-slate-450 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
+              <p className="text-slate-500 font-semibold mt-0.5">{invoice.client.companyName || invoice.client.email}</p>
             </div>
           </div>
 
@@ -229,7 +260,7 @@ export default function PublicInvoicePage() {
           <div className="pt-6 border-t border-slate-100/60">
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2.5">Project Scope</span>
             <div className="bg-slate-50 border border-slate-100/80 rounded-2xl p-4 flex items-center justify-between">
-              <p className="font-bold text-slate-750 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
+              <p className="font-bold text-slate-700 text-xs truncate max-w-[320px]">{invoice.projectDescription}</p>
               <p className="font-mono font-bold text-slate-900 text-xs pl-4">{formatCurrency(invoice.amount)}</p>
             </div>
           </div>
@@ -249,7 +280,47 @@ export default function PublicInvoicePage() {
 
           {/* Action triggers */}
           {invoice.status !== "PAID" ? (
-            <div className="pt-8 border-t border-slate-150 mt-4 space-y-4">
+            <div className="pt-8 border-t border-slate-150 mt-4 space-y-5">
+              
+              {/* Upload Receipt Panel */}
+              <div className="space-y-2.5">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Upload Payment Receipt</span>
+                <div className="border border-dashed border-slate-200/80 hover:border-emerald-500/40 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-50 transition-all relative flex flex-col items-center justify-center text-center cursor-pointer group">
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setReceiptFile(file);
+                        setReceiptError(null);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                  />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-450 group-hover:bg-emerald-55 group-hover:text-emerald-600 flex items-center justify-center transition-all mb-2 border border-slate-200/20">
+                    <FileText className="w-4.5 h-4.5" />
+                  </div>
+                  {receiptFile ? (
+                    <div className="space-y-1 z-30 pointer-events-none">
+                      <p className="text-xs font-bold text-slate-700">{receiptFile.name}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold font-mono">{(receiptFile.size / 1024).toFixed(0)} KB · Change receipt</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 z-30 pointer-events-none">
+                      <p className="text-xs font-bold text-slate-600">Select receipt image or PDF</p>
+                      <p className="text-[10px] text-slate-450 font-semibold">Gemini AI will verify the date, reference, and amount</p>
+                    </div>
+                  )}
+                </div>
+                {receiptError && (
+                  <div className="flex items-start gap-1.5 text-rose-600 text-[11px] font-semibold bg-rose-50 border border-rose-100 p-3.5 rounded-xl">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{receiptError}</span>
+                  </div>
+                )}
+              </div>
+
               {isConfirmedSuccessfully ? (
                 <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 p-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-bounce" />
@@ -272,7 +343,7 @@ export default function PublicInvoicePage() {
             </div>
           ) : (
             <div className="pt-8 border-t border-slate-150 mt-4">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 p-4.5 rounded-2xl text-xs font-bold text-center flex flex-col items-center justify-center gap-2">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4.5 rounded-2xl text-xs font-bold text-center flex flex-col items-center justify-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-1">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
