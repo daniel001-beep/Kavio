@@ -18,11 +18,10 @@ export default function BottomNav() {
     { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
     { href: "/dashboard/collections", label: "Collections", icon: MessageSquare },
-    { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 py-2.5 pb-5 shadow-2xl grid grid-cols-5 justify-items-center w-full">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 py-2.5 pb-5 shadow-2xl grid grid-cols-4 justify-items-center w-full">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href;
