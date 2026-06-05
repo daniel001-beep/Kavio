@@ -28,6 +28,14 @@ export async function GET(req: Request) {
         extractedRef: receiptSubmissions.extractedRef,
         reason: receiptSubmissions.reason,
         createdAt: receiptSubmissions.createdAt,
+        senderName: receiptSubmissions.senderName,
+        receiverName: receiptSubmissions.receiverName,
+        transactionTime: receiptSubmissions.transactionTime,
+        narration: receiptSubmissions.narration,
+        bankName: receiptSubmissions.bankName,
+        sessionId: receiptSubmissions.sessionId,
+        senderAccountLast4: receiptSubmissions.senderAccountLast4,
+        submittedRef: receiptSubmissions.submittedRef,
         invoice: {
           id: invoices.id,
           invoiceNumber: invoices.invoiceNumber,
@@ -35,6 +43,7 @@ export async function GET(req: Request) {
           projectDescription: invoices.projectDescription,
         },
         client: {
+          id: clients.id,
           name: clients.name,
           email: clients.email,
         }

@@ -230,7 +230,7 @@ body {
 [data-page="public-invoice"] p,
 [data-page="public-invoice"] span,
 [data-page="public-invoice"] a {
-    color: inherit !important;
+    color: inherit;
 }
 
 [data-page="public-invoice"] {

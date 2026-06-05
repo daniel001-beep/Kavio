@@ -117,6 +117,38 @@ async function runMigration() {
     `);
     console.log("✅ receipt_submission table created.");
 
+    console.log("Injecting columns to receipt_submission if they don't exist...");
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "sender_name" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "receiver_name" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "transaction_time" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "narration" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "bank_name" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "session_id" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "sender_account_last4" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "submitted_ref" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "ocr_result" jsonb DEFAULT '{}';`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "image_hash" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "receipt_hash" text;`);
+    await db.execute(sql`ALTER TABLE "receipt_submission" ADD COLUMN IF NOT EXISTS "freelancer_decision" text;`);
+    console.log("✅ receipt_submission columns injected.");
+
+    console.log("Creating payment_audit_log table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "payment_audit_log" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "invoice_id" uuid NOT NULL REFERENCES "invoice"("id") ON DELETE CASCADE,
+        "client_id" uuid NOT NULL REFERENCES "client"("id") ON DELETE CASCADE,
+        "receipt_image_base64" text,
+        "ocr_result" jsonb DEFAULT '{}',
+        "trust_score" double precision NOT NULL DEFAULT 0,
+        "fraud_flags" jsonb DEFAULT '[]',
+        "freelancer_decision" text,
+        "timestamp" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ payment_audit_log table created.");
+
+
     console.log("🎉 All migrations applied successfully!");
   } catch (error: any) {
     console.error("❌ Migration failed:", error.message || error);

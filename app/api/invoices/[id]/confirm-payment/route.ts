@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { invoices, payments, receiptSubmissions, clients } from "@/src/db/schema";
+import { invoices, payments, receiptSubmissions, clients, paymentAuditLogs } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, and } from "drizzle-orm";
 
@@ -47,11 +47,10 @@ export async function POST(
         .from(receiptSubmissions)
         .where(eq(receiptSubmissions.id, submissionId));
     } else {
-      // Default to the latest active submission
       submissionQuery = db
         .select()
         .from(receiptSubmissions)
-        .where(and(eq(receiptSubmissions.invoiceId, id), eq(receiptSubmissions.status, "VERIFIED"))); // or UNDER_REVIEW
+        .where(and(eq(receiptSubmissions.invoiceId, id), eq(receiptSubmissions.status, "VERIFIED")));
     }
 
     const submissions = await submissionQuery.limit(1);
@@ -67,7 +66,7 @@ export async function POST(
           amount: invoice.amount,
           datePaid: new Date(),
           reference: submission?.extractedRef || "AI-VERIFIED-APPROVED",
-          notes: notes || `Approved by freelancer. AI Confidence: ${submission?.confidenceScore || "N/A"}%`,
+          notes: notes || `Approved by freelancer. AI Trust Score: ${submission?.confidenceScore || "N/A"}%`,
         })
         .returning();
 
@@ -80,16 +79,30 @@ export async function POST(
         })
         .where(eq(invoices.id, id));
 
-      // 3. Update receipt submission status to APPROVED
+      // 3. Update receipt submission status to APPROVED and freelancer decision
       if (submission) {
         await db
           .update(receiptSubmissions)
           .set({
             status: "APPROVED",
-            reason: notes || `Approved by freelancer. AI Confidence: ${submission.confidenceScore}%`,
+            freelancerDecision: "APPROVED",
+            reason: notes || `Approved by freelancer. Trust Score: ${submission.confidenceScore}%`,
             updatedAt: new Date(),
           })
           .where(eq(receiptSubmissions.id, submission.id));
+
+        // Insert into Immutable Audit Log Table
+        await db
+          .insert(paymentAuditLogs)
+          .values({
+            invoiceId: invoice.id,
+            clientId: invoice.clientId,
+            receiptImageBase64: submission.receiptImageBase64 || "",
+            ocrResult: submission.ocrResult || {},
+            trustScore: submission.confidenceScore,
+            fraudFlags: submission.fraudFlags || [],
+            freelancerDecision: "APPROVED"
+          });
       }
 
       // Track event
@@ -100,10 +113,9 @@ export async function POST(
         metadata: { invoiceId: invoice.id, paymentId: newPayment.id, amount: invoice.amount, approvedViaQueue: true },
       });
 
-      // Client Notification System:
-      // "Your payment has been confirmed by [Business Name]. Invoice INV-XXX is now marked as Paid."
-      const freelancerName = session?.user?.name || "the business owner";
-      const notificationText = `Your payment has been confirmed by ${freelancerName}. Invoice ${invoice.invoiceNumber} is now marked as Paid.`;
+      // Notification payload:
+      // "Payment Confirmed ✅\n\nYour payment for invoice KAV-2026-001 has been confirmed."
+      const notificationText = `Payment Confirmed ✅\n\nYour payment for invoice ${invoice.invoiceNumber} has been confirmed.`;
 
       return NextResponse.json({ 
         success: true, 
@@ -125,16 +137,31 @@ export async function POST(
         })
         .where(eq(invoices.id, id));
 
-      // 2. Update receipt submission status to REJECTED
+      // 2. Update receipt submission status to REJECTED and freelancer decision
       if (submission) {
+        const decisionVal = action === "REQUEST_NEW" ? "REQUEST_NEW" : "REJECTED";
         await db
           .update(receiptSubmissions)
           .set({
-            status: "REJECTED",
+            status: action === "REQUEST_NEW" ? "NEEDS_REVIEW" : "REJECTED", // Keep status matched internally
+            freelancerDecision: decisionVal,
             reason: notes || `Rejected by freelancer: ${action === "REQUEST_NEW" ? "Requesting a new receipt." : "Invalid proof of payment."}`,
             updatedAt: new Date(),
           })
           .where(eq(receiptSubmissions.id, submission.id));
+
+        // Insert into Immutable Audit Log Table
+        await db
+          .insert(paymentAuditLogs)
+          .values({
+            invoiceId: invoice.id,
+            clientId: invoice.clientId,
+            receiptImageBase64: submission.receiptImageBase64 || "",
+            ocrResult: submission.ocrResult || {},
+            trustScore: submission.confidenceScore,
+            fraudFlags: submission.fraudFlags || [],
+            freelancerDecision: decisionVal
+          });
       }
 
       // Track event
