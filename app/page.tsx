@@ -70,19 +70,19 @@ export default function Home() {
             className="text-4xl sm:text-5xl md:text-7.5xl font-black tracking-tight leading-snug sm:leading-[1.1] md:leading-[1.08] max-w-4xl"
             style={{ color: "#090d16", WebkitTextFillColor: "#090d16", background: "none", WebkitBackgroundClip: "unset", backgroundClip: "unset" }}
           >
-            Get paid on time,<br />
+            Stop Chasing Payments.<br />
             <span 
               className="bg-gradient-to-r from-emerald-650 to-emerald-500 bg-clip-text text-transparent drop-shadow-sm block sm:inline mt-3.5 sm:mt-0"
               style={{ WebkitTextFillColor: "transparent" }}
             >
-              without the awkward silences.
+              Get Paid Faster.
             </span>
           </h1>
         </ScrollReveal3D>
 
         <ScrollReveal3D delay={250} duration={0.9}>
           <p className="mt-8 text-base sm:text-lg md:text-xl text-slate-650 max-w-2xl font-medium leading-relaxed">
-            Kavio is the polite, persistent collection assistant for freelancers. We handle late invoice follow-ups via automated WhatsApp and Email reminders so you never have to awkwardly chase a client for money again.
+            Track invoices, monitor outstanding revenue, identify risky clients, and send payment reminders from one unified space.
           </p>
         </ScrollReveal3D>
 
