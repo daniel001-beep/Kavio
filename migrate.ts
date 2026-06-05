@@ -97,6 +97,26 @@ async function runMigration() {
     `);
     console.log("✅ admin_notifications table created.");
 
+    console.log("Creating receipt_submission table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "receipt_submission" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "invoice_id" uuid NOT NULL REFERENCES "invoice"("id") ON DELETE CASCADE,
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "status" text NOT NULL DEFAULT 'UNDER_REVIEW',
+        "confidence_score" double precision NOT NULL DEFAULT 0,
+        "fraud_flags" jsonb DEFAULT '[]',
+        "receipt_image_base64" text,
+        "extracted_amount" double precision,
+        "extracted_date" text,
+        "extracted_ref" text,
+        "reason" text,
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ receipt_submission table created.");
+
     console.log("🎉 All migrations applied successfully!");
   } catch (error: any) {
     console.error("❌ Migration failed:", error.message || error);

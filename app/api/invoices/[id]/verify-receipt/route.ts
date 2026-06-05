@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { invoices, payments, clients, users } from "@/src/db/schema";
-import { getResilientSession } from "@/src/lib/auth-session";
-import { eq, and } from "drizzle-orm";
+import { invoices, payments, clients, users, receiptSubmissions } from "@/src/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
@@ -19,6 +18,7 @@ export async function POST(
     const invoiceRecords = await db
       .select({
         id: invoices.id,
+        userId: invoices.userId,
         invoiceNumber: invoices.invoiceNumber,
         amount: invoices.amount,
         dueDate: invoices.dueDate,
@@ -63,6 +63,8 @@ export async function POST(
 
     let verificationResult = {
       isValid: true,
+      confidenceScore: 98,
+      fraudFlags: [] as string[],
       reason: "Receipt verified successfully via Kavio Demo Engine.",
       extractedAmount: invoice.amount,
       extractedDate: new Date().toLocaleDateString(),
@@ -89,25 +91,30 @@ Invoice Details:
 Verification Instructions:
 1. RECEIPT TYPE VALIDATION:
    - Check if the uploaded image or document is a genuine bank transfer receipt, transaction success screen, or proof of payment.
-   - If the document is NOT a bank transfer receipt (e.g., it is a photo of a person, animal, scenery, text message screenshot, website logo, dashboard, or a store/restaurant checkout receipt for physical goods), it is INVALID. Mark "isValid": false and set "reason" to "The uploaded file does not appear to be a valid bank transfer receipt or proof of payment. Please upload a valid bank transfer receipt."
+   - If the document is NOT a bank transfer receipt (e.g., it is a photo of a person, animal, scenery, text message screenshot, website logo, dashboard, or a store/restaurant checkout receipt for physical goods), it is INVALID. Set "isValid" to false, "confidenceScore" below 50, and add "NOT_A_RECEIPT" to "fraudFlags".
 
 2. AMOUNT VALIDATION:
    - Extract the transaction amount.
-   - The transaction amount must exactly or very closely match the invoice amount (${invoice.amount} NGN). If the receipt amount is different, it is INVALID.
+   - The transaction amount must exactly or very closely match the invoice amount (${invoice.amount} NGN). If the receipt amount is different, add "AMOUNT_MISMATCH" to "fraudFlags" and reduce the confidence score accordingly.
 
 3. RECIPIENT / PAYEE VALIDATION:
    - The recipient's name or bank account details on the receipt must match the Freelancer's Name ("${invoice.user.name}") or the account details/bank instructions provided in the Payment Instructions ("${invoice.paymentInstructions}").
-   - If the receipt shows a different recipient name or bank details completely unrelated to the freelancer, it is INVALID.
+   - If the receipt shows a different recipient name or bank details completely unrelated to the freelancer, add "RECIPIENT_MISMATCH" to "fraudFlags" and reduce the confidence score.
 
-4. REUSED RECEIPT VALIDATION:
-   - The receipt transaction date must be close to the current date and time. If the receipt transaction date is more than 48 hours ago relative to ${new Date().toISOString()}, or is in the future, it is INVALID (flagged as a reused or forged receipt).
+4. DATE VALIDATION:
+   - The receipt transaction date must be close to the current date and time. If the receipt transaction date is more than 48 hours ago relative to ${new Date().toISOString()}, or is in the future, add "DATE_MISMATCH" or "REUSED_RECEIPT" to "fraudFlags" and reduce the confidence score.
 
-5. PAYER / SENDER VALIDATION:
-   - The sender name or description/notes in the receipt should ideally match or relate to the Client's Name ("${invoice.client.name}") or Client Company ("${invoice.client.companyName || ''}").
+5. CONFIDENCE SCORING:
+   - Assess the authenticity of the receipt and assign a "confidenceScore" between 0 and 100.
+   - If everything is perfect, matching, and authentic, the score should be 96-100.
+   - If there are minor discrepancies (e.g. slight naming mismatch but correct amount and bank), the score should be 70-95.
+   - If there is a major issue (not a receipt, amount mismatch, recipient mismatch, or very old date), the score should be below 70.
 
 Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do NOT include backticks, do NOT include any prefix/suffix text, just return the raw JSON string):
 {
   "isValid": true/false,
+  "confidenceScore": number,
+  "fraudFlags": ["FLAG1", "FLAG2"],
   "reason": "Clear explanation of why it is valid, or specific details of what parameters mismatched if it is invalid",
   "extractedAmount": number,
   "extractedDate": "YYYY-MM-DD",
@@ -133,6 +140,28 @@ Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do
         const parsed = JSON.parse(cleanedText);
         if (typeof parsed.isValid === "boolean") {
           verificationResult = parsed;
+          
+          // Check for duplicate reference in existing approved/verified/under_review receipt submissions
+          if (parsed.extractedRef) {
+            const existingSubmissions = await db
+              .select()
+              .from(receiptSubmissions)
+              .where(
+                and(
+                  eq(receiptSubmissions.extractedRef, parsed.extractedRef),
+                  sql`${receiptSubmissions.status} IN ('APPROVED', 'VERIFIED', 'UNDER_REVIEW')`
+                )
+              );
+            
+            if (existingSubmissions.length > 0) {
+              verificationResult.isValid = false;
+              verificationResult.confidenceScore = Math.min(verificationResult.confidenceScore, 30);
+              if (!verificationResult.fraudFlags.includes("REUSED_RECEIPT")) {
+                verificationResult.fraudFlags.push("REUSED_RECEIPT");
+              }
+              verificationResult.reason = `This reference number (${parsed.extractedRef}) has already been used for another submission. Duplicate receipt detected.`;
+            }
+          }
         }
       } catch (aiError: any) {
         console.error("Gemini AI receipt verification error:", aiError);
@@ -140,7 +169,9 @@ Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do
         if (file.name.toLowerCase().includes("fail") || file.name.toLowerCase().includes("fake")) {
           verificationResult = {
             isValid: false,
-            reason: "AI Verification Error: Failed to analyze receipt, but filename suggests invalid document.",
+            confidenceScore: 35,
+            fraudFlags: ["MANUAL_DEMO_FLAG"],
+            reason: "AI Verification Error: Failed to analyze receipt, and filename suggests invalid document.",
             extractedAmount: 0,
             extractedDate: "",
             extractedRef: "",
@@ -153,6 +184,8 @@ Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do
       if (file.name.toLowerCase().includes("fail") || file.name.toLowerCase().includes("fake")) {
         verificationResult = {
           isValid: false,
+          confidenceScore: 45,
+          fraudFlags: ["DEMO_FLAG"],
           reason: "Demo Mode: The upload was flagged as invalid because the filename contains 'fake' or 'fail'. Please upload a valid transfer receipt.",
           extractedAmount: 0,
           extractedDate: "",
@@ -161,19 +194,62 @@ Return ONLY a JSON object with this exact structure (do NOT wrap in markdown, do
       }
     }
 
-    if (!verificationResult.isValid) {
-      return NextResponse.json({ 
-        success: false, 
-        error: verificationResult.reason 
-      }, { status: 200 }); // Return 200 with success: false to handle gracefully in client UI
+    // Determine status based on confidence score
+    let status = "FAILED";
+    if (verificationResult.confidenceScore > 95) {
+      status = "VERIFIED";
+    } else if (verificationResult.confidenceScore >= 70) {
+      status = "UNDER_REVIEW";
+    }
+
+    // Save to receiptSubmissions table
+    const [newSubmission] = await db
+      .insert(receiptSubmissions)
+      .values({
+        invoiceId: invoice.id,
+        userId: invoice.userId,
+        status,
+        confidenceScore: verificationResult.confidenceScore,
+        fraudFlags: verificationResult.fraudFlags,
+        receiptImageBase64: base64Data, // Save base64 representation for previews
+        extractedAmount: verificationResult.extractedAmount || invoice.amount,
+        extractedDate: verificationResult.extractedDate || new Date().toISOString().split("T")[0],
+        extractedRef: verificationResult.extractedRef || "N/A",
+        reason: verificationResult.reason,
+      })
+      .returning();
+
+    // If verification succeeded at some level, update invoice status
+    if (status === "VERIFIED") {
+      await db
+        .update(invoices)
+        .set({
+          status: "VERIFIED",
+          updatedAt: new Date(),
+        })
+        .where(eq(invoices.id, invoice.id));
+    } else if (status === "UNDER_REVIEW") {
+      await db
+        .update(invoices)
+        .set({
+          status: "UNDER_REVIEW",
+          updatedAt: new Date(),
+        })
+        .where(eq(invoices.id, invoice.id));
     }
 
     return NextResponse.json({
-      success: true,
+      success: status !== "FAILED",
+      status,
+      confidenceScore: verificationResult.confidenceScore,
+      fraudFlags: verificationResult.fraudFlags,
       extractedAmount: verificationResult.extractedAmount,
       extractedDate: verificationResult.extractedDate,
       extractedRef: verificationResult.extractedRef,
-      message: "Receipt verified successfully!"
+      reason: verificationResult.reason,
+      message: status === "VERIFIED"
+        ? "Payment Successfully Verified ✅"
+        : (status === "UNDER_REVIEW" ? "Receipt Received ⏳" : "Verification Failed ❌")
     });
 
   } catch (error: any) {
