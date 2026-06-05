@@ -14,7 +14,8 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Settings
+  Settings,
+  MessageSquare
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useSession, useSignOut } from "@/app/context/AuthContext";
@@ -47,6 +48,7 @@ export default function Navbar() {
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/dashboard/invoices", label: "Invoices", icon: FileSpreadsheet },
         { href: "/dashboard/clients", label: "Clients", icon: Users },
+        { href: "/dashboard/collections", label: "Collections", icon: MessageSquare },
         { href: "/dashboard/report", label: "Reports", icon: TrendingUp },
         { href: "/dashboard/settings", label: "Settings", icon: Settings },
         ...(session?.user?.isAdmin ? [{ href: "/fintech/admin", label: "Admin Console", icon: ShieldCheck }] : []),

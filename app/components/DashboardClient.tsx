@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   TrendingUp, 
   Activity, 
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 export default function DashboardClient() {
+  const router = useRouter();
   const {
     status,
     isLoading,
@@ -48,6 +50,27 @@ export default function DashboardClient() {
     logReminder,
   } = useDashboardData();
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
+
+  const [onboardingResponses, setOnboardingResponses] = useState<any>(null);
+
+  // Redirect to onboarding if not completed yet
+  useEffect(() => {
+    if (userEmail) {
+      const onboarded = localStorage.getItem(`kavio_onboarded_${userEmail}`);
+      if (onboarded !== "true") {
+        router.push("/dashboard/onboarding");
+      } else {
+        const cached = localStorage.getItem(`kavio_onboarded_responses_${userEmail}`);
+        if (cached) {
+          try {
+            setOnboardingResponses(JSON.parse(cached));
+          } catch (e) {
+            console.warn("Failed to parse onboarding responses", e);
+          }
+        }
+      }
+    }
+  }, [userEmail, router]);
 
   // 1. Recent Invoices (limit to 5)
   const recentInvoices = useMemo(() => {
@@ -323,7 +346,7 @@ export default function DashboardClient() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm relative overflow-hidden">
         <div className="space-y-1.5 relative z-10">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Revenue OS Dashboard
+            Payment Recovery Console
           </h1>
           <p className="text-slate-500 text-sm font-semibold">
             Track outstanding balances, log payments, and nudge clients on time. As of {todayReadable}.
@@ -339,6 +362,32 @@ export default function DashboardClient() {
           </Link>
         </div>
       </div>
+
+      {/* Onboarding Suggestion Widget */}
+      {onboardingResponses && (
+        <div className="bg-gradient-to-r from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-4 text-left">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">Personalized Recovery Tip</h4>
+              <p className="text-xs text-slate-600 font-semibold mt-1">
+                {onboardingResponses.challenge === "late_payments" && "We've optimized your dashboard to track late invoices. Go to Collections to send quick WhatsApp nudges."}
+                {onboardingResponses.challenge === "tracking" && "We've highlighted outstanding balances below. Use the clients registry to track payment health."}
+                {onboardingResponses.challenge === "awkward_reminders" && "Kavio provides pre-written message templates. Click Nudge on any invoice to send a polite reminder."}
+                {!["late_payments", "tracking", "awkward_reminders"].includes(onboardingResponses.challenge) && "Use the Collections Center to monitor due dates and send pre-written payment links."}
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/collections" passHref legacyBehavior>
+            <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold px-5 py-3.5 text-xs shrink-0 flex items-center gap-2 border-none">
+              Open Collections Center
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* PWA App Installation Promotion Banner */}
       {isPWAInstallable && (
