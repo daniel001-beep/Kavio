@@ -11,11 +11,11 @@ import {
   Loader2,
   ShieldCheck,
   Zap,
-  Copy,
-  Check,
   UploadCloud,
   File
 } from "lucide-react";
+import OpayButton from "@/components/OpayButton";
+import CopyButton from "@/components/CopyButton";
 
 interface InvoiceData {
   id: string;
@@ -48,7 +48,6 @@ export default function ClientPaymentPage() {
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [isCopied, setIsCopied] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   // Receipt states
@@ -94,12 +93,6 @@ export default function ClientPaymentPage() {
       loadInvoice();
     }
   }, [invoiceId]);
-
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setIsCopied(field);
-    setTimeout(() => setIsCopied(null), 2000);
-  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -167,7 +160,7 @@ export default function ClientPaymentPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to connect to verification engine.");
+        throw new Error("Upload failed, please try again");
       }
 
       const data = await res.json();
@@ -180,7 +173,7 @@ export default function ClientPaymentPage() {
         setReceiptError(data.reason || data.message || "Verification failed. Please upload a clear receipt.");
       }
     } catch (err: any) {
-      setReceiptError(err.message || "An error occurred during verification.");
+      setReceiptError("Upload failed, please try again");
     } finally {
       setIsConfirming(false);
     }
@@ -196,7 +189,7 @@ export default function ClientPaymentPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
@@ -207,35 +200,38 @@ export default function ClientPaymentPage() {
     );
   }
 
+  // Edge Case 8d: Invoice not found or invalid
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-rose-950/30 border border-rose-800/30 flex items-center justify-center text-rose-500 mb-4">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 mb-4 shadow-sm">
           <AlertTriangle className="w-8 h-8" />
         </div>
-        <h1 className="text-xl font-bold">Invoice Not Found</h1>
-        <p className="text-xs text-slate-400 mt-2 max-w-sm">
+        <h1 className="text-xl font-bold text-slate-900">This invoice link is invalid or has expired</h1>
+        <p className="text-xs text-slate-500 mt-2 max-w-sm font-semibold">
           The requested payment link is invalid, expired, or was removed by the freelancer.
         </p>
       </div>
     );
   }
 
+  const isPaid = invoice.status === "PAID";
+
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-200 font-sans flex flex-col py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans flex flex-col py-12 px-4 relative overflow-hidden">
       {/* Background glow effects */}
-      <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-950/20 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-950/25 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-2xl mx-auto space-y-6 relative z-10">
         
         {/* Brand Header */}
         <div className="flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md shadow-emerald-500/10">
               <Zap className="w-4 h-4 text-white" />
             </div>
-            <span className="text-sm font-extrabold tracking-wider uppercase text-slate-400 font-mono">
+            <span className="text-sm font-extrabold tracking-wider uppercase text-slate-500 font-mono">
               Kavio Secure Portal
             </span>
           </div>
@@ -245,254 +241,285 @@ export default function ClientPaymentPage() {
         </div>
 
         {/* Invoice details card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl shadow-black/50">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
           
           {/* Header row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800/60">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
             <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Invoice Reference</span>
-              <h2 className="text-xl font-mono font-bold text-white mt-1">{invoice.invoiceNumber}</h2>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Invoice Reference</span>
+              <h2 className="text-xl font-mono font-bold text-slate-900 mt-1">{invoice.invoiceNumber}</h2>
             </div>
             
             {/* Status indicator */}
             <div>
-              {invoice.status === "PAID" ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              {isPaid ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-250 text-emerald-800">
                   <CheckCircle className="w-3.5 h-3.5" /> Paid & Settled
                 </span>
               ) : invoice.status === "VERIFIED" ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 border border-blue-250 text-blue-800">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Transfer Verified
                 </span>
               ) : invoice.status === "UNDER_REVIEW" ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 border border-amber-250 text-amber-800">
                   <Clock className="w-3.5 h-3.5 animate-pulse" /> Awaiting Clearance
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-500/10 border border-slate-500/20 text-slate-400">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700">
                   <Clock className="w-3.5 h-3.5" /> Awaiting Payment
                 </span>
               )}
             </div>
           </div>
 
-          {/* Pricing scope */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs border-b border-slate-800/60 pb-6">
+          {/* Pricing scope / Invoice Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs border-b border-slate-200/80 pb-6">
             <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Payee (Freelancer)</span>
-              <p className="font-bold text-white text-sm">{invoice.user.name}</p>
-              <p className="text-slate-400 font-semibold">{invoice.user.email}</p>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Payee (Freelancer)</span>
+              <p className="font-bold text-slate-900 text-sm">{invoice.user.name}</p>
+              <p className="text-slate-500 font-semibold">{invoice.user.email}</p>
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Billing Description</span>
-              <p className="font-bold text-white text-sm">{invoice.projectDescription}</p>
-              <p className="text-emerald-400 font-bold font-mono text-base mt-1">{formatCurrency(invoice.amount)}</p>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Billing Description</span>
+              <p className="font-bold text-slate-900 text-sm">{invoice.projectDescription}</p>
+              <p id="invoice-amount-text" className="text-emerald-700 font-bold font-mono text-base mt-1">
+                {formatCurrency(invoice.amount)}
+              </p>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Due Date</span>
+              <p className="font-bold text-slate-900 text-sm">
+                {new Date(invoice.dueDate).toLocaleDateString("en-NG", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="text-slate-550 font-semibold mt-1">
+                {new Date(invoice.dueDate) < new Date() && invoice.status !== "PAID" ? (
+                  <span className="text-rose-500 font-bold">Overdue</span>
+                ) : (
+                  <span>Standard Term</span>
+                )}
+              </p>
             </div>
           </div>
 
-          {/* Bank details instruction */}
-          {invoice.status !== "PAID" && (
-            <div className="space-y-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Bank Account Details</span>
-              
-              <div className="bg-[#0f172a]/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-                
-                {/* Bank Name */}
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Bank Name</span>
-                  <span className="font-bold text-white font-mono">{invoice.bankName || "OPay"}</span>
-                </div>
-
-                {/* Account Name */}
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Account Name</span>
-                  <span className="font-bold text-white font-mono">{invoice.accountName || invoice.user.name}</span>
-                </div>
-
-                {/* Account Number */}
-                <div className="flex justify-between items-center text-xs border-t border-slate-800/40 pt-3">
-                  <span className="text-slate-400 font-medium">Account Number</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-emerald-400 font-mono text-sm tracking-wider">
-                      {invoice.accountNumber || "1234567890"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(invoice.accountNumber || "1234567890", "acc")}
-                      className="p-1 hover:bg-slate-800 rounded transition-all text-slate-500 hover:text-slate-300 cursor-pointer"
-                    >
-                      {isCopied === "acc" ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* Action areas based on status */}
-          {invoice.status === "PAID" ? (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-6 rounded-2xl text-center space-y-2">
-              <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h3 className="font-bold text-sm">Payment Confirmed</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+          {/* Payment Section (Edge Case 8c: Hide payment section if Paid) */}
+          {isPaid ? (
+            <div className="bg-emerald-50 border border-emerald-250 text-emerald-800 p-6 rounded-2xl text-center space-y-2 shadow-sm">
+              <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto" />
+              <h3 className="font-black text-sm">This invoice has already been paid ✅</h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-semibold">
                 This invoice has been cleared and fully settled. No further actions are required.
               </p>
             </div>
-          ) : invoice.status === "VERIFIED" ? (
-            <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 p-6 rounded-2xl text-center space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-blue-400 mx-auto" />
-              <h3 className="font-bold text-sm">Transfer Auto-Verified ✅</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Your receipt has been scanned and verified. We are awaiting the freelancer to crosscheck their bank app and approve.
-              </p>
-            </div>
-          ) : invoice.status === "UNDER_REVIEW" ? (
-            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 p-6 rounded-2xl text-center space-y-2">
-              <Clock className="w-8 h-8 text-amber-400 mx-auto animate-pulse" />
-              <h3 className="font-bold text-sm">Receipt Under Review ⏳</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                We've logged your receipt details and flagged it for the freelancer's review. Automated reminders have been paused.
-              </p>
-            </div>
           ) : (
-            <form onSubmit={handleVerifyPayment} className="space-y-4 pt-4 border-t border-slate-800/60">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
-                Provide Proof of Bank Transfer
-              </span>
-
-              {/* Drag and Drop Zone */}
-              <div
-                onDragEnter={handleDrag}
-                onDragOver={handleDrag}
-                onDragLeave={handleDrag}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all relative ${
-                  dragActive
-                    ? "border-emerald-500 bg-emerald-950/10"
-                    : "border-slate-800 hover:border-slate-700 bg-slate-950/40"
-                }`}
-              >
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg, image/jpg, application/pdf"
-                  onChange={handleFileChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            <div className="space-y-6">
+              
+              {/* PRIMARY CALL TO ACTION: OPay Button & Guidance text */}
+              <div className="pt-2">
+                <OpayButton
+                  invoiceAmount={invoice.amount}
+                  freelancerAccount={invoice.accountNumber}
+                  freelancerBank={invoice.bankName}
+                  freelancerName={invoice.user.name}
                 />
+                <p className="text-[11px] italic text-slate-500 text-center mt-3 font-semibold leading-relaxed">
+                  Once you've paid, upload your OPay receipt below to confirm payment and stop all reminders instantly ⬇️
+                </p>
+              </div>
+
+              {/* Secondary Option Divider */}
+              <div className="relative my-6 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <span className="relative bg-white px-3 text-[9px] font-extrabold uppercase tracking-widest text-slate-400">
+                  Or pay manually via bank transfer
+                </span>
+              </div>
+
+              {/* Manual bank details */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Bank Account Details</span>
                 
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
-                    <UploadCloud className="w-5 h-5" />
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+                  
+                  {/* Bank Name */}
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-semibold">Bank Name</span>
+                    <span className="font-bold text-slate-900 font-mono">{invoice.bankName || "OPay"}</span>
                   </div>
 
-                  {receiptFile ? (
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-200">{receiptFile.name}</p>
-                      <p className="text-[10px] text-slate-500">
-                        {(receiptFile.size / 1024).toFixed(0)} KB · Drag/Click to change
-                      </p>
+                  {/* Account Name */}
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-semibold">Account Name</span>
+                    <span className="font-bold text-slate-900 font-mono">{invoice.accountName || invoice.user.name}</span>
+                  </div>
+
+                  {/* Account Number */}
+                  <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-3">
+                    <span className="text-slate-500 font-semibold">Account Number</span>
+                    <div className="flex items-center gap-2">
+                      <span id="manual-account-number" className="font-bold text-slate-950 font-mono text-sm tracking-wider">
+                        {invoice.accountNumber || "1234567890"}
+                      </span>
+                      <CopyButton text={invoice.accountNumber || "1234567890"} highlightTargetId="manual-account-number" />
                     </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-300">Drag & drop your transfer receipt</p>
-                      <p className="text-[10px] text-slate-500">
-                        Accepts PNG, JPG, JPEG, or PDF (Max 5MB)
-                      </p>
+                  </div>
+
+                  {/* Amount to transfer (with copy button) */}
+                  <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-3">
+                    <span className="text-slate-500 font-semibold">Amount to Pay</span>
+                    <div className="flex items-center gap-2">
+                      <span id="manual-amount" className="font-bold text-emerald-700 font-mono text-sm">
+                        {formatCurrency(invoice.amount)}
+                      </span>
+                      <CopyButton text={invoice.amount.toString()} highlightTargetId="manual-amount" />
                     </div>
-                  )}
+                  </div>
+
                 </div>
               </div>
 
-              {/* Transaction Ref input */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
-                  Optional transaction Reference
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Session ID or Reference Code"
-                  value={transactionRef}
-                  onChange={(e) => setTransactionRef(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-800 bg-slate-950/40 focus:outline-none focus:border-emerald-500 text-xs font-semibold text-slate-200"
-                />
-              </div>
+              {/* Receipt Upload Section */}
+              <form onSubmit={handleVerifyPayment} className="space-y-4 pt-4 border-t border-slate-200/80">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                  Provide Proof of Bank Transfer
+                </span>
 
-              {receiptError && (
-                <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-[11px] text-rose-400 flex items-start gap-2 font-medium">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-                  <div>{receiptError}</div>
-                </div>
-              )}
+                {/* Drag and Drop Zone */}
+                <div
+                  onDragEnter={handleDrag}
+                  onDragOver={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all relative ${
+                    dragActive
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-200 hover:border-slate-300 bg-slate-50"
+                  }`}
+                >
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg, application/pdf"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 shadow-sm">
+                      <UploadCloud className="w-5 h-5" />
+                    </div>
 
-              {/* Verification processing display */}
-              {verificationResult && (
-                <div className={`border rounded-2xl p-4 text-xs space-y-1.5 ${
-                  verificationResult.status === "AUTO_VERIFIED"
-                    ? "bg-emerald-950/20 border-emerald-800/40 text-emerald-400"
-                    : "bg-amber-950/20 border-amber-800/40 text-amber-400"
-                }`}>
-                  <div className="font-bold flex items-center gap-1.5">
-                    {verificationResult.status === "AUTO_VERIFIED" ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    {receiptFile ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-800">{receiptFile.name}</p>
+                        <p className="text-[10px] text-slate-500 font-semibold">
+                          {(receiptFile.size / 1024).toFixed(0)} KB · Drag/Click to change
+                        </p>
+                      </div>
                     ) : (
-                      <Clock className="w-4 h-4 text-amber-400" />
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-700">Drag & drop your transfer receipt</p>
+                        <p className="text-[10px] text-slate-500 font-semibold">
+                          Accepts PNG, JPG, JPEG, or PDF (Max 5MB)
+                        </p>
+                      </div>
                     )}
-                    {verificationResult.message}
                   </div>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">
-                    {verificationResult.reason}
-                  </p>
                 </div>
-              )}
 
-              {/* Action trigger button */}
-              <button
-                type="submit"
-                disabled={isConfirming || !receiptFile}
-                style={{
-                  height: "46px",
-                  width: "100%",
-                  borderRadius: "14px",
-                  backgroundColor: isConfirming || !receiptFile ? "#1e293b" : "#10b981",
-                  color: "#ffffff",
-                  fontWeight: "700",
-                  fontSize: "13px",
-                  border: "none",
-                  cursor: isConfirming || !receiptFile ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  boxShadow: isConfirming || !receiptFile ? "none" : "0 4px 14px rgba(16,185,129,0.25)",
-                  transition: "all 0.15s ease-in-out",
-                }}
-                className="hover:opacity-90 active:scale-[0.99] disabled:opacity-50"
-              >
-                {isConfirming ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing Receipt with Gemini OCR...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Confirm Bank Transfer
-                  </>
+                {/* Transaction Ref input */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                    Optional transaction Reference
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Session ID or Reference Code"
+                    value={transactionRef}
+                    onChange={(e) => setTransactionRef(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-emerald-500 text-xs font-semibold text-slate-800 shadow-sm"
+                  />
+                </div>
+
+                {/* Error handling displaying receipt error message (Edge Case 8h) */}
+                {receiptError && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-[11px] text-rose-800 flex items-start gap-2 font-semibold shadow-sm">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                    <div>{receiptError}</div>
+                  </div>
                 )}
-              </button>
-            </form>
+
+                {/* Verification processing display */}
+                {verificationResult && (
+                  <div className={`border rounded-2xl p-4 text-xs space-y-1.5 shadow-sm ${
+                    verificationResult.status === "AUTO_VERIFIED"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                      : "bg-amber-50 border-amber-200 text-amber-800"
+                  }`}>
+                    <div className="font-black flex items-center gap-1.5">
+                      {verificationResult.status === "AUTO_VERIFIED" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-600" />
+                      )}
+                      {verificationResult.message}
+                    </div>
+                    <p className="text-slate-550 text-[11px] leading-relaxed font-semibold">
+                      {verificationResult.reason}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action trigger button */}
+                <button
+                  type="submit"
+                  disabled={isConfirming || !receiptFile}
+                  style={{
+                    height: "46px",
+                    width: "100%",
+                    borderRadius: "14px",
+                    backgroundColor: isConfirming || !receiptFile ? "#e2e8f0" : "#10b981",
+                    color: isConfirming || !receiptFile ? "#94a3b8" : "#ffffff",
+                    fontWeight: "700",
+                    fontSize: "13px",
+                    border: "none",
+                    cursor: isConfirming || !receiptFile ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: isConfirming || !receiptFile ? "none" : "0 4px 14px rgba(16,185,129,0.20)",
+                    transition: "all 0.15s ease-in-out",
+                  }}
+                  className="hover:opacity-95 active:scale-[0.99] disabled:opacity-50"
+                >
+                  {isConfirming ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analyzing Receipt with Gemini OCR...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Confirm Bank Transfer
+                    </>
+                  )}
+                </button>
+              </form>
+
+            </div>
           )}
 
         </div>
 
         {/* Portal footer */}
-        <div className="flex items-center justify-between text-[10px] text-slate-600 px-4">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 px-4">
           <span className="font-semibold flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
             256-bit encrypted transfer verification node
           </span>
           <span className="font-bold uppercase tracking-wider">Powered by Kavio</span>

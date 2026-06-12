@@ -70,7 +70,7 @@ export default function OnboardingPage() {
         addNotification({
           type: "SUCCESS",
           title: "Setup Completed",
-          message: "Welcome to Kavio! Your payment recovery command center is ready."
+          message: "Welcome to Kavio! Your collections dashboard is ready."
         });
 
         // Small delay for micro-animations
