@@ -26,7 +26,7 @@ export default function PitchPage() {
     { id: "solution", label: "Automated Verification" },
     { id: "engine", label: "Gemini Vision Auditing" },
     { id: "how", label: "How it Works" },
-    { id: "market", label: "Sizing the Opportunity" },
+    { id: "market", label: "Seizing the Opportunity" },
   ] as const;
 
   // Trigger simulated scanning effect
@@ -52,7 +52,7 @@ export default function PitchPage() {
   }, [mockVerificationState]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col py-16 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-white text-slate-905 font-sans flex flex-col py-16 px-4 relative overflow-hidden">
       
       {/* Decorative gradient canvas accents */}
       <div className="absolute top-[-20%] right-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-100/40 blur-[130px] pointer-events-none" />
@@ -62,13 +62,22 @@ export default function PitchPage() {
         
         {/* Pitch Hero Section */}
         <div className="text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-black text-emerald-700 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-black text-emerald-750 shadow-sm">
             <Zap className="w-3.5 h-3.5 text-emerald-600" /> Presenting Kavio
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto">
+          {/* Title styled with inline overrides to prevent global transparency/gradient color loss */}
+          <h1 
+            className="text-4xl sm:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto"
+            style={{ color: "#0f172a", background: "none", WebkitTextFillColor: "initial", backgroundClip: "unset" }}
+          >
             Freelancers stop chasing clients. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Get paid faster.</span>
+            <span 
+              className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600"
+              style={{ WebkitTextFillColor: "transparent" }}
+            >
+              Get paid faster.
+            </span>
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed font-bold">
@@ -92,23 +101,27 @@ export default function PitchPage() {
         </div>
 
         {/* Feature Navigation Tabs */}
-        <div className="grid grid-cols-1 sm:grid-cols-5 bg-slate-100 border border-slate-200/80 p-1.5 rounded-2xl text-center text-[10px] sm:text-xs font-black font-mono shadow-inner gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveSlide(tab.id);
-                setMockVerificationState("idle");
-              }}
-              className={`py-3 px-2 rounded-xl uppercase tracking-wider transition-all cursor-pointer text-[10px] leading-tight font-black ${
-                activeSlide === tab.id
-                  ? "bg-white text-slate-900 shadow-md border border-slate-200"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-5 bg-slate-100 border border-slate-200/85 p-1.5 rounded-2xl text-center shadow-inner gap-1">
+          {tabs.map((tab) => {
+            const isActive = activeSlide === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveSlide(tab.id);
+                  setMockVerificationState("idle");
+                }}
+                className={`py-3 px-2 rounded-xl uppercase tracking-wider transition-all cursor-pointer text-[10.5px] leading-tight font-black border-none ${
+                  isActive
+                    ? "bg-white shadow-md border border-slate-200"
+                    : "hover:bg-white/50"
+                }`}
+                style={{ color: isActive ? "#0f172a" : "#475569" }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Active Tab Viewport */}
@@ -119,31 +132,36 @@ export default function PitchPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
               <div className="space-y-5">
                 <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest block font-mono">The Friction</span>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">The Chasing Loop</h2>
-                <p className="text-xs sm:text-sm text-slate-605 leading-relaxed font-bold">
+                <h2 
+                  className="text-2xl font-black tracking-tight"
+                  style={{ color: "#0f172a" }}
+                >
+                  The Chasing Loop
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-bold">
                   Freelancers lose up to <strong className="text-rose-600">20 hours a month</strong> manually emailing and texting clients for outstanding invoices.
                 </p>
-                <p className="text-xs sm:text-sm text-slate-605 leading-relaxed font-bold">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-bold">
                   When payments are finally made via bank transfer, freelancers are vulnerable to <strong className="text-rose-600 font-extrabold">forged transfer receipts</strong> and delayed ledger clearance.
                 </p>
               </div>
               
               <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 text-xs">
-                <span className="font-black text-slate-500 uppercase tracking-wider block font-mono">Freelancer Pain Points</span>
+                <span className="font-black text-slate-550 uppercase tracking-wider block font-mono">Freelancer Pain Points</span>
                 
                 <div className="space-y-3 font-bold">
-                  <div className="flex gap-3 text-rose-700 bg-rose-50 border border-rose-200/50 p-4 rounded-xl">
+                  <div className="flex gap-3 text-rose-750 bg-rose-50 border border-rose-200/50 p-4 rounded-xl">
                     <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
                     <div>
-                      <h4 className="font-extrabold text-[12.5px]">Awkward Reminder Chats</h4>
+                      <h4 className="font-extrabold text-[12.5px]" style={{ color: "#9f1239" }}>Awkward Reminder Chats</h4>
                       <p className="text-[10.5px] text-slate-600 mt-1 font-semibold leading-normal">Damages relationships by repeatedly asking clients for cash manually.</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 text-rose-700 bg-rose-50 border border-rose-200/50 p-4 rounded-xl">
+                  <div className="flex gap-3 text-rose-755 bg-rose-50 border border-rose-200/50 p-4 rounded-xl">
                     <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
                     <div>
-                      <h4 className="font-extrabold text-[12.5px]">Screenshot Tampering</h4>
+                      <h4 className="font-extrabold text-[12.5px]" style={{ color: "#9f1239" }}>Screenshot Tampering</h4>
                       <p className="text-[10.5px] text-slate-600 mt-1 font-semibold leading-normal">Fake mobile app success receipts generated to trick freelancers.</p>
                     </div>
                   </div>
@@ -157,7 +175,12 @@ export default function PitchPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
               <div className="space-y-5">
                 <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block font-mono">The Breakthrough</span>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Automated Verification</h2>
+                <h2 
+                  className="text-2xl font-black tracking-tight"
+                  style={{ color: "#0f172a" }}
+                >
+                  Automated Verification
+                </h2>
                 <p className="text-xs sm:text-sm text-slate-605 leading-relaxed font-bold">
                   Kavio offloads the awkwardness. Our scheduling node automatically contacts clients via WhatsApp & Email reminders.
                 </p>
@@ -167,18 +190,18 @@ export default function PitchPage() {
               </div>
 
               <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-3.5 text-xs">
-                <span className="font-black text-slate-500 uppercase tracking-wider block font-mono">Product Benefits</span>
+                <span className="font-black text-slate-550 uppercase tracking-wider block font-mono">Product Benefits</span>
                 
                 <div className="space-y-3 font-bold">
-                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-700">
+                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-800">
                     <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Multi-channel follow-ups (WhatsApp + Email)</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-700">
+                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-800">
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Gemini-powered transaction verification</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-700">
+                  <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200/50 p-3.5 rounded-xl text-emerald-800">
                     <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Automatic reminder suspension on verify</span>
                   </div>
@@ -192,7 +215,12 @@ export default function PitchPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
               <div className="space-y-5">
                 <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block font-mono">AI-Powered Scorer</span>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight font-sans">Gemini Vision Auditing</h2>
+                <h2 
+                  className="text-2xl font-black tracking-tight font-sans"
+                  style={{ color: "#0f172a" }}
+                >
+                  Gemini Vision Auditing
+                </h2>
                 <p className="text-xs sm:text-sm text-slate-605 leading-relaxed font-bold">
                   We use Gemini Vision to parse uploaded receipts. The verification engine assigns trust weights to different parameters.
                 </p>
@@ -236,7 +264,7 @@ export default function PitchPage() {
                 {mockVerificationState === "verified" && (
                   <div className="space-y-3.5">
                     <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3.5 rounded-xl font-bold flex items-center gap-2">
-                      <CheckCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+                      <CheckCircle className="w-4.5 h-4.5 text-emerald-650 shrink-0" />
                       <span>Payment Verified Successfully (95/100)</span>
                     </div>
                     <div className="text-[11px] text-slate-700 space-y-1.5 font-mono bg-white border border-slate-200 p-3 rounded-lg shadow-sm">
@@ -261,44 +289,49 @@ export default function PitchPage() {
             <div className="w-full space-y-6">
               <div>
                 <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block font-mono">The Workflow</span>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight font-sans">How it Works</h2>
+                <h2 
+                  className="text-2xl font-black font-sans"
+                  style={{ color: "#0f172a" }}
+                >
+                  How it Works
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-bold">
                 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">1</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Create Invoice</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Create Invoice</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">Freelancer creates invoice with custom bank details.</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">2</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Send Payment Details</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Send Payment Details</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">Automatic multi-channel invoice links are shared with clients.</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">3</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Bank Transfer Payment</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Bank Transfer Payment</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">Client transfers payment directly to designated banking portal.</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">4</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Upload Receipt</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Upload Receipt</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">Client uploads bank transfer receipt screenshot directly on check-out.</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">5</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Gemini Verifies Payment</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Gemini Verifies Payment</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">Gemini Vision extracts details and runs comparative checks.</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-300 transition-all">
+                <div className="bg-slate-50 border border-slate-250 p-5 rounded-2xl space-y-3 shadow-sm hover:border-slate-350 transition-all">
                   <div className="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-black">6</div>
-                  <h4 className="font-extrabold text-slate-900 text-[13px]">Reminders Stop</h4>
+                  <h4 className="font-extrabold text-[13px]" style={{ color: "#0f172a" }}>Reminders Stop</h4>
                   <p className="text-[10.5px] text-slate-600 font-bold leading-normal">System automatically halts all active WhatsApp & Email nudge loops.</p>
                 </div>
 
@@ -311,7 +344,12 @@ export default function PitchPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
               <div className="space-y-5">
                 <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block font-mono">Market Potential</span>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Sizing the Opportunity</h2>
+                <h2 
+                  className="text-2xl font-black"
+                  style={{ color: "#0f172a" }}
+                >
+                  Seizing the Opportunity
+                </h2>
                 <p className="text-xs sm:text-sm text-slate-655 leading-relaxed font-bold">
                   African gig economy is expanding rapidly, with over <strong>50 million</strong> freelancers, designers, developers, and creators.
                 </p>
