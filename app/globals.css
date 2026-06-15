@@ -3380,3 +3380,19 @@ p {
     @apply max-w-none text-gray-300 text-sm leading-loose;
 }
 
+/* Hide Clerk development mode badge and footer branding */
+.cl-internal-developmentModeBadge,
+.cl-developmentModeBadge,
+.cl-internal-180g7wz,
+div[class*="cl-developmentModeBadge"],
+div[class*="developmentModeBadge"],
+div[class*="cl-internal-developmentModeBadge"],
+div[class*="cl-internal-developmentMode"],
+.cl-developmentMode,
+.cl-footer,
+.cl-internal-1npip8m,
+.cl-internal-1m0pxb2 {
+    display: none !important;
+}
+
+
