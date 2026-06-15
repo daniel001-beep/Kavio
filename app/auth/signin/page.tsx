@@ -3,6 +3,9 @@
 import { SignIn } from '@clerk/nextjs';
 import { Zap } from 'lucide-react';
 
+// Force dynamic rendering — Clerk components cannot be statically prerendered
+export const dynamic = 'force-dynamic';
+
 export default function SignInPage() {
   return (
     <div data-page="auth" className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
@@ -30,7 +33,7 @@ export default function SignInPage() {
               colorPrimary: '#10b981',
             },
             elements: {
-              card: 'border border-slate-100/50 shadow-xl rounded-3xl bg-white/95 backdrop-blur-md w-full',
+              card: 'border border-slate-100/50 shadow-xl rounded-t-3xl rounded-b-none bg-white/95 backdrop-blur-md w-full',
               headerTitle: 'text-slate-900 font-extrabold tracking-tight',
               headerSubtitle: 'text-slate-500 text-xs font-medium',
               socialButtonsBlockButton: 'border border-slate-200 hover:bg-slate-50/50 transition-all rounded-xl',
@@ -43,20 +46,25 @@ export default function SignInPage() {
           }}
         />
 
-        {/* Quick Demo Navigation */}
-        <div className="mt-6 flex flex-col gap-2.5 w-full">
-          <button
-            onClick={() => window.location.href = "/founder-demo"}
-            className="w-full border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs py-3.5 rounded-xl transition-all active:scale-[0.98] cursor-pointer text-center bg-white shadow-sm flex items-center justify-center gap-2"
-          >
-            Explore Founder Dashboard (No Login)
-          </button>
-          <button
-            onClick={() => window.location.href = "/demo"}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all active:scale-[0.98] cursor-pointer text-center shadow-sm flex items-center justify-center gap-2 border-none"
-          >
-            Launch Kavio Demo Console
-          </button>
+        {/* Demo buttons — attached flush to the bottom of the Clerk card */}
+        <div className="w-full bg-white/95 backdrop-blur-md border border-slate-100/50 border-t border-slate-100 shadow-xl rounded-b-3xl px-6 pb-5 pt-3.5">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center mb-3">
+            Or explore without an account
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.location.href = "/founder-demo"}
+              className="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-semibold text-[10px] py-2 px-3 rounded-lg transition-all active:scale-[0.98] cursor-pointer text-center bg-white"
+            >
+              Founder Demo
+            </button>
+            <button
+              onClick={() => window.location.href = "/demo"}
+              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[10px] py-2 px-3 rounded-lg transition-all active:scale-[0.98] cursor-pointer text-center border-none"
+            >
+              Demo Console
+            </button>
+          </div>
         </div>
       </div>
     </div>

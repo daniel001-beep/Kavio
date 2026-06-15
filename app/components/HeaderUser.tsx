@@ -24,7 +24,7 @@ export default function HeaderUser() {
     <div className="flex items-center gap-3 h-8">
       {/* Avatar with live pulse indicator */}
       <div className="relative">
-        <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0">
+        <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center font-bold text-emerald-700 text-xs shrink-0">
           {initials}
         </div>
         {/* Live WebSocket indicator */}
