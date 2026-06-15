@@ -198,99 +198,102 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
+    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16 relative">
+      {/* Ambient glow effects */}
+      <div className="absolute top-[-5%] left-[-5%] w-[350px] h-[350px] bg-emerald-150/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[300px] h-[300px] bg-emerald-100/5 rounded-full blur-[90px] pointer-events-none" />
       
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Account Command Center</h1>
-        <p className="text-slate-600 text-sm font-semibold mt-1">Configure details, currency preferences, security credentials, and Pro settings</p>
+      <div className="relative z-10">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Command Center</h1>
+        <p className="text-slate-500 text-sm font-medium mt-1">Configure details, currency preferences, security credentials, and Pro settings</p>
       </div>
-
+ 
       {/* Main Layout grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
         
         {/* Navigation Sidebar Cards */}
-        <div className="lg:col-span-1 flex flex-col gap-3">
+        <div className="lg:col-span-1 flex flex-col gap-2.5">
           <button
             onClick={() => { setActiveTab("PROFILE"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
               activeTab === "PROFILE"
-                ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <User className="w-[18px] h-[18px]" />
             Account Information
           </button>
-
+ 
           <button
             onClick={() => { setActiveTab("SECURITY"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
               activeTab === "SECURITY"
-                ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <Lock className="w-[18px] h-[18px]" />
             Security & Credentials
           </button>
-
+ 
           <button
             onClick={() => { setActiveTab("TIER"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
               activeTab === "TIER"
-                ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <CreditCard className="w-[18px] h-[18px]" />
             Subscription Plan
           </button>
-
+ 
           <button
             onClick={() => { setActiveTab("PWA"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
               activeTab === "PWA"
-                ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <Sparkles className="w-[18px] h-[18px] text-amber-500" />
             Install App (PWA)
           </button>
-
+ 
           <button
             onClick={() => { setActiveTab("SUPPORT"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
               activeTab === "SUPPORT"
-                ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
-            <Phone className="w-[18px] h-[18px] text-emerald-500" />
+            <Phone className="w-[18px] h-[18px] text-emerald-55" />
             Contact & Support
           </button>
-
+ 
           {session?.user?.isAdmin && (
             <button
               onClick={() => { setActiveTab("ADMIN"); setStatusMessage(null); }}
-              className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm ${
+              className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
                 activeTab === "ADMIN"
-                  ? "bg-emerald-50 text-emerald-600 font-extrabold"
-                  : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
+                  : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
               }`}
             >
               <ShieldCheck className="w-[18px] h-[18px] text-blue-500" />
               Super Admin Console
             </button>
           )}
-
+ 
           {/* Mobile-only Sign Out button inside sidebar */}
           <button
             id="mobile-settings-signout"
             onClick={handleSignOut}
             disabled={isSigningOut}
-            className="lg:hidden flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[13px] font-bold text-left transition-all shadow-sm bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-60 mt-2"
+            className="lg:hidden flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm bg-rose-50 border-l-2 border-rose-500 text-rose-600 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-60 mt-2"
           >
             {isSigningOut ? (
               <Loader2 className="w-[18px] h-[18px] animate-spin" />
@@ -303,7 +306,7 @@ export default function SettingsPage() {
 
         {/* Content Box Panels */}
         <div className="lg:col-span-3">
-          <Card className="border-none rounded-3xl shadow-sm bg-white overflow-hidden">
+          <Card className="border border-slate-100 rounded-3xl shadow-sm bg-white overflow-hidden hover:shadow-md transition-all duration-300">
             <CardContent className="p-8">
               
               {/* Messages banner */}
@@ -332,7 +335,7 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -340,14 +343,14 @@ export default function SettingsPage() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Freelancer Full Name"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-350" />
                         <Input
@@ -360,7 +363,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Freelancer / Company Name</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Freelancer / Company Name</label>
                       <div className="relative">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -368,19 +371,19 @@ export default function SettingsPage() {
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           placeholder="e.g. Adebayo Design Studio"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Primary Currency</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Currency</label>
                       <div className="relative">
                         <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <select
                           value={currency}
                           onChange={(e) => setCurrency(e.target.value)}
-                          className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200/50 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs cursor-pointer"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-[#00B140] focus:border-[#00B140] text-xs cursor-pointer transition-all"
                         >
                           <option value="NGN">₦ Nigerian Naira (NGN)</option>
                           <option value="USD">$ United States Dollar (USD)</option>
@@ -390,7 +393,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -398,13 +401,13 @@ export default function SettingsPage() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="e.g. +234 803 123 4567"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Location / Country</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location / Country</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -412,7 +415,7 @@ export default function SettingsPage() {
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
                           placeholder="e.g. Lagos, Nigeria"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                         />
                       </div>
                     </div>
@@ -422,7 +425,7 @@ export default function SettingsPage() {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="py-5 px-6 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-colors shadow-md shadow-emerald-500/10 flex items-center gap-2"
+                      className="py-5 px-6 rounded-xl bg-[#00B140] hover:bg-[#009933] text-white font-bold text-xs transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-emerald-500/10 flex items-center gap-2"
                     >
                       {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       Save Profile Changes
@@ -441,7 +444,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-4 max-w-md">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Current Password</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -449,14 +452,14 @@ export default function SettingsPage() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="Enter current password"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">New Password</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -464,14 +467,14 @@ export default function SettingsPage() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Minimum 6 characters"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Confirm New Password</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input
@@ -479,7 +482,7 @@ export default function SettingsPage() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Verify new password"
-                          className="pl-9 py-5 rounded-xl border-slate-200/50 focus-visible:ring-emerald-500 text-xs"
+                          className="pl-9 py-5 rounded-xl border-slate-250 focus-visible:ring-[#00B140] focus-visible:border-[#00B140] text-xs transition-all"
                           required
                         />
                       </div>
@@ -490,7 +493,7 @@ export default function SettingsPage() {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="py-5 px-6 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-colors shadow-md shadow-emerald-500/10 flex items-center gap-2"
+                      className="py-5 px-6 rounded-xl bg-[#00B140] hover:bg-[#009933] text-white font-bold text-xs transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-emerald-500/10 flex items-center gap-2"
                     >
                       {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       Update Password
@@ -508,19 +511,19 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                                      {/* Active Plan Detail Box */}
-                    <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
+                    {/* Active Plan Detail Box */}
+                    <div className="bg-slate-50/70 border border-slate-100 p-6 rounded-3xl flex flex-col justify-between h-[210px] transition-all hover:border-slate-200">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Account Status</span>
                         </div>
                         <h3 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
                           {isFreePromo ? "Early Adopter Pro" : "Kavio Free"}
-                          <Badge className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase border-none">
+                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase">
                             {isFreePromo ? "Promo Active" : "Free Tier"}
                           </Badge>
                         </h3>
-                        <p className="text-xs text-slate-500 font-semibold mt-2">
+                        <p className="text-xs text-slate-550 font-semibold mt-2.5 leading-relaxed">
                           {isFreePromo 
                             ? "Unlimited billing invoices, automated WhatsApp reminders, client directory nesting, and printable P&L reports."
                             : "Standard freelancer tools, including invoice creation, manual payment logging, and revenue statements."
@@ -528,8 +531,8 @@ export default function SettingsPage() {
                         </p>
                       </div>
 
-                      <div className="text-xs text-slate-650 font-bold flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />
+                      <div className="text-xs text-slate-500 font-bold flex items-center gap-1.5 mt-2">
+                        <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
                         {isFreePromo 
                           ? `Early Adopter Promotion: Registered user #${totalUsersCount} of 10`
                           : "Standard plan limits apply."
@@ -538,33 +541,33 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Features list */}
-                    <div className="bg-slate-50/30 p-6 rounded-3xl flex flex-col justify-between h-[200px]">
+                    <div className="bg-slate-50/30 border border-slate-100/50 p-6 rounded-3xl flex flex-col justify-between h-[210px] transition-all hover:border-slate-200">
                       <div>
-                        <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-3">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
                           {isFreePromo ? "Early Adopter Benefits" : "Standard Plan Features"}
                         </span>
-                        <ul className="space-y-2.5 text-xs text-slate-655 font-semibold">
+                        <ul className="space-y-2.5 text-xs text-slate-600 font-bold">
                           <li className="flex items-center gap-2.5">
-                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                            <ShieldCheck className="w-4 h-4 text-[#00B140]" />
                             Unlimited client profiles and connections
                           </li>
                           <li className="flex items-center gap-2.5">
-                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                            <ShieldCheck className="w-4 h-4 text-[#00B140]" />
                             WhatsApp invoice link reminders
                           </li>
                           <li className="flex items-center gap-2.5">
-                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                            <ShieldCheck className="w-4 h-4 text-[#00B140]" />
                             Deductions & dynamic pre-tax reports
                           </li>
                         </ul>
                       </div>
 
                       {isFreePromo ? (
-                        <div className="text-center font-bold text-xs text-emerald-600 bg-emerald-50 py-3 rounded-xl uppercase">
+                        <div className="text-center font-bold text-xs text-emerald-700 bg-emerald-50/60 border border-emerald-100/40 py-3 rounded-xl uppercase mt-2">
                           ₦0/month (Free Lifetime Access)
                         </div>
                       ) : (
-                        <div className="text-center font-bold text-xs text-slate-500 bg-slate-100 py-3 rounded-xl uppercase">
+                        <div className="text-center font-bold text-xs text-slate-500 bg-slate-100 py-3 rounded-xl uppercase mt-2">
                           Standard Plan (Free)
                         </div>
                       )}
@@ -579,30 +582,30 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">Kavio Desktop & Mobile App</h2>
-                    <p className="text-xs text-slate-500 mt-1">Install Kavio directly onto your device for quick startup, native notification hooks, and offline operations.</p>
+                    <p className="text-xs text-slate-505 mt-1">Install Kavio directly onto your device for quick startup, native notification hooks, and offline operations.</p>
                   </div>
 
                   {isIOS ? (
-                    <div className="bg-slate-50/50 rounded-3xl p-6 sm:p-8 border border-slate-200/40 space-y-6">
+                    <div className="bg-slate-50/50 rounded-3xl p-6 sm:p-8 border border-slate-100 space-y-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                          <Smartphone className="w-5 h-5" />
+                          <Smartphone className="w-5 h-5 animate-pulse" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-slate-850">iOS Safari Installation Guide</h4>
-                          <p className="text-[11px] text-slate-400 font-semibold">Follow these simple steps to install Kavio on your iPhone or iPad</p>
+                          <h4 className="text-sm font-bold text-slate-800">iOS Safari Installation Guide</h4>
+                          <p className="text-[11px] text-slate-450 font-semibold">Follow these simple steps to install Kavio on your iPhone or iPad</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                         {/* Step 1 */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-4 shadow-sm hover:border-slate-200 transition-all duration-300">
                           <div className="space-y-2">
                             <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
                               1
                             </div>
-                            <h5 className="text-xs font-bold text-slate-850">Open Share Menu</h5>
-                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                            <h5 className="text-xs font-bold text-slate-800">Open Share Menu</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">
                               Tap the **Share** button in Safari's bottom toolbar (looks like a square with an upward arrow).
                             </p>
                           </div>
@@ -614,31 +617,31 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Step 2 */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-4 shadow-sm hover:border-slate-200 transition-all duration-300">
                           <div className="space-y-2">
                             <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
                               2
                             </div>
-                            <h5 className="text-xs font-bold text-slate-850">Add to Home Screen</h5>
-                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                            <h5 className="text-xs font-bold text-slate-800">Add to Home Screen</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">
                               Scroll down the Safari action checklist and select **Add to Home Screen** from the choices.
                             </p>
                           </div>
                           <div className="flex items-center justify-center p-3.5 bg-slate-50/50 rounded-xl">
-                            <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-slate-650 shadow-sm">
+                            <div className="w-7 h-7 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm">
                               <PlusSquare className="w-4 h-4 text-emerald-500" />
                             </div>
                           </div>
                         </div>
 
                         {/* Step 3 */}
-                        <div className="bg-white p-5 rounded-2xl border border-slate-200/40 flex flex-col justify-between space-y-4">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-4 shadow-sm hover:border-slate-200 transition-all duration-300">
                           <div className="space-y-2">
                             <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center">
                               3
                             </div>
-                            <h5 className="text-xs font-bold text-slate-850">Confirm & Launch</h5>
-                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                            <h5 className="text-xs font-bold text-slate-800">Confirm & Launch</h5>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">
                               Confirm the app details (Kavio) and tap **Add** in the top-right corner. The app will launch directly from your home screen.
                             </p>
                           </div>
@@ -651,7 +654,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-slate-50/70 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="bg-slate-50/60 border border-slate-100 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-sm transition-all duration-300">
                       <div className="space-y-1.5 max-w-md">
                         <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                           <Smartphone className="w-4.5 h-4.5 text-slate-500" />
@@ -668,7 +671,7 @@ export default function SettingsPage() {
                       <Button
                         onClick={handleTriggerPWAInstall}
                         disabled={!isPWAInstallable}
-                        className="bg-emerald-650 hover:bg-emerald-750 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2"
+                        className="bg-[#00B140] hover:bg-[#009933] disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2 transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-emerald-500/10 cursor-pointer"
                       >
                         <Sparkles className="w-4 h-4 text-amber-350" />
                         Add to Home Screen
@@ -683,10 +686,10 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">Super Admin Launchpad</h2>
-                    <p className="text-xs text-slate-500 mt-1">Authorized super admin functions. Open the system-wide console to audit transactions and clean database instances.</p>
+                    <p className="text-xs text-slate-505 mt-1">Authorized super admin functions. Open the system-wide console to audit transactions and clean database instances.</p>
                   </div>
 
-                  <div className="bg-blue-500/5 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="bg-blue-50/50 border border-blue-100/60 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-sm transition-all duration-300">
                     <div className="space-y-1.5 max-w-md">
                       <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-blue-500" />
@@ -699,7 +702,7 @@ export default function SettingsPage() {
 
                     <Button
                       onClick={() => window.location.href = "/fintech/admin"}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-blue-500/10 cursor-pointer border-none"
                     >
                       Launch Admin Panel
                     </Button>
@@ -712,29 +715,29 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">Contact & Support</h2>
-                    <p className="text-xs text-slate-500 mt-1">Get in touch with the Kavio founder directly for support, feature requests, or partnerships.</p>
+                    <p className="text-xs text-slate-505 mt-1">Get in touch with the Kavio founder directly for support, feature requests, or partnerships.</p>
                   </div>
 
-                  <div className="bg-emerald-500/5 rounded-3xl p-6 border border-emerald-500/10 space-y-6">
+                  <div className="bg-emerald-50/40 rounded-3xl p-6 border border-emerald-100/80 space-y-6 hover:shadow-sm transition-all duration-300">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shadow-sm shrink-0 border border-emerald-100/40">
                         💬
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-slate-850">Direct WhatsApp Support</h4>
-                        <p className="text-[11px] text-slate-400 font-semibold">Message the founder directly on WhatsApp for instant assistance</p>
+                        <h4 className="text-sm font-bold text-slate-800">Direct WhatsApp Support</h4>
+                        <p className="text-[11px] text-slate-450 font-semibold">Message the founder directly on WhatsApp for instant assistance</p>
                       </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                       <div className="text-left w-full sm:w-auto">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</span>
-                        <span className="text-sm font-mono font-bold text-slate-700">07011755321</span>
+                        <span className="text-sm font-mono font-bold text-slate-750">07011755321</span>
                       </div>
                       
                       <Button
                         onClick={() => window.open("https://wa.me/2347011755321", "_blank")}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2 border-none shadow-md shadow-emerald-500/10 w-full sm:w-auto justify-center"
+                        className="bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 flex items-center gap-2 border-none transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-emerald-500/10 w-full sm:w-auto justify-center cursor-pointer"
                       >
                         <Phone className="w-4 h-4" />
                         Chat on WhatsApp
@@ -756,7 +759,7 @@ export default function SettingsPage() {
           id="mobile-sticky-signout"
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60 cursor-pointer"
         >
           {isSigningOut ? (
             <Loader2 className="w-4 h-4 animate-spin" />

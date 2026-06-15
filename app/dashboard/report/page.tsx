@@ -132,24 +132,27 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-24 print:p-0 print:space-y-4">
+    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-24 relative print:p-0 print:space-y-4">
+      {/* Decorative ambient glow */}
+      <div className="absolute top-[-5%] left-[-5%] w-[400px] h-[400px] bg-emerald-150/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[350px] h-[350px] bg-emerald-100/5 rounded-full blur-[90px] pointer-events-none" />
       
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200/40 relative overflow-hidden print:border-none print:shadow-none print:p-0 print:m-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden print:border-none print:shadow-none print:p-0 print:m-0 z-10">
         <div className="space-y-2 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">Kavio Tax & Profitability Suite</span>
+            <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Kavio Tax & Profitability Suite</span>
             {isFreePromo && (
-              <Badge className="bg-emerald-50 text-emerald-600 font-black px-2.5 py-0.5 rounded-full text-[10px] tracking-wide shadow-sm border-none flex items-center gap-1">
+              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-black px-2.5 py-0.5 rounded-full text-[10px] tracking-wide shadow-sm flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3 text-amber-500 animate-spin" />
                 Early Adopter Promo: Pro Free
               </Badge>
             )}
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight print:text-xl">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight print:text-xl">
             Profitability & Tax Hub
           </h1>
-          <p className="text-slate-505 text-xs sm:text-sm font-semibold print:hidden">
+          <p className="text-slate-500 text-xs sm:text-sm font-semibold print:hidden">
             Dynamic cash-basis statements calculated directly from your real client billing records.
           </p>
         </div>
@@ -157,7 +160,7 @@ export default function ReportPage() {
         <div className="flex items-center gap-4 relative z-10 print:hidden">
           <Button
             onClick={handlePrintReport}
-            className="py-5 px-5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-450 hover:to-emerald-550 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2 cursor-pointer"
+            className="py-5 px-5 text-xs font-bold rounded-xl bg-[#00B140] hover:bg-[#009933] text-white shadow-lg shadow-emerald-500/10 border-none transition-all duration-200 flex items-center gap-2 cursor-pointer hover:translate-y-[-1px] active:translate-y-[0px]"
           >
             <Download className="w-4 h-4" />
             Print / Save Statement PDF
@@ -166,7 +169,7 @@ export default function ReportPage() {
       </div>
 
       {isFreePromo && (
-        <div className="bg-emerald-500/5 rounded-2xl p-4.5 flex items-start gap-3 border border-emerald-500/20 shadow-sm print:hidden">
+        <div className="bg-emerald-50/50 rounded-2xl p-5 flex items-start gap-3 border border-emerald-100/80 shadow-sm relative z-10 print:hidden">
           <Sparkles className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <h4 className="text-xs font-black text-emerald-800">Early Adopter Pricing Activated</h4>
@@ -178,40 +181,40 @@ export default function ReportPage() {
       )}
 
       {/* Section 1: Income vs Expenses Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
         
         {/* Total Income Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-200/40">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-100 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Total Paid Revenue</span>
             <h2 className="text-2xl font-black text-emerald-600 font-mono">{formatCurrency(totalPaidRevenue)}</h2>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">Confirmed client cash receipts</p>
+            <p className="text-[10px] text-slate-450 font-semibold mt-1">Confirmed client cash receipts</p>
           </div>
-          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl flex items-center justify-center shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
         </div>
 
         {/* Total Outstanding Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-200/40">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-100 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Accounts Receivable</span>
             <h2 className="text-2xl font-black text-amber-600 font-mono">{formatCurrency(totalOutstandingReceivables)}</h2>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">Outstanding pending collections</p>
+            <p className="text-[10px] text-slate-450 font-semibold mt-1">Outstanding pending collections</p>
           </div>
-          <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 shrink-0">
+          <div className="w-12 h-12 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl flex items-center justify-center shrink-0">
             <TrendingDown className="w-5 h-5" />
           </div>
         </div>
 
         {/* Net Reconciled Difference */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-200/40">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 flex items-center justify-between shadow-sm border border-slate-100 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Disposable Net Income</span>
-            <h2 className="text-2xl font-black text-emerald-600 font-mono">{formatCurrency(netDisposableProfit)}</h2>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">Cash profit minus estimated taxes</p>
+            <h2 className="text-2xl font-black text-emerald-700 font-mono">{formatCurrency(netDisposableProfit)}</h2>
+            <p className="text-[10px] text-slate-450 font-semibold mt-1">Cash profit minus estimated taxes</p>
           </div>
-          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl flex items-center justify-center shrink-0">
             <Calculator className="w-5 h-5" />
           </div>
         </div>
@@ -219,22 +222,22 @@ export default function ReportPage() {
       </div>
 
       {/* Grid for Statement & Client share breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         
         {/* Left Side: Profit & Loss Statement Table */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-200/40 print:border-none print:shadow-none print:p-0">
+        <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-100 hover:shadow-md transition-all duration-300 print:border-none print:shadow-none print:p-0">
           <div>
             <h2 className="text-lg font-bold text-slate-800 tracking-tight">Statement of Revenue & Tax</h2>
-            <p className="text-xs text-slate-400 font-medium">Reconciled profit and loss details calculated for self-assessment reporting</p>
+            <p className="text-xs text-slate-450 font-semibold mt-1">Reconciled profit and loss details calculated for self-assessment reporting</p>
           </div>
 
-          <div className="w-full border border-slate-200/60 rounded-2xl p-6 sm:p-8 space-y-6 bg-white print:border-none print:p-0">
+          <div className="w-full border border-slate-100 rounded-2xl p-6 sm:p-8 space-y-6 bg-white print:border-none print:p-0">
             <div className="flex justify-between items-start border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-sm font-black text-slate-850">Kavio Freelancer Ledger</h3>
-                <p className="text-[10px] text-slate-400 font-semibold mt-1">Account Holder: {userEmail || "Registered User"}</p>
+                <h3 className="text-sm font-bold text-slate-800">Kavio Freelancer Ledger</h3>
+                <p className="text-[10px] text-slate-400 font-semibold mt-1.5">Account Holder: {userEmail || "Registered User"}</p>
               </div>
-              <Badge className="bg-emerald-500/10 text-emerald-600 font-black px-2 py-0.5 rounded-full text-[9px] uppercase border-none">
+              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold px-2.5 py-0.5 rounded-full text-[9px] uppercase">
                 Cash Basis
               </Badge>
             </div>
@@ -258,7 +261,7 @@ export default function ReportPage() {
                   <div className="text-right font-mono text-slate-500">{formatCurrency(totalOutstandingReceivables)}</div>
                 </div>
 
-                <div className="grid grid-cols-3 text-xs font-bold text-slate-700 pt-3 border-t border-slate-100/65">
+                <div className="grid grid-cols-3 text-xs font-bold text-slate-700 pt-3 border-t border-slate-100/60">
                   <div className="col-span-2">Total Operating Revenue Base</div>
                   <div className="text-right font-mono text-slate-900">{formatCurrency(totalPaidRevenue)}</div>
                 </div>
@@ -268,12 +271,12 @@ export default function ReportPage() {
                   <div className="text-right font-mono text-slate-400">₦ 0</div>
                 </div>
 
-                <div className="grid grid-cols-3 text-xs font-bold text-slate-700 pt-3 border-t border-slate-100/65">
+                <div className="grid grid-cols-3 text-xs font-bold text-slate-700 pt-3 border-t border-slate-100/60">
                   <div className="col-span-2">Estimated Pre-Tax Income</div>
                   <div className="text-right font-mono text-slate-900">{formatCurrency(totalPaidRevenue)}</div>
                 </div>
 
-                <div className="grid grid-cols-3 text-xs font-bold text-slate-450">
+                <div className="grid grid-cols-3 text-xs font-bold text-slate-500">
                   <div className="col-span-2">Deductions: Est. Freelancer Tax (15%)</div>
                   <div className="text-right font-mono text-rose-500">-{formatCurrency(estimatedTax)}</div>
                 </div>
@@ -289,10 +292,10 @@ export default function ReportPage() {
         </div>
 
         {/* Right Side: Client Revenue Shares (dynamic categories replacement) */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-200/40 print:hidden">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 border border-slate-100 hover:shadow-md transition-all duration-300 print:hidden">
           <div>
             <h2 className="text-lg font-bold text-slate-800 tracking-tight">Revenue Concentration</h2>
-            <p className="text-xs text-slate-400 font-medium">Breakdown of earnings distributed by client volume</p>
+            <p className="text-xs text-slate-450 font-semibold mt-1">Breakdown of earnings distributed by client volume</p>
           </div>
 
           <div className="space-y-6">
@@ -304,14 +307,14 @@ export default function ReportPage() {
               </div>
             ) : (
               clientRevenueShares.map((share, idx) => (
-                <div key={idx} className="space-y-1.5">
+                <div key={idx} className="space-y-2">
                   <div className="flex justify-between text-xs font-bold text-slate-700">
                     <span className="truncate max-w-[150px]">{share.name}</span>
                     <span className="font-mono text-slate-900">{formatCurrency(share.value)} ({share.pctLabel})</span>
                   </div>
-                  <div className="w-full h-2.5 bg-slate-50 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                      className="h-full bg-gradient-to-r from-emerald-500 to-[#00B140] rounded-full"
                       style={{ width: `${share.pctValue}%` }}
                     />
                   </div>
@@ -324,24 +327,24 @@ export default function ReportPage() {
       </div>
 
       {/* Section 4: Paid Invoices Ledger Log */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 border border-slate-200/40 print:border-none print:shadow-none print:p-0">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 border border-slate-100 hover:shadow-md transition-all duration-300 relative z-10 print:border-none print:shadow-none print:p-0">
         <div>
           <h2 className="text-lg font-bold text-slate-800 tracking-tight">Audit Trail: Settled Ledger Credits</h2>
-          <p className="text-xs text-slate-400 font-medium print:hidden">Verified log of all completed payments used in these calculations</p>
+          <p className="text-xs text-slate-450 font-semibold mt-1 print:hidden">Verified log of all completed payments used in these calculations</p>
         </div>
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Invoice No.</th>
-                <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Client Name</th>
-                <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description</th>
-                <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date Settled</th>
-                <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Settled Amount</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Invoice No.</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Client Name</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date Settled</th>
+                <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Settled Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 text-xs font-semibold text-slate-700">
+            <tbody className="divide-y divide-slate-50 text-xs font-semibold text-slate-650">
               {invoices.filter(inv => inv.status === "PAID").length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-slate-400">
@@ -353,11 +356,11 @@ export default function ReportPage() {
                 invoices
                   .filter(inv => inv.status === "PAID")
                   .map((inv) => (
-                    <tr key={inv.id} className="hover:bg-slate-50/50 transition-all">
-                      <td className="py-4 px-4 font-mono font-bold text-slate-700">{inv.invoiceNumber}</td>
-                      <td className="py-4 px-4">{inv.client?.name || "Client"}</td>
-                      <td className="py-4 px-4 text-slate-505 font-medium">{inv.projectDescription}</td>
-                      <td className="py-4 px-4 text-slate-400 font-medium">
+                    <tr key={inv.id} className="hover:bg-slate-50/50 transition-all duration-200">
+                      <td className="py-4 px-4 font-mono font-bold text-slate-800">{inv.invoiceNumber}</td>
+                      <td className="py-4 px-4 font-bold text-slate-900">{inv.client?.name || "Client"}</td>
+                      <td className="py-4 px-4 text-slate-500 font-medium">{inv.projectDescription}</td>
+                      <td className="py-4 px-4 text-slate-450 font-medium">
                         {inv.updatedAt ? new Date(inv.updatedAt).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-4 text-right font-mono font-bold text-emerald-600">

@@ -8,6 +8,8 @@
   --color-surface: #F8FAFC;
   --color-card: #FFFFFF;
   --color-muted: #64748B;
+  --color-primary-green: #00B140;
+  --color-primary-green-hover: #009933;
 }
 
 :root {
