@@ -36,11 +36,11 @@ export default function SignInPage() {
 
       <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="text-lg font-black tracking-tight" style={{ color: '#0f172a' }}>
+          <span className="text-xl font-black tracking-tight" style={{ color: '#0f172a' }}>
             Kavio <span style={{ color: '#94a3b8', fontWeight: 600 }}>Finance</span>
           </span>
         </div>
