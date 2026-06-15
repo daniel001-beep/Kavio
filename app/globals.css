@@ -3134,23 +3134,14 @@ p {
     50% { transform: translateY(-20px); }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Hidden globally for cleaner UI */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 0px;
+    height: 0px;
+    display: none;
 }
-
-::-webkit-scrollbar-track {
-    background: #050505;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #2563eb;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #1d4ed8;
+* {
+    scrollbar-width: none;
 }
 
 /* Product Card Improvements */
@@ -3379,4 +3370,20 @@ p {
 .review-summarizer-result-text {
     @apply max-w-none text-gray-300 text-sm leading-loose;
 }
+
+/* Hide Clerk development mode badge and footer branding */
+.cl-internal-developmentModeBadge,
+.cl-developmentModeBadge,
+.cl-internal-180g7wz,
+div[class*="cl-developmentModeBadge"],
+div[class*="developmentModeBadge"],
+div[class*="cl-internal-developmentModeBadge"],
+div[class*="cl-internal-developmentMode"],
+.cl-developmentMode,
+.cl-footer,
+.cl-internal-1npip8m,
+.cl-internal-1m0pxb2 {
+    display: none !important;
+}
+
 

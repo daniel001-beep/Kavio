@@ -17,78 +17,20 @@ import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const localUserCookie = cookieStore.get('velox-local-user')?.value;
-  let userId = '';
-  let userEmail = '';
-
-  if (localUserCookie) {
-    try {
-      let val = decodeURIComponent(localUserCookie).trim();
-      if (val.startsWith('"') && val.endsWith('"')) {
-        val = val.slice(1, -1);
-      }
-      if (val.includes('%')) {
-        val = decodeURIComponent(val);
-      }
-      let localUser = JSON.parse(val);
-      if (typeof localUser === 'string') {
-        localUser = JSON.parse(localUser);
-      }
-      userId = localUser.id;
-      userEmail = localUser.email;
-    } catch (e) {
-      try {
-        let val = localUserCookie.trim();
-        if (val.startsWith('"') && val.endsWith('"')) {
-          val = val.slice(1, -1);
-        }
-        let localUser = JSON.parse(val);
-        if (typeof localUser === 'string') {
-          localUser = JSON.parse(localUser);
-        }
-        userId = localUser.id;
-        userEmail = localUser.email;
-      } catch (innerErr) {}
-    }
-  }
-
-  if (!userId) {
-    const supabase = await createClient();
-    const { data: { user: cloudUser } } = await supabase ? await supabase.auth.getUser() : { data: { user: null } };
-    if (cloudUser) {
-      userId = cloudUser.id;
-      userEmail = cloudUser.email || '';
-    }
-  }
-
-  if (!userId) return null;
-  return { id: userId, email: userEmail };
-}
+import { getResilientSession } from "@/src/lib/auth-session";
 
 export async function GET() {
   try {
-    const user = await getAuthenticatedUser();
+    const session = await getResilientSession();
 
-    if (!user?.email) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized - not authenticated" },
         { status: 401 }
       );
     }
 
-    // Fetch current user and verify isAdmin
-    const currentUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, user.email))
-      .limit(1);
-
-    const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
-    const isSuperAdmin = adminEmail && user.email.toLowerCase().trim() === adminEmail;
-
-    if (!currentUser[0]?.isAdmin && !isSuperAdmin) {
+    if (!session.user.isAdmin) {
       return NextResponse.json(
         { error: "Unauthorized - not an admin" },
         { status: 403 }

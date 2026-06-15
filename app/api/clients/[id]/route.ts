@@ -28,56 +28,51 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1. Fetch client record
-    const clientRecord = await db
-      .select()
-      .from(clients)
-      .where(and(eq(clients.id, clientId), eq(clients.userId, userId)))
-      .limit(1);
+    // We implement a retry block to handle Vercel serverless idle connection drops
+    let clientRecord = [];
+    let clientInvoices = [];
+    let notes = [];
+    let tags = [];
+    let activities = [];
+    let relationship = [];
 
-    if (clientRecord.length === 0) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    let retries = 2;
+    while (retries > 0) {
+      try {
+        // 1. Fetch client record first to ensure they exist
+        clientRecord = await db
+          .select()
+          .from(clients)
+          .where(and(eq(clients.id, clientId), eq(clients.userId, userId)))
+          .limit(1);
+
+        if (clientRecord.length === 0) {
+          return NextResponse.json({ error: "Client not found" }, { status: 404 });
+        }
+
+        // Fetch everything else in parallel to prevent connection timeouts and speed up response
+        [clientInvoices, notes, tags, activities, relationship] = await Promise.all([
+          db.select().from(invoices).where(eq(invoices.clientId, clientId)).orderBy(desc(invoices.createdAt)),
+          db.select().from(clientNotes).where(eq(clientNotes.clientId, clientId)).orderBy(desc(clientNotes.createdAt)),
+          db.select().from(clientTags).where(eq(clientTags.clientId, clientId)).orderBy(desc(clientTags.createdAt)),
+          db.select().from(clientActivities).where(eq(clientActivities.clientId, clientId)).orderBy(desc(clientActivities.createdAt)),
+          db.select().from(clientRelationships).where(eq(clientRelationships.clientId, clientId)).limit(1)
+        ]);
+
+        // If we get here, queries succeeded
+        break;
+      } catch (err: any) {
+        retries--;
+        if (retries === 0) throw err;
+        // Wait 200ms before retry
+        await new Promise(r => setTimeout(r, 200));
+      }
     }
-
-    const client = clientRecord[0];
-
-    // 2. Fetch associated invoices
-    const clientInvoices = await db
-      .select()
-      .from(invoices)
-      .where(eq(invoices.clientId, clientId))
-      .orderBy(desc(invoices.createdAt));
-
-    // 3. Fetch notes
-    const notes = await db
-      .select()
-      .from(clientNotes)
-      .where(eq(clientNotes.clientId, clientId))
-      .orderBy(desc(clientNotes.createdAt));
-
-    // 4. Fetch tags
-    const tags = await db
-      .select()
-      .from(clientTags)
-      .where(eq(clientTags.clientId, clientId))
-      .orderBy(desc(clientTags.createdAt));
-
-    // 5. Fetch activities
-    const activities = await db
-      .select()
-      .from(clientActivities)
-      .where(eq(clientActivities.clientId, clientId))
-      .orderBy(desc(clientActivities.createdAt));
-
-    // 6. Fetch CRM relationship data
-    const relationship = await db
-      .select()
-      .from(clientRelationships)
-      .where(eq(clientRelationships.clientId, clientId))
-      .limit(1);
 
     // ==========================================
     // Calculate Financial and Behavior Analytics
+    const client = clientRecord[0];
+
     // ==========================================
     const totalInvoiced = clientInvoices.reduce((sum, inv) => sum + inv.amount, 0);
     
