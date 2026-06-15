@@ -172,13 +172,20 @@ export default function OpayButton({
             </div>
 
             {/* Actions */}
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => window.open("https://opayweb.com", "_blank")}
+                className="w-full h-11 bg-[#00B140] hover:bg-[#009933] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              >
+                Open OPay Web <ArrowRight className="w-4 h-4 text-emerald-100" />
+              </button>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
-                I have opened the app <ArrowRight className="w-4 h-4 text-emerald-400" />
+                Done (I used my phone app)
               </button>
             </div>
           </div>
