@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
+export const dynamic = "force-dynamic";
 import { transactions } from "@/src/db/schema";
 import { asc, eq } from "drizzle-orm";
 import * as crypto from "crypto";

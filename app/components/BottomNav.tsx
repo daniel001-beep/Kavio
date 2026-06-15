@@ -22,7 +22,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg z-50 py-2.5 pb-5 shadow-2xl grid grid-cols-5 justify-items-center w-full">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100/80 z-50 py-2.5 pb-5 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] grid grid-cols-5 justify-items-center w-full">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href;
@@ -36,16 +36,16 @@ export default function BottomNav() {
             <div
               className={`p-1 rounded-full transition-all ${
                 isActive 
-                  ? "bg-emerald-500/10 text-emerald-400" 
-                  : "text-slate-400 group-hover:text-white"
+                  ? "bg-emerald-50 text-emerald-600" 
+                  : "text-slate-400 group-hover:text-slate-700"
               }`}
             >
               <Icon className="w-4.5 h-4.5" />
             </div>
             
             <span
-              className={`text-[8.5px] font-bold tracking-tighter transition-colors text-center whitespace-nowrap ${
-                isActive ? "text-emerald-400" : "text-slate-400 group-hover:text-white"
+              className={`text-[9px] font-bold tracking-tight transition-colors text-center whitespace-nowrap ${
+                isActive ? "text-emerald-700" : "text-slate-400 group-hover:text-slate-700"
               }`}
             >
               {tab.label}
@@ -53,7 +53,7 @@ export default function BottomNav() {
 
             {/* Active Indicator dot */}
             {isActive && (
-              <span className="absolute top-0 w-1 h-1 bg-emerald-400 rounded-full" />
+              <span className="absolute top-0 w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
             )}
           </Link>
         );

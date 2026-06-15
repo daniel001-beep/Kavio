@@ -340,39 +340,41 @@ export default function DashboardClient() {
   const pendingInvoices = invoices.filter(inv => inv.status !== "PAID" && inv.status !== "DRAFT");
 
   return (
-    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16">
-      
+    <div className="relative flex flex-col space-y-8 animate-in fade-in duration-500 pb-16 min-h-full">
+      {/* Background Decorative Blur Glows */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-50/20 rounded-full blur-[120px] pointer-events-none z-0" />
+
       {/* Top Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm relative overflow-hidden">
-        <div className="space-y-1.5 relative z-10">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10">
+        <div className="space-y-1.5">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             Collections Dashboard
           </h1>
-          <p className="text-slate-500 text-sm font-semibold">
-            Track outstanding balances, log payments, and nudge clients on time. As of {todayReadable}.
+          <p className="text-slate-500 text-sm">
+            Track outstanding balances, log payments, and nudge client accounts on time. As of {todayReadable}.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 relative z-10">
+        <div className="flex items-center gap-3">
           <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-            <Button className="py-6 px-6 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-450 hover:to-emerald-550 text-white shadow-lg shadow-emerald-500/20 border-none transition-all duration-200 flex items-center gap-2">
+            <button className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm">
               <Plus className="w-4 h-4" />
               Create Invoice
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
 
       {/* Onboarding Suggestion Widget */}
       {onboardingResponses && (
-        <div className="bg-gradient-to-r from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
           <div className="flex items-center gap-4 text-left">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">Personalized Recovery Tip</h4>
-              <p className="text-xs text-slate-600 font-semibold mt-1">
+              <p className="text-sm font-medium text-slate-700">
                 {onboardingResponses.challenge === "late_payments" && "We've optimized your dashboard to track late invoices. Go to Collections to send quick WhatsApp nudges."}
                 {onboardingResponses.challenge === "tracking" && "We've highlighted outstanding balances below. Use the clients registry to track payment health."}
                 {onboardingResponses.challenge === "awkward_reminders" && "Kavio provides pre-written message templates. Click Nudge on any invoice to send a polite reminder."}
@@ -381,132 +383,123 @@ export default function DashboardClient() {
             </div>
           </div>
           <Link href="/dashboard/collections" passHref legacyBehavior>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold px-5 py-3.5 text-xs shrink-0 flex items-center gap-2 border-none">
+            <button className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm">
               Open Collections Center
               <ChevronRight className="w-4 h-4" />
-            </Button>
+            </button>
           </Link>
         </div>
       )}
 
       {/* PWA App Installation Promotion Banner */}
       {isPWAInstallable && (
-        <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in slide-in-from-top duration-300">
+        <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
           <div className="flex items-center gap-4 text-left">
-            <div className="p-3 bg-emerald-500 text-white rounded-2xl">
+            <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-800">Install Kavio App</h4>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">
+              <h4 className="text-sm font-semibold text-slate-850">Install Kavio App</h4>
+              <p className="text-xs text-slate-500 mt-0.5">
                 Add Kavio to your home screen for quick offline access and persistent collections tracking.
               </p>
             </div>
           </div>
-          <Button 
+          <button 
             onClick={triggerPWAInstall}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold px-5 py-4 text-xs shrink-0 flex items-center gap-2 shadow-md shadow-emerald-500/10 border-none"
+            className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm"
           >
-            <Sparkles className="w-4 h-4 text-amber-350" />
             Add to Home Screen
-          </Button>
+          </button>
         </div>
       )}
 
       {/* Aggregate Cards (Outstanding Revenue Dashboard) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         
         {/* Total Outstanding */}
-        <Card className="border-none rounded-2xl shadow-sm bg-amber-500/5 hover:bg-amber-500/10 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Outstanding</span>
-              <Clock className="w-4 h-4 text-amber-500" />
-            </div>
-            <h3 className="text-2xl font-black text-slate-800 font-mono tracking-tight">{formatCurrency(outstandingSum)}</h3>
-            <p className="text-[10px] text-slate-550 font-semibold mt-1">Pending client payments</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Outstanding</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-900 tracking-tight mt-3 font-mono group-hover:text-amber-600 transition-colors duration-300">{formatCurrency(outstandingSum)}</h3>
+          <p className="text-xs text-slate-400 mt-1.5">Pending client payments</p>
+        </div>
 
         {/* Total Overdue */}
-        <Card className="border-none rounded-2xl shadow-sm bg-rose-500/5 hover:bg-rose-500/10 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Overdue</span>
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
-            </div>
-            <h3 className="text-2xl font-black text-rose-600 font-mono tracking-tight">{formatCurrency(overdueSum)}</h3>
-            <p className="text-[10px] text-rose-500 font-semibold mt-1">Past due invoices</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Overdue</span>
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+          </div>
+          <h3 className="text-3xl font-bold text-rose-600 tracking-tight mt-3 font-mono group-hover:text-rose-700 transition-colors duration-300">{formatCurrency(overdueSum)}</h3>
+          <p className="text-xs text-slate-400 mt-1.5">Past due invoices</p>
+        </div>
 
-        {/* Total Paid (This month / aggregate) */}
-        <Card className="border-none rounded-2xl shadow-sm bg-emerald-500/5 hover:bg-emerald-500/10 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Recovered</span>
-              <CheckCircle className="w-4 h-4 text-emerald-500" />
-            </div>
-            <h3 className="text-2xl font-black text-emerald-600 font-mono tracking-tight">{formatCurrency(paidSum)}</h3>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-1">Total revenue collected</p>
-          </CardContent>
-        </Card>
+        {/* Total Paid / Total Recovered */}
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recovered</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+          <h3 className="text-3xl font-bold text-emerald-600 tracking-tight mt-3 font-mono group-hover:text-emerald-700 transition-colors duration-300">{formatCurrency(paidSum)}</h3>
+          <p className="text-xs text-slate-400 mt-1.5">Total revenue collected</p>
+        </div>
 
         {/* Total Invoices Count */}
-        <Card className="border-none rounded-2xl shadow-sm bg-white hover:bg-slate-50/50 transition-all">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tracked Invoices</span>
-              <FileText className="w-4 h-4 text-slate-400" />
-            </div>
-            <h3 className="text-2xl font-black text-slate-800 tracking-tight">{invoices.length} Invoices</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-1">Across {clientsCount} clients</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tracked Invoices</span>
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
+          </div>
+          <h3 className="text-3xl font-bold text-slate-900 tracking-tight mt-3 group-hover:text-[#00B140] transition-colors duration-300">{invoices.length} Invoices</h3>
+          <p className="text-xs text-slate-400 mt-1.5">Across {clientsCount} clients</p>
+        </div>
       </div>
 
       {/* Bento Layout Grid for Revenue OS Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         
         {/* Left Columns (Invoices and Top Clients) */}
         <div className="lg:col-span-2 space-y-8">
           
           {/* Recent Invoices & Collections */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Recent Invoices & Collections</h2>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">Track, log payments, and nudge client accounts on time</p>
+                <h2 className="text-lg font-bold text-slate-800 tracking-tight">Recent Invoices & Collections</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Track, log payments, and nudge client accounts on time</p>
               </div>
               
               {/* Tab Filters */}
-              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl w-fit self-start sm:self-center">
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 p-1 rounded-xl w-fit self-start sm:self-center">
                 <button
                   onClick={() => setInvoiceTab("ALL")}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                  className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all border-none cursor-pointer ${
                     invoiceTab === "ALL" 
-                      ? "bg-white text-slate-800 shadow-sm" 
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-white text-emerald-700 border border-slate-100 shadow-sm" 
+                      : "text-slate-400 hover:text-slate-700 bg-transparent"
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setInvoiceTab("PENDING")}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                  className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all border-none cursor-pointer ${
                     invoiceTab === "PENDING" 
-                      ? "bg-white text-slate-800 shadow-sm" 
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-white text-emerald-700 border border-slate-100 shadow-sm" 
+                      : "text-slate-400 hover:text-slate-700 bg-transparent"
                   }`}
                 >
                   Pending
                 </button>
                 <button
                   onClick={() => setInvoiceTab("PAID")}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                  className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all border-none cursor-pointer ${
                     invoiceTab === "PAID" 
-                      ? "bg-white text-slate-800 shadow-sm" 
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-white text-emerald-700 border border-slate-100 shadow-sm" 
+                      : "text-slate-400 hover:text-slate-700 bg-transparent"
                   }`}
                 >
                   Paid
@@ -514,19 +507,19 @@ export default function DashboardClient() {
               </div>
             </div>
 
-            <div className="overflow-x-auto w-full">
+            <div className="overflow-hidden bg-white rounded-2xl border border-slate-100 w-full">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100/40 bg-slate-50/30">
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount Owed</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Due Date</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  <tr className="bg-slate-50/50 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    <th className="py-4 px-5">Invoice</th>
+                    <th className="py-4 px-5">Client Name</th>
+                    <th className="py-4 px-5">Amount Owed</th>
+                    <th className="py-4 px-5">Due Date</th>
+                    <th className="py-4 px-5">Status</th>
+                    <th className="py-4 px-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50 text-xs">
+                <tbody className="divide-y divide-slate-100/60 text-sm">
                   {(() => {
                     const filtered = invoices.filter(inv => {
                       if (invoiceTab === "PENDING") return inv.status !== "PAID" && inv.status !== "DRAFT";
@@ -552,12 +545,12 @@ export default function DashboardClient() {
                         <tr>
                           <td colSpan={6}>
                             <div className="py-12 flex flex-col items-center gap-4 text-center">
-                              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-350">
-                                <CheckCircle className="w-5 h-5" />
+                              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                                <CheckCircle className="w-6 h-6" />
                               </div>
                               <div>
-                                <h4 className="text-xs font-bold text-slate-700">No invoices in this view</h4>
-                                <p className="text-[10px] text-slate-400 mt-0.5">Use the create invoice action to add collections logs.</p>
+                                <h4 className="text-slate-650 font-semibold mt-4">No invoices in this view</h4>
+                                <p className="text-slate-400 text-sm mt-1">Use the create invoice action to add collections logs.</p>
                               </div>
                             </div>
                           </td>
@@ -566,29 +559,29 @@ export default function DashboardClient() {
                     }
 
                     return filtered.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="py-4 px-4 font-mono font-bold text-slate-700">
+                      <tr key={inv.id} className="hover:bg-slate-50/20 transition-colors duration-150 group">
+                        <td className="py-4 px-5 font-mono font-bold text-slate-900">
                           {inv.invoiceNumber}
                         </td>
-                        <td className="py-4 px-4">
-                          <p className="font-bold text-slate-800">{inv.client.name}</p>
-                          <p className="text-[10px] text-slate-400 font-semibold">{inv.client.companyName || inv.client.email}</p>
+                        <td className="py-4 px-5">
+                          <p className="font-semibold text-slate-800 leading-tight">{inv.client.name}</p>
+                          <p className="text-xs text-slate-400 font-mono mt-0.5">{inv.client.companyName || inv.client.email}</p>
                         </td>
-                        <td className="py-4 px-4 font-mono font-bold text-slate-800">
+                        <td className="py-4 px-5 font-mono font-bold text-slate-900">
                           {formatCurrency(inv.amount)}
                         </td>
-                        <td className="py-4 px-4 text-slate-500 font-medium">
+                        <td className="py-4 px-5 text-slate-500 font-mono text-sm">
                           {new Date(inv.dueDate).toLocaleDateString()}
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-5">
                           {getStatusBadge(inv.status)}
                         </td>
-                        <td className="py-4 px-4 text-right">
+                        <td className="py-4 px-5 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {/* Copy Link */}
                             <button
                               onClick={() => copyShareableLink(inv.id)}
-                              className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-transparent rounded-lg transition-colors animate-none bg-transparent"
+                              className="p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-700 border border-slate-100 rounded-xl transition-all duration-150 bg-transparent cursor-pointer"
                               title="Copy Public Link"
                               type="button"
                             >
@@ -604,7 +597,7 @@ export default function DashboardClient() {
                                     e.target.value = ""; // Reset
                                   }
                                 }}
-                                className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/50 text-slate-700 text-[10px] font-bold rounded-lg px-1.5 py-1 cursor-pointer focus:outline-none"
+                                className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-650 hover:text-slate-800 font-medium cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                               >
                                 <option value="">💬 Nudge...</option>
                                 <option value="DUE_TOMORROW">Due Tomorrow</option>
@@ -616,14 +609,14 @@ export default function DashboardClient() {
 
                             {/* Log manual payment */}
                             {inv.status !== "PAID" ? (
-                              <Button
+                              <button
                                 onClick={() => setSelectedInvoice(inv)}
-                                className="py-0.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[9px] rounded-lg border-none"
+                                className="py-1.5 px-3.5 bg-[#00B140] hover:bg-[#009933] text-white font-semibold text-xs rounded-xl border-none cursor-pointer hover:shadow-md hover:shadow-emerald-50 transition-all duration-200"
                               >
                                 Log Pay
-                              </Button>
+                              </button>
                             ) : (
-                              <span className="text-[10px] text-emerald-650 font-bold px-2 py-0.5 bg-emerald-50 rounded-md">Settled</span>
+                              <span className="text-xs text-emerald-700 font-semibold px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100/80">Settled</span>
                             )}
                           </div>
                         </td>
@@ -634,9 +627,9 @@ export default function DashboardClient() {
               </table>
             </div>
             
-            <div className="flex justify-end pt-4 border-t border-slate-100/40">
+            <div className="flex justify-end pt-4 border-t border-slate-100">
               <Link href="/dashboard/invoices" passHref legacyBehavior>
-                <a className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5">
+                <a className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
                   View All Invoices Hub
                   <ChevronRight className="w-3.5 h-3.5" />
                 </a>
@@ -645,51 +638,51 @@ export default function DashboardClient() {
           </div>
 
           {/* Top Billing Clients */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300 relative z-10">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Top Billing Clients</h2>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">Clients sorted by highest volume of total invoices billed</p>
+              <h2 className="text-lg font-bold text-slate-800 tracking-tight">Top Billing Clients</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Clients sorted by highest volume of total invoices billed</p>
             </div>
 
-            <div className="overflow-x-auto w-full">
+            <div className="overflow-hidden bg-white rounded-2xl border border-slate-100 w-full">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100/40 bg-slate-50/30">
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Company / Country</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Invoiced</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Settled</th>
-                    <th className="py-3.5 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outstanding Owed</th>
+                  <tr className="bg-slate-50/50 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    <th className="py-4 px-5">Client Name</th>
+                    <th className="py-4 px-5">Company / Country</th>
+                    <th className="py-4 px-5">Total Invoiced</th>
+                    <th className="py-4 px-5">Total Settled</th>
+                    <th className="py-4 px-5">Outstanding Owed</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50 text-xs">
+                <tbody className="divide-y divide-slate-100/60 text-sm">
                   {topClients.length === 0 ? (
                     <tr>
                       <td colSpan={5}>
                         <div className="py-12 flex flex-col items-center gap-4 text-center">
-                          <p className="text-[10px] text-slate-400">No client data found. Start by adding a client inside the Clients Directory.</p>
+                          <p className="text-slate-400 text-sm">No client data found. Start by adding a client inside the Clients Directory.</p>
                         </div>
                       </td>
                     </tr>
                   ) : (
                     topClients.map((c) => (
-                      <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-4">
+                      <tr key={c.id} className="hover:bg-slate-50/20 transition-colors duration-150">
+                        <td className="py-4 px-5">
                           <Link href={`/dashboard/clients/${c.id}`} passHref legacyBehavior>
-                            <a className="font-bold text-slate-805 hover:text-emerald-600 block">{c.name}</a>
+                            <a className="font-bold text-slate-900 hover:text-[#00B140] transition-colors block leading-tight">{c.name}</a>
                           </Link>
-                          <span className="text-[10px] text-slate-400 font-semibold">{c.email}</span>
+                          <span className="text-xs text-slate-400 font-mono mt-0.5">{c.email}</span>
                         </td>
-                        <td className="py-4 px-4 font-medium text-slate-505">
+                        <td className="py-4 px-5 font-medium text-slate-500">
                           {c.companyName || "Solo"} {c.location ? `• ${c.location}` : ""}
                         </td>
-                        <td className="py-4 px-4 font-mono font-bold text-slate-800">
+                        <td className="py-4 px-5 font-mono font-bold text-slate-900">
                           {formatCurrency(c.totalBilled)}
                         </td>
-                        <td className="py-4 px-4 font-mono font-bold text-emerald-600">
+                        <td className="py-4 px-5 font-mono font-bold text-emerald-600">
                           {formatCurrency(c.totalPaid)}
                         </td>
-                        <td className={`py-4 px-4 font-mono font-bold ${c.outstanding > 0 ? "text-amber-600" : "text-slate-400"}`}>
+                        <td className={`py-4 px-5 font-mono font-bold ${c.outstanding > 0 ? "text-amber-500" : "text-slate-400"}`}>
                           {formatCurrency(c.outstanding)}
                         </td>
                       </tr>
@@ -699,9 +692,9 @@ export default function DashboardClient() {
               </table>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-100/40">
+            <div className="flex justify-end pt-4 border-t border-slate-100">
               <Link href="/dashboard/clients" passHref legacyBehavior>
-                <a className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5">
+                <a className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
                   Open Clients Directory
                   <ChevronRight className="w-3.5 h-3.5" />
                 </a>
@@ -713,23 +706,22 @@ export default function DashboardClient() {
 
         {/* Right Column (Side Widgets) */}
         <div className="space-y-8">
-          
-          {/* Money Owed Breakdown */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+                 {/* Money Owed Breakdown */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative z-10">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Money Owed Breakdown</h3>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Collections aging distribution</p>
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight">Money Owed Breakdown</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Collections aging distribution</p>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-end justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Outstanding</span>
-                  <span className="text-xl font-mono font-black text-slate-800">{formatCurrency(outstandingSum)}</span>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Outstanding</span>
+                  <span className="text-xl font-mono font-bold text-slate-900">{formatCurrency(outstandingSum)}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold text-rose-500 uppercase block">Overdue Share</span>
-                  <span className="text-xs font-mono font-bold text-rose-650">
+                  <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block">Overdue Share</span>
+                  <span className="text-xs font-mono font-bold text-rose-600">
                     {outstandingSum > 0 ? Math.round((overdueSum / outstandingSum) * 100) : 0}%
                   </span>
                 </div>
@@ -741,17 +733,17 @@ export default function DashboardClient() {
                   <>
                     <div 
                       style={{ width: `${(outstandingAging.overdue / outstandingSum) * 100}%` }} 
-                      className="bg-rose-500 h-full"
+                      className="bg-rose-500 h-full transition-all duration-350"
                       title={`Overdue: ${formatCurrency(outstandingAging.overdue)}`}
                     />
                     <div 
                       style={{ width: `${(outstandingAging.withinWeek / outstandingSum) * 100}%` }} 
-                      className="bg-amber-450 h-full"
+                      className="bg-amber-500 h-full transition-all duration-350"
                       title={`Due within 7 days: ${formatCurrency(outstandingAging.withinWeek)}`}
                     />
                     <div 
                       style={{ width: `${(outstandingAging.withinMonth / outstandingSum) * 100}%` }} 
-                      className="bg-emerald-500 h-full"
+                      className="bg-emerald-500 h-full transition-all duration-350"
                       title={`Due later: ${formatCurrency(outstandingAging.withinMonth)}`}
                     />
                   </>
@@ -760,26 +752,26 @@ export default function DashboardClient() {
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-50 text-[10px] font-semibold text-slate-500">
+              <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-slate-100/80 text-xs font-medium text-slate-550">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
                   <div>
-                    <p className="text-[8px] text-slate-400 uppercase">Overdue</p>
-                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.overdue)}</p>
+                    <p className="text-[9px] text-slate-400 uppercase font-semibold">Overdue</p>
+                    <p className="font-mono text-slate-800 font-bold">{formatCurrency(outstandingAging.overdue)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-450 shrink-0" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
                   <div>
-                    <p className="text-[8px] text-slate-400 uppercase">1-7 Days</p>
-                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.withinWeek)}</p>
+                    <p className="text-[9px] text-slate-400 uppercase font-semibold">1-7 Days</p>
+                    <p className="font-mono text-slate-800 font-bold">{formatCurrency(outstandingAging.withinWeek)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
                   <div>
-                    <p className="text-[8px] text-slate-400 uppercase">8-30 Days</p>
-                    <p className="font-mono text-slate-700 font-bold">{formatCurrency(outstandingAging.withinMonth)}</p>
+                    <p className="text-[9px] text-slate-400 uppercase font-semibold">8-30 Days</p>
+                    <p className="font-mono text-slate-800 font-bold">{formatCurrency(outstandingAging.withinMonth)}</p>
                   </div>
                 </div>
               </div>
@@ -787,34 +779,34 @@ export default function DashboardClient() {
           </div>
 
           {/* Client Reliability Rankings */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative z-10">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Client Reliability Ratings</h3>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Behavior assessment & risk tiers</p>
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight">Client Reliability Ratings</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Behavior assessment & risk tiers</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {reliabilityRankings.length === 0 ? (
-                <p className="text-[10px] text-slate-400 py-2">No reliability rankings. Please log invoices to analyze payment speed.</p>
+                <p className="text-slate-400 text-xs py-2">No reliability rankings. Please log invoices to analyze payment speed.</p>
               ) : (
                 reliabilityRankings.slice(0, 5).map((rank) => (
-                  <div key={rank.id} className="flex items-center justify-between gap-4 p-2 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-all">
+                  <div key={rank.id} className="flex items-center justify-between gap-4 p-2.5 bg-slate-50/40 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-all duration-200">
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-800 truncate">{rank.name}</p>
-                      <p className="text-[9px] text-slate-400 font-semibold truncate">{rank.companyName || "Solo Business"}</p>
+                      <p className="text-[10px] text-slate-400 font-mono truncate mt-0.5">{rank.companyName || "Solo Business"}</p>
                     </div>
                     
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                         rank.riskStatus === "Reliable" 
-                          ? "bg-emerald-50 text-emerald-700" 
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-100/50" 
                           : rank.riskStatus === "Moderate" 
-                            ? "bg-amber-50 text-amber-600" 
-                            : "bg-rose-50 text-rose-650 font-black"
+                            ? "bg-amber-50 text-amber-700 border-amber-100/50" 
+                            : "bg-rose-50 text-rose-600 border-rose-100/50"
                       }`}>
-                        {rank.riskStatus === "Reliable" ? "🟢 Good" : rank.riskStatus === "Moderate" ? "🟡 Moderate" : "🔴 High Risk"}
+                        {rank.riskStatus === "Reliable" ? "Good" : rank.riskStatus === "Moderate" ? "Moderate" : "High Risk"}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">{rank.healthScore}%</span>
+                      <span className="text-xs font-mono font-semibold text-slate-500">{rank.healthScore}%</span>
                     </div>
                   </div>
                 ))
@@ -823,30 +815,30 @@ export default function DashboardClient() {
           </div>
 
           {/* Upcoming Due Dates */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative z-10">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Upcoming Due Dates</h3>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Payments expected this week</p>
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight">Upcoming Due Dates</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Payments expected this week</p>
             </div>
 
             <div className="space-y-3">
               {upcomingInvoices.length === 0 ? (
                 <div className="py-4 text-center">
-                  <p className="text-[10px] text-emerald-650 font-bold bg-emerald-50 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5">
+                  <p className="text-xs font-bold bg-emerald-50 text-emerald-700 py-2.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 border border-emerald-100/50">
                     <CheckCircle className="w-3.5 h-3.5" />
                     No upcoming collections this week
                   </p>
                 </div>
               ) : (
                 upcomingInvoices.map((inv) => (
-                  <div key={inv.id} className="flex items-center justify-between gap-3 text-xs border-b border-slate-50 pb-2 last:border-b-0 last:pb-0">
+                  <div key={inv.id} className="flex items-center justify-between gap-3 text-xs border-b border-slate-100/60 pb-3 last:border-b-0 last:pb-0">
                     <div>
-                      <p className="font-bold text-slate-800">{inv.client.name}</p>
-                      <p className="text-[9px] text-slate-400 font-mono font-bold">{inv.invoiceNumber}</p>
+                      <p className="font-semibold text-slate-800 leading-tight">{inv.client.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{inv.invoiceNumber}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono font-bold text-slate-800">{formatCurrency(inv.amount)}</p>
-                      <p className="text-[9px] text-slate-550 font-semibold">Due {new Date(inv.dueDate).toLocaleDateString()}</p>
+                      <p className="font-mono font-bold text-slate-900">{formatCurrency(inv.amount)}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Due {new Date(inv.dueDate).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))
@@ -856,18 +848,18 @@ export default function DashboardClient() {
 
           {/* Overdue Alerts */}
           {overdueClients.length > 0 && (
-            <div className="bg-rose-50/40 border border-rose-100/50 rounded-3xl p-6 shadow-sm space-y-4">
+            <div className="bg-rose-50/50 border border-rose-100/80 rounded-3xl p-6 shadow-sm space-y-4 relative z-10 hover:shadow-md transition-all duration-300">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                <h3 className="text-sm font-black text-rose-900 tracking-tight">Overdue Warnings</h3>
+                <h3 className="text-sm font-bold text-rose-800 tracking-tight">Overdue Warnings</h3>
               </div>
-              <p className="text-[10px] text-rose-700 font-medium">The following clients are currently holding outstanding balances past their deadlines. Immediate chase advised:</p>
+              <p className="text-xs text-rose-600">The following clients are currently holding outstanding balances past their deadlines. Immediate chase advised:</p>
               
               <div className="space-y-2.5">
                 {overdueClients.slice(0, 3).map((oc) => (
-                  <div key={oc.id} className="flex items-center justify-between text-xs font-semibold">
+                  <div key={oc.id} className="flex items-center justify-between text-xs font-bold">
                     <span className="text-slate-800 truncate max-w-[120px]">{oc.name}</span>
-                    <span className="text-rose-650 font-mono font-bold">{formatCurrency(oc.overdueAmount)}</span>
+                    <span className="text-rose-650 font-mono">{formatCurrency(oc.overdueAmount)}</span>
                   </div>
                 ))}
               </div>
@@ -879,66 +871,67 @@ export default function DashboardClient() {
 
       {/* Manual Payment Logging Dialog / Modal */}
       {selectedInvoice && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col gap-6">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100 animate-in zoom-in-95 duration-300 flex flex-col gap-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 to-[#00B140]" />
+            
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Record Manual Payment</h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <h2 className="text-lg font-bold text-slate-800 tracking-tight">Record Manual Payment</h2>
+              <p className="text-xs text-slate-400 mt-1">
                 Log a direct transfer or card payment for invoice <strong>{selectedInvoice.invoiceNumber}</strong>.
               </p>
             </div>
 
             <form onSubmit={handleRecordPayment} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Amount Received</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Amount Received</label>
                 <Input
                   type="text"
                   disabled
                   value={formatCurrency(selectedInvoice.amount)}
-                  className="rounded-xl border-transparent bg-slate-50 text-slate-500 text-xs py-4 font-mono font-bold"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm text-slate-500 focus:outline-none font-mono font-bold"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Payment Reference / Bank ID</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Payment Reference / Bank ID</label>
                 <Input
                   type="text"
                   value={paymentReference}
                   onChange={(e) => setPaymentReference(e.target.value)}
                   placeholder="e.g. UBA/REF-839210"
-                  className="rounded-xl border-slate-200/50 text-xs py-4"
+                  className="w-full bg-slate-50 border border-slate-200/60 rounded-2xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#00B140] transition-all duration-200 placeholder:text-slate-300"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase">Internal Notes</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Internal Notes</label>
                 <Input
                   type="text"
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
                   placeholder="e.g. Paid via bank transfer to NGN account"
-                  className="rounded-xl border-slate-200/50 text-xs py-4"
+                  className="w-full bg-slate-50 border border-slate-200/60 rounded-2xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#00B140] transition-all duration-200 placeholder:text-slate-300"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100/30">
-                <Button
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setSelectedInvoice(null)}
-                  className="rounded-xl px-5 text-xs py-4 border-slate-200/50 font-semibold"
+                  className="bg-transparent text-slate-400 hover:text-slate-650 text-sm font-semibold border-none cursor-pointer transition-colors"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
                   disabled={isSubmittingPayment}
-                  className="rounded-xl px-5 text-xs py-4 bg-emerald-600 text-white font-bold hover:bg-emerald-500 flex items-center gap-1.5"
+                  className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-1px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm"
                 >
                   {isSubmittingPayment && <Loader2 className="w-3 h-3 animate-spin" />}
                   Confirm Payment
-                </Button>
+                </button>
               </div>
             </form>
           </div>
