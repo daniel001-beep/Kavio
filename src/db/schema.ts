@@ -135,15 +135,16 @@ export const ledgerEntries = pgTable("ledger_entry", {
 export const auditLogs = pgTable("audit_log", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id"),
-  eventType: text("event_type").notNull(),
-  entityType: text("entity_type").notNull(),
-  entityId: text("entity_id"),
-  changes: jsonb("changes"),
-  changeHash: text("change_hash"),
+  invoiceId: uuid("invoice_id").references(() => invoices.id),
+  uploadId: text("upload_id"),
+  action: text("action").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  result: text("result"),
+  finalScore: integer("final_score"),
+  suspectedFraud: boolean("suspected_fraud"),
   metadata: jsonb("metadata").default({}),
-  timestamp: timestamp("timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const systemHealth = pgTable("system_health", {
@@ -213,11 +214,13 @@ export const invoices = pgTable("invoice", {
   viewCount: integer("view_count").default(0),
   viewedAt: timestamp("viewed_at"),
   clientPortalToken: text("client_portal_token"),
-  verificationStatus: text("verification_status").default("unverified"),
+  verificationStatus: text("verification_status").default("UNVERIFIED"),
   verifiedAt: timestamp("verified_at"),
+  rejectedAttempts: integer("rejected_attempts").default(0),
+  blockedAt: timestamp("blocked_at"),
+  blockedReason: text("blocked_reason"),
   verificationAttempts: integer("verification_attempts").default(0),
   geminiExtractedData: jsonb("gemini_extracted_data"),
-  transactionReference: text("transaction_reference"),
   confidenceScore: integer("confidence_score"),
   uploadId: text("upload_id"),
   flagged: boolean("flagged").default(false),
@@ -458,47 +461,41 @@ export const invoiceReminders = pgTable("invoice_reminder", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// 10. Receipt Uploads (Specifically requested: receipt_uploads)
+// 10. Receipt Uploads
 export const receiptUploads = pgTable("receipt_upload", {
   id: uuid("id").defaultRandom().primaryKey(),
   invoiceId: uuid("invoice_id")
     .notNull()
     .references(() => invoices.id, { onDelete: "cascade" }),
-  fileUrl: text("file_url"),
-  fileName: text("file_name"),
-  fileSize: integer("file_size"),
-  fileType: text("file_type"), // PNG, JPG, JPEG, PDF
-  receiptImageBase64: text("receipt_image_base64"),
+  uploadId: text("upload_id").notNull().unique(),
+  imageHash: text("image_hash").notNull(),
+  fileSizeBytes: integer("file_size_bytes"),
+  fileType: text("file_type"),
+  verificationStatus: text("verification_status"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// 11. Verification Attempts (Specifically requested: verification_attempts)
+// 11. Verification Attempts
 export const verificationAttempts = pgTable("verification_attempt", {
   id: uuid("id").defaultRandom().primaryKey(),
   invoiceId: uuid("invoice_id")
     .notNull()
     .references(() => invoices.id, { onDelete: "cascade" }),
-  receiptUploadId: uuid("receipt_upload_id")
-    .references(() => receiptUploads.id, { onDelete: "set null" }),
-  confidenceScore: doublePrecision("confidence_score").notNull().default(0),
-  extractedAmount: doublePrecision("extracted_amount"),
+  uploadId: text("upload_id").notNull(),
+  imageHash: text("image_hash").notNull(),
+  extractedAmount: numeric("extracted_amount"),
   extractedAccountNumber: text("extracted_account_number"),
   extractedAccountName: text("extracted_account_name"),
-  extractedBankName: text("extracted_bank_name"),
-  extractedRef: text("extracted_ref"),
-  extractedSenderName: text("extracted_sender_name"),
-  extractedDate: text("extracted_date"),
-  scoreAmount: integer("score_amount").default(0),
-  scoreAccountNumber: integer("score_account_number").default(0),
-  scoreAccountName: integer("score_account_name").default(0),
-  scoreDate: integer("score_date").default(0),
-  scoreReference: integer("score_reference").default(0),
-  totalScore: integer("total_score").default(0),
-  status: text("status").notNull().default("REJECTED"), // AUTO_VERIFIED, MANUAL_REVIEW, REJECTED
-  fraudFlags: jsonb("fraud_flags").default([]),
-  isSuspectedFraud: boolean("is_suspected_fraud").default(false),
-  ocrRawResult: jsonb("ocr_raw_result").default({}),
-  fingerprint: text("fingerprint"),
+  extractedTransactionRef: text("extracted_transaction_ref"),
+  extractedDate: timestamp("extracted_date", { mode: "date" }),
+  geminiConfidenceScore: integer("gemini_confidence_score"),
+  suspectedFraud: boolean("suspected_fraud").default(false),
+  fraudReasons: text("fraud_reasons").array(),
+  imageAuthenticity: text("image_authenticity"),
+  scoreBreakdown: jsonb("score_breakdown"),
+  finalScore: integer("final_score"),
+  verificationStatus: text("verification_status").notNull(),
+  attemptNumber: integer("attempt_number").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -753,20 +753,29 @@ export default function SettingsPage() {
 
       </div>
 
-      {/* Mobile-only sticky Sign Out footer strip */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/90 backdrop-blur-md border-t border-rose-100">
+      {/* Mobile-only sticky footer strip */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/90 backdrop-blur-md border-t border-rose-100 flex items-center gap-3">
+        {session?.user?.isAdmin && (
+          <button
+            onClick={() => window.location.href = "/fintech/admin"}
+            className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/25 cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Admin Panel
+          </button>
+        )}
         <button
           id="mobile-sticky-signout"
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60 cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60 cursor-pointer"
         >
           {isSigningOut ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <LogOut className="w-4 h-4" />
           )}
-          {isSigningOut ? "Signing out..." : "Sign Out of Kavio"}
+          {isSigningOut ? "Signing out..." : "Sign Out"}
         </button>
       </div>
 
