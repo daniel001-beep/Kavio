@@ -17,7 +17,8 @@ export type EventType =
   | "INVOICE_PAID"
   | "CLIENT_CREATED"
   | "CLIENT_UPDATED"
-  | "REPORT_EXPORTED";
+  | "REPORT_EXPORTED"
+  | "RECEIPT_REJECTED";
 
 export interface TrackEventOptions {
   userId: string;

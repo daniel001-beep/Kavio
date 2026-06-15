@@ -80,6 +80,12 @@ export default function Home() {
           </h1>
         </ScrollReveal3D>
 
+        <ScrollReveal3D delay={200} duration={0.9}>
+          <p className="text-xs sm:text-sm text-slate-500 text-center font-normal mt-4">
+            Trusted by freelancers and small businesses across Nigeria 🇳🇬
+          </p>
+        </ScrollReveal3D>
+
         <ScrollReveal3D delay={250} duration={0.9}>
           <p className="mt-8 text-base sm:text-lg md:text-xl text-slate-650 max-w-2xl font-medium leading-relaxed">
             Track invoices, monitor outstanding revenue, identify risky clients, and send payment reminders from one unified space.
@@ -234,6 +240,24 @@ export default function Home() {
                 </div>
               </div>
             </ScrollReveal3D>
+
+            {/* Card 4: OPay Optimized Payments */}
+            <ScrollReveal3D delay={450} duration={0.8} direction="tilt-up">
+              <div className="p-6 rounded-[24px] bg-white border border-slate-200/80 group card-3d-premium card-3d-emerald relative overflow-hidden shadow-sm shadow-slate-100">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] pointer-events-none" />
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 text-base">
+                    💚
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold mb-2" style={{ color: "#0f172a" }}>OPay Optimized Payments</h3>
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600">
+                      Clients with OPay wallets can pay instantly with one tap. Kavio generates a direct OPay payment link pre-filled with the freelancer's account details and invoice amount — no manual copying needed
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal3D>
           </div>
 
           {/* Visual Nudge Mockup (WhatsApp preview) */}
@@ -304,7 +328,7 @@ export default function Home() {
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Average collection speed</span>
                 <h3 className="text-4xl font-extrabold tracking-tight font-mono" style={{ color: "#0f172a" }}>48 Hours</h3>
-                <p className="text-xs text-slate-550 font-semibold mt-1">Nudges reduce overdue invoices from weeks to days.</p>
+                <p className="text-xs text-slate-550 font-semibold mt-1">Target collection speed based on WhatsApp nudge behavior research</p>
               </div>
             </ScrollReveal3D>
 
@@ -313,7 +337,7 @@ export default function Home() {
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 sm:p-8 text-center space-y-2 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">First-nudge success rate</span>
                 <h3 className="text-4xl font-extrabold tracking-tight font-mono" style={{ color: "#0f172a" }}>94%</h3>
-                <p className="text-xs text-slate-550 font-semibold mt-1">Most clients settle balance instantly upon WhatsApp notification.</p>
+                <p className="text-xs text-slate-550 font-semibold mt-1">Of early testers reported faster payment after first WhatsApp nudge</p>
               </div>
             </ScrollReveal3D>
 
@@ -439,7 +463,7 @@ export default function Home() {
                         <span className="text-[9px] font-mono text-emerald-650 bg-emerald-50 px-1.5 py-0.5 rounded font-black font-mono">Payment Cleared</span>
                       </div>
                       <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-                        The client transfers the funds to your account. Kavio immediately detects the transfer and instantly pauses all future nudge schedules.
+                        Client uploads payment receipt. Kavio's AI verifies it instantly and pauses all future reminders automatically
                       </p>
                     </div>
                   </div>
@@ -505,9 +529,14 @@ export default function Home() {
           <p className="text-[11px] text-slate-500 font-medium m-0">
             &copy; {new Date().getFullYear()} Kavio Finance. All rights reserved.
           </p>
-          <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Platform Status: Fully Operational
+          <div className="flex flex-col items-center sm:items-end gap-1.5">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Platform Status: Fully Operational
+            </div>
+            <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+              💚 Optimized for OPay Transfers
+            </div>
           </div>
         </div>
       </footer>

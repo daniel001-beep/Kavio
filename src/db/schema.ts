@@ -204,12 +204,25 @@ export const invoices = pgTable("invoice", {
   dueDate: timestamp("due_date").notNull(),
   status: text("status").notNull().default("DRAFT"), // DRAFT, SENT, VIEWED, OVERDUE, PAID
   paymentInstructions: text("payment_instructions"),
+  bankName: text("bank_name"),
+  accountName: text("account_name"),
+  accountNumber: text("account_number"),
   metadata: jsonb("metadata").default({}),
   isAutomatedReminderEnabled: boolean("is_automated_reminder_enabled").default(true),
   lastReminderSentAt: timestamp("last_reminder_sent_at"),
   viewCount: integer("view_count").default(0),
   viewedAt: timestamp("viewed_at"),
   clientPortalToken: text("client_portal_token"),
+  verificationStatus: text("verification_status").default("unverified"),
+  verifiedAt: timestamp("verified_at"),
+  verificationAttempts: integer("verification_attempts").default(0),
+  geminiExtractedData: jsonb("gemini_extracted_data"),
+  transactionReference: text("transaction_reference"),
+  confidenceScore: integer("confidence_score"),
+  uploadId: text("upload_id"),
+  flagged: boolean("flagged").default(false),
+  flagReason: text("flag_reason"),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -429,5 +442,76 @@ export const paymentAuditLogs = pgTable("payment_audit_log", {
   fraudFlags: jsonb("fraud_flags").default([]),
   freelancerDecision: text("freelancer_decision"), // APPROVED, REJECTED, REQUEST_NEW
   timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// 9. Invoice Reminders (Specifically requested: invoice_reminders)
+export const invoiceReminders = pgTable("invoice_reminder", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  reminderDate: timestamp("reminder_date").defaultNow(),
+  status: text("status").notNull().default("PENDING"), // PENDING, SENT, FAILED
+  channel: text("channel").notNull(), // EMAIL, WHATSAPP
+  scheduleDay: integer("schedule_day").notNull(), // 0, 2, 5, 7
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 10. Receipt Uploads (Specifically requested: receipt_uploads)
+export const receiptUploads = pgTable("receipt_upload", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  fileUrl: text("file_url"),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"),
+  fileType: text("file_type"), // PNG, JPG, JPEG, PDF
+  receiptImageBase64: text("receipt_image_base64"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 11. Verification Attempts (Specifically requested: verification_attempts)
+export const verificationAttempts = pgTable("verification_attempt", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceId: uuid("invoice_id")
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  receiptUploadId: uuid("receipt_upload_id")
+    .references(() => receiptUploads.id, { onDelete: "set null" }),
+  confidenceScore: doublePrecision("confidence_score").notNull().default(0),
+  extractedAmount: doublePrecision("extracted_amount"),
+  extractedAccountNumber: text("extracted_account_number"),
+  extractedAccountName: text("extracted_account_name"),
+  extractedBankName: text("extracted_bank_name"),
+  extractedRef: text("extracted_ref"),
+  extractedSenderName: text("extracted_sender_name"),
+  extractedDate: text("extracted_date"),
+  scoreAmount: integer("score_amount").default(0),
+  scoreAccountNumber: integer("score_account_number").default(0),
+  scoreAccountName: integer("score_account_name").default(0),
+  scoreDate: integer("score_date").default(0),
+  scoreReference: integer("score_reference").default(0),
+  totalScore: integer("total_score").default(0),
+  status: text("status").notNull().default("REJECTED"), // AUTO_VERIFIED, MANUAL_REVIEW, REJECTED
+  fraudFlags: jsonb("fraud_flags").default([]),
+  isSuspectedFraud: boolean("is_suspected_fraud").default(false),
+  ocrRawResult: jsonb("ocr_raw_result").default({}),
+  fingerprint: text("fingerprint"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 12. General Notifications (Specifically requested: notifications)
+export const notifications = pgTable("notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  type: text("type").notNull(), // 'receipt_uploaded', 'invoice_verified', 'manual_review_required', 'invoice_paid'
+  createdAt: timestamp("created_at").defaultNow(),
 });
 

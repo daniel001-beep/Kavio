@@ -308,8 +308,8 @@ export default function FounderDemoPage() {
                           <TrendingUp className="w-3.5 h-3.5" /> +610% YTD
                         </span>
                       </div>
-                      <div className="w-full" style={{ height: 180, minHeight: 180, position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height={180}>
+                      <div className="h-[180px] w-full relative">
+                        <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={userGrowthData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                             <defs>
                               <linearGradient id="userGrad" x1="0" y1="0" x2="0" y2="1">
@@ -335,8 +335,8 @@ export default function FounderDemoPage() {
                           <TrendingUp className="w-3.5 h-3.5" /> +185.4M Collected
                         </span>
                       </div>
-                      <div className="w-full" style={{ height: 180, minHeight: 180, position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height={180}>
+                      <div className="h-[180px] w-full relative">
+                        <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={revenueGrowthData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                             <XAxis dataKey="name" fontSize={10} stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -358,8 +358,8 @@ export default function FounderDemoPage() {
                           <CheckCircle className="w-3.5 h-3.5" /> 94% Peak Target Met
                         </span>
                       </div>
-                      <div className="w-full" style={{ height: 180, minHeight: 180, position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height={180}>
+                      <div className="h-[180px] w-full relative">
+                        <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={paymentCollectionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                             <XAxis dataKey="name" fontSize={10} stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -379,8 +379,8 @@ export default function FounderDemoPage() {
                           <Layers className="w-3.5 h-3.5" /> 1,250 Cumulative
                         </span>
                       </div>
-                      <div className="w-full" style={{ height: 180, minHeight: 180, position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height={180}>
+                      <div className="h-[180px] w-full relative">
+                        <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={invoiceCreationData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                             <XAxis dataKey="name" fontSize={10} stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -403,8 +403,8 @@ export default function FounderDemoPage() {
                 </div>
 
                 {/* Pie Chart container */}
-                <div className="w-full flex items-center justify-center relative my-4" style={{ height: 192, minHeight: 192 }}>
-                  <ResponsiveContainer width="100%" height={192}>
+                <div className="h-48 w-full flex items-center justify-center relative my-4">
+                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={industryData}

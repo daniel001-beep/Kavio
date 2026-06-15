@@ -22,18 +22,24 @@ export async function POST(
     const body = await req.json();
     const { action, submissionId, notes } = body; // action is "APPROVE", "REJECT", or "REQUEST_NEW"
 
-    // Verify invoice exists and belongs to the freelancer
+    // Verify invoice exists and belongs to the freelancer or requester is admin
+    const isAdmin = session?.user?.isAdmin || session?.user?.email?.toLowerCase().trim() === (process.env.NEXT_PUBLIC_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "admin@kavio.co").toLowerCase().trim();
+
     const invoiceRecord = await db
       .select()
       .from(invoices)
-      .where(and(eq(invoices.id, id), eq(invoices.userId, userId)))
+      .where(eq(invoices.id, id))
       .limit(1);
 
     if (invoiceRecord.length === 0) {
-      return NextResponse.json({ error: "Invoice not found or unauthorized" }, { status: 404 });
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
     const invoice = invoiceRecord[0];
+
+    if (invoice.userId !== userId && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Find the active receipt submission
     let submissionQuery = db

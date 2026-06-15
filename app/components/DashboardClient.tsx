@@ -346,7 +346,7 @@ export default function DashboardClient() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white text-slate-800 p-8 rounded-3xl shadow-sm relative overflow-hidden">
         <div className="space-y-1.5 relative z-10">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Payment Recovery Console
+            Collections Dashboard
           </h1>
           <p className="text-slate-500 text-sm font-semibold">
             Track outstanding balances, log payments, and nudge clients on time. As of {todayReadable}.

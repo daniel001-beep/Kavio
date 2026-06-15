@@ -3,6 +3,7 @@
 import { createContext, useState, useEffect } from "react";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { NotificationProvider } from "@/app/context/NotificationContext";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const CartContext = createContext<any>(null);
 
@@ -63,12 +64,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
-    <AuthProvider>
-      <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, cartCount, cartTotal }}>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
-      </CartContext.Provider>
-    </AuthProvider>
+    <ClerkProvider>
+      <AuthProvider>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, cartCount, cartTotal }}>
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
+        </CartContext.Provider>
+      </AuthProvider>
+    </ClerkProvider>
   );
 }

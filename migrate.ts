@@ -148,6 +148,84 @@ async function runMigration() {
     `);
     console.log("✅ payment_audit_log table created.");
 
+    console.log("Altering invoice table with bank details...");
+    await db.execute(sql`ALTER TABLE "invoice" ADD COLUMN IF NOT EXISTS "bank_name" text;`);
+    await db.execute(sql`ALTER TABLE "invoice" ADD COLUMN IF NOT EXISTS "account_name" text;`);
+    await db.execute(sql`ALTER TABLE "invoice" ADD COLUMN IF NOT EXISTS "account_number" text;`);
+    console.log("✅ invoice table updated.");
+
+    console.log("Creating invoice_reminder table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "invoice_reminder" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "invoice_id" uuid NOT NULL REFERENCES "invoice"("id") ON DELETE CASCADE,
+        "reminder_date" timestamp DEFAULT now(),
+        "status" text NOT NULL DEFAULT 'PENDING',
+        "channel" text NOT NULL,
+        "schedule_day" integer NOT NULL,
+        "error_message" text,
+        "created_at" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ invoice_reminder table created.");
+
+    console.log("Creating receipt_upload table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "receipt_upload" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "invoice_id" uuid NOT NULL REFERENCES "invoice"("id") ON DELETE CASCADE,
+        "file_url" text,
+        "file_name" text,
+        "file_size" integer,
+        "file_type" text,
+        "receipt_image_base64" text,
+        "created_at" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ receipt_upload table created.");
+
+    console.log("Creating verification_attempt table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "verification_attempt" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "invoice_id" uuid NOT NULL REFERENCES "invoice"("id") ON DELETE CASCADE,
+        "receipt_upload_id" uuid REFERENCES "receipt_upload"("id") ON DELETE SET NULL,
+        "confidence_score" double precision NOT NULL DEFAULT 0,
+        "extracted_amount" double precision,
+        "extracted_account_number" text,
+        "extracted_account_name" text,
+        "extracted_bank_name" text,
+        "extracted_ref" text,
+        "extracted_sender_name" text,
+        "extracted_date" text,
+        "score_amount" integer DEFAULT 0,
+        "score_account_number" integer DEFAULT 0,
+        "score_account_name" integer DEFAULT 0,
+        "score_date" integer DEFAULT 0,
+        "score_reference" integer DEFAULT 0,
+        "total_score" integer DEFAULT 0,
+        "status" text NOT NULL DEFAULT 'REJECTED',
+        "fraud_flags" jsonb DEFAULT '[]',
+        "is_suspected_fraud" boolean DEFAULT false,
+        "ocr_raw_result" jsonb DEFAULT '{}',
+        "created_at" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ verification_attempt table created.");
+
+    console.log("Creating notifications table...");
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "notifications" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "title" text NOT NULL,
+        "message" text NOT NULL,
+        "is_read" boolean DEFAULT false,
+        "type" text NOT NULL,
+        "created_at" timestamp DEFAULT now()
+      );
+    `);
+    console.log("✅ notifications table created.");
 
     console.log("🎉 All migrations applied successfully!");
   } catch (error: any) {
