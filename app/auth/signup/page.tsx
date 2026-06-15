@@ -3,6 +3,9 @@
 import { SignUp } from '@clerk/nextjs';
 import { Zap } from 'lucide-react';
 
+// Force dynamic rendering — Clerk components cannot be statically prerendered
+export const dynamic = 'force-dynamic';
+
 export default function SignUpPage() {
   return (
     <div data-page="auth" className="min-h-screen bg-[#fafbfe] relative overflow-hidden flex items-center justify-center p-4 font-sans">
