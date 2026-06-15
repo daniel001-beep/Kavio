@@ -75,7 +75,8 @@ CRITICAL RULES:
 - If this image is not a payment receipt at all set receiptType to not_a_receipt and set confidenceScore to 0
 - If any field is unclear or not visible return null — never guess
 - Account numbers in Nigeria are exactly 10 digits
-- suspectedFraud must be true if ANY fraud indicator is detected no matter how minor`;
+- suspectedFraud must be true if ANY fraud indicator is detected no matter how minor
+- DO NOT check for or care about invoice reference numbers (like KAV-XXXX). They are explicitly NO LONGER REQUIRED on receipts. Ignore them.`;
 
     try {
         const googleInstance = createGoogleGenerativeAI({ apiKey });
