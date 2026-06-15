@@ -213,6 +213,16 @@ export const invoices = pgTable("invoice", {
   viewCount: integer("view_count").default(0),
   viewedAt: timestamp("viewed_at"),
   clientPortalToken: text("client_portal_token"),
+  verificationStatus: text("verification_status").default("unverified"),
+  verifiedAt: timestamp("verified_at"),
+  verificationAttempts: integer("verification_attempts").default(0),
+  geminiExtractedData: jsonb("gemini_extracted_data"),
+  transactionReference: text("transaction_reference"),
+  confidenceScore: integer("confidence_score"),
+  uploadId: text("upload_id"),
+  flagged: boolean("flagged").default(false),
+  flagReason: text("flag_reason"),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -488,6 +498,7 @@ export const verificationAttempts = pgTable("verification_attempt", {
   fraudFlags: jsonb("fraud_flags").default([]),
   isSuspectedFraud: boolean("is_suspected_fraud").default(false),
   ocrRawResult: jsonb("ocr_raw_result").default({}),
+  fingerprint: text("fingerprint"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

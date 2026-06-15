@@ -3,6 +3,8 @@ import { db } from "@/src/db";
 import { invoices, clients, users } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, and } from "drizzle-orm";
+import { generateCsrfToken } from "@/lib/security";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,8 @@ export async function GET(
 ) {
   try {
     const { id } = await props.params;
+    const headersList = await headers();
+    const clientIp = headersList.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
 
     const invoiceRecords = await db
       .select({
@@ -26,6 +30,7 @@ export async function GET(
         bankName: invoices.bankName,
         accountName: invoices.accountName,
         accountNumber: invoices.accountNumber,
+        expiresAt: invoices.expiresAt,
         createdAt: invoices.createdAt,
         client: {
           id: clients.id,
@@ -49,7 +54,25 @@ export async function GET(
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    return NextResponse.json(invoiceRecords[0], { status: 200 });
+    const invoiceData = invoiceRecords[0];
+
+    // If expiresAt is not set, calculate (30 days after due date) and store it
+    let expiresAt = invoiceData.expiresAt;
+    if (!expiresAt) {
+      const calculatedExpiry = new Date(new Date(invoiceData.dueDate).getTime() + 30 * 24 * 60 * 60 * 1000);
+      await db.update(invoices)
+        .set({ expiresAt: calculatedExpiry })
+        .where(eq(invoices.id, id));
+      invoiceData.expiresAt = calculatedExpiry;
+    }
+
+    // Generate CSRF token for checkout page load
+    const csrfToken = generateCsrfToken(id, clientIp);
+
+    return NextResponse.json({
+      invoice: invoiceData,
+      csrfToken
+    }, { status: 200 });
   } catch (error: any) {
     console.error("GET /api/invoices/[id] error:", error);
     return NextResponse.json(
@@ -58,6 +81,7 @@ export async function GET(
     );
   }
 }
+
 
 // PUT (edit invoice details)
 export async function PUT(
