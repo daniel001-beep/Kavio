@@ -276,14 +276,10 @@ export default function SettingsPage() {
  
           {session?.user?.isAdmin && (
             <button
-              onClick={() => { setActiveTab("ADMIN"); setStatusMessage(null); }}
-              className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
-                activeTab === "ADMIN"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                  : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
-              }`}
+              onClick={() => window.location.href = "/fintech/admin"}
+              className="flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 bg-indigo-50 text-indigo-700 border-indigo-500 hover:bg-indigo-100"
             >
-              <ShieldCheck className="w-[18px] h-[18px] text-blue-500" />
+              <ShieldCheck className="w-[18px] h-[18px] text-indigo-600" />
               Super Admin Console
             </button>
           )}
@@ -681,34 +677,7 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Tab 5: Admin Panel Launchpad */}
-              {activeTab === "ADMIN" && session?.user?.isAdmin && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">Super Admin Launchpad</h2>
-                    <p className="text-xs text-slate-505 mt-1">Authorized super admin functions. Open the system-wide console to audit transactions and clean database instances.</p>
-                  </div>
 
-                  <div className="bg-blue-50/50 border border-blue-100/60 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-sm transition-all duration-300">
-                    <div className="space-y-1.5 max-w-md">
-                      <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-blue-500" />
-                        Admin Privileges Active
-                      </h4>
-                      <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                        Logged in as super admin <span className="font-mono text-slate-750 font-bold">{session.user.email}</span>. Click below to launch the administrative control center dashboard.
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={() => window.location.href = "/fintech/admin"}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-xs shrink-0 transition-all hover:translate-y-[-1px] active:translate-y-[0px] shadow-md shadow-blue-500/10 cursor-pointer border-none"
-                    >
-                      Launch Admin Panel
-                    </Button>
-                  </div>
-                </div>
-              )}
 
               {/* Tab 6: Contact & Support */}
               {activeTab === "SUPPORT" && (
