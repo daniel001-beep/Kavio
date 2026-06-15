@@ -24,6 +24,7 @@ export default function SignInPage() {
           </span>
         </div>
 
+        {/* Clerk SignIn — rounded top only, seamlessly connects to demo panel below */}
         <SignIn
           routing="hash"
           signUpUrl="/auth/signup"
@@ -38,17 +39,21 @@ export default function SignInPage() {
               headerSubtitle: 'text-slate-500 text-xs font-medium',
               socialButtonsBlockButton: 'border border-slate-200 hover:bg-slate-50/50 transition-all rounded-xl',
               formFieldLabel: 'text-slate-500 text-[10px] font-bold uppercase tracking-wider',
-              formFieldInput: 'bg-slate-50 border border-slate-250/50 text-slate-900 text-xs rounded-xl focus:border-emerald-500 focus:bg-white transition-all',
+              formFieldInput: 'bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-xl focus:border-emerald-500 focus:bg-white transition-all',
               formButtonPrimary: 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl py-3 border-none shadow-md shadow-emerald-500/10 transition-all active:scale-[0.99]',
               footerActionLink: 'text-emerald-500 hover:text-emerald-600 font-bold',
+              // Hide Clerk branding & dev mode
+              footer: 'hidden',
+              footerPages: 'hidden',
+              badge: 'hidden',
               developmentModeBadge: 'hidden',
             }
           }}
         />
 
-        {/* Demo buttons — attached flush to the bottom of the Clerk card */}
-        <div className="w-full bg-white/95 backdrop-blur-md border border-slate-100/50 border-t border-slate-100 shadow-xl rounded-b-3xl px-6 pb-5 pt-3.5">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center mb-3">
+        {/* Demo buttons — flush to the bottom of the Clerk card, no gap */}
+        <div className="w-full bg-white border border-slate-100/50 border-t border-slate-100 shadow-xl rounded-b-3xl px-5 pb-4 pt-3">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center mb-2.5">
             Or explore without an account
           </p>
           <div className="flex items-center gap-2">
@@ -66,6 +71,7 @@ export default function SignInPage() {
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
