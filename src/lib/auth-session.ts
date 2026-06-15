@@ -48,13 +48,20 @@ export async function getResilientSession() {
             name: name,
             isAdmin: !!isAdmin,
           })
+          .onConflictDoUpdate({
+            target: users.id,
+            set: { lastLogin: new Date() }
+          })
           .returning();
 
         const insertTimeoutPromise = new Promise<null>((resolve) => {
           setTimeout(() => resolve(null), 1000);
         });
 
-        const insertResult = await Promise.race([insertPromise, insertTimeoutPromise]).catch(() => null);
+        const insertResult = await Promise.race([insertPromise, insertTimeoutPromise]).catch((err) => {
+          console.error("Failed to insert user:", err);
+          return null;
+        });
 
         if (insertResult && insertResult[0]) {
           dbUser = insertResult[0];

@@ -63,16 +63,16 @@ export default function Navbar() {
       }`}
     >
       {/* Header Area */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100 shrink-0">
         {!isCollapsed && (
           <Link
             href="/dashboard"
-            className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0"
+            className="no-underline flex items-center hover:opacity-85 transition-opacity shrink-0 min-w-0"
           >
-            <span className="text-2xl font-bold text-slate-900 tracking-tight py-1">
+            <span className="text-xl font-bold text-slate-900 tracking-tight py-1 truncate">
               Kavio
             </span>
-            <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full ml-2">
+            <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full ml-2 shrink-0">
               Pro
             </span>
           </Link>

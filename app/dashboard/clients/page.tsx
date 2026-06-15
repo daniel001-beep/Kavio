@@ -204,7 +204,9 @@ export default function ClientsPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to save client profile");
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Save client API error:", errorData);
+        throw new Error(errorData.details || errorData.error || "Failed to save client profile");
       }
 
       const savedClient = await res.json();

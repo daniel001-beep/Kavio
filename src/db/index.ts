@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
 
-const dbUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING || '';
 const isPlaceholder = !dbUrl || dbUrl.includes("your_postgres_url_here") || dbUrl.includes("placeholder");
 
 // We do not throw at module load time so the Next.js static build step doesn't crash 

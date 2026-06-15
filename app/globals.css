@@ -3134,23 +3134,14 @@ p {
     50% { transform: translateY(-20px); }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Hidden globally for cleaner UI */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 0px;
+    height: 0px;
+    display: none;
 }
-
-::-webkit-scrollbar-track {
-    background: #050505;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #2563eb;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #1d4ed8;
+* {
+    scrollbar-width: none;
 }
 
 /* Product Card Improvements */
