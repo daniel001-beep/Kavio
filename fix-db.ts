@@ -1,37 +1,37 @@
-import { pgTable, text } from "drizzle-orm/pg-core";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { sql } from "drizzle-orm";
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-async function fix() {
-  const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
-  console.log("Connecting to:", connectionString?.split('@')[1]); // Log host only for safety
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
+
+async function main() {
+  if (!dbUrl) {
+    console.error("No database URL found");
+    process.exit(1);
+  }
 
   const pool = new Pool({
-    connectionString,
-    ssl: { rejectUnauthorized: false }
+    connectionString: dbUrl,
+    ssl: { rejectUnauthorized: false },
   });
-  
-  const db = drizzle(pool);
 
-  console.log("Executing ALTER TABLE...");
   try {
-    await db.execute(sql`ALTER TABLE "user" ADD COLUMN "password" text;`);
-    console.log("✅ Success! Password column added.");
-  } catch (err: any) {
-    console.log("Full Error:", JSON.stringify(err, null, 2));
-    if (err.message && err.message.includes('already exists')) {
-        console.log("✅ Column already exists, we are good!");
-    } else {
-        console.error("❌ Final Failure:", err.message || err);
-    }
+    console.log("Truncating audit_log, verification_attempt, and receipt_upload tables...");
+    await pool.query('TRUNCATE TABLE "audit_log" CASCADE;');
+    await pool.query('TRUNCATE TABLE "verification_attempt" CASCADE;');
+    await pool.query('TRUNCATE TABLE "receipt_upload" CASCADE;');
+    
+    console.log("Dropping problematic columns...");
+    await pool.query('ALTER TABLE "invoice" DROP COLUMN IF EXISTS "transaction_reference";');
+    await pool.query('ALTER TABLE "audit_log" DROP COLUMN IF EXISTS "event_type", DROP COLUMN IF EXISTS "entity_type", DROP COLUMN IF EXISTS "entity_id", DROP COLUMN IF EXISTS "changes", DROP COLUMN IF EXISTS "change_hash", DROP COLUMN IF EXISTS "timestamp";');
+    
+    console.log("Successfully prepared database for Drizzle push.");
+  } catch (error) {
+    console.error("Failed to execute DB preparation queries:", error);
   } finally {
     await pool.end();
   }
-  process.exit(0);
 }
 
-fix();
+main();

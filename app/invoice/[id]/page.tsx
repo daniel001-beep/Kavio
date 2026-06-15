@@ -19,7 +19,7 @@ interface InvoiceData {
   invoiceNumber: string;
   amount: number;
   dueDate: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW";
+  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW" | "BLOCKED";
   projectDescription: string;
   paymentInstructions?: string;
   createdAt: string;
@@ -46,8 +46,6 @@ export default function PublicInvoicePage() {
 
   // Receipt states
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [transactionRef, setTransactionRef] = useState("");
-  const [senderAccountLast4, setSenderAccountLast4] = useState("");
   const [receiptError, setReceiptError] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
 
@@ -91,14 +89,6 @@ export default function PublicInvoicePage() {
       setReceiptError("Please upload a receipt file to verify.");
       return;
     }
-    if (!transactionRef.trim()) {
-      setReceiptError("Please enter the transaction reference or session ID.");
-      return;
-    }
-    if (senderAccountLast4.trim().length !== 4 || isNaN(Number(senderAccountLast4.trim()))) {
-      setReceiptError("Please enter the last 4 digits of the sender's bank account.");
-      return;
-    }
 
     setIsConfirming(true);
     setReceiptError(null);
@@ -106,22 +96,19 @@ export default function PublicInvoicePage() {
       // 1. Verify receipt via Gemini API
       const formData = new FormData();
       formData.append("file", receiptFile);
-      formData.append("submittedRef", transactionRef.trim());
-      formData.append("senderAccountLast4", senderAccountLast4.trim());
 
       const verifyRes = await fetch(`/api/invoices/${invoice.id}/verify-receipt`, {
         method: "POST",
         body: formData
       });
 
-      if (!verifyRes.ok) {
-        throw new Error("Unable to connect to Kavio verification engine.");
-      }
-
       const verifyData = await verifyRes.json();
-      if (!verifyData.success && verifyData.status === "FAILED") {
-        setReceiptError(verifyData.reason || "We couldn't verify this payment. Please upload a clearer receipt or contact the business owner.");
+      
+      if (!verifyRes.ok || (!verifyData.success && verifyData.status === "REJECTED")) {
+        setReceiptError(verifyData.message || verifyData.error || "We couldn't verify this payment. Please upload a clearer receipt.");
         setIsConfirming(false);
+        // Reload to check if it's blocked now
+        await loadInvoice();
         return;
       }
 
@@ -156,6 +143,13 @@ export default function PublicInvoicePage() {
           <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-700 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
             <Clock className="w-4 h-4 text-amber-500" />
             Needs Review
+          </Badge>
+        );
+      case "BLOCKED":
+        return (
+          <Badge className="bg-red-500/10 border border-red-500/20 text-red-700 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            Blocked
           </Badge>
         );
       case "SENT":
@@ -217,7 +211,7 @@ export default function PublicInvoicePage() {
   }
 
   // Determine if check-out actions are completed/frozen
-  const isSubmissionCompleted = ["PAID", "VERIFIED", "UNDER_REVIEW"].includes(invoice.status);
+  const isSubmissionCompleted = ["PAID", "VERIFIED", "UNDER_REVIEW", "BLOCKED"].includes(invoice.status);
 
   return (
     <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans flex flex-col py-8 sm:py-16 px-4 relative overflow-hidden transition-colors duration-300">
@@ -305,7 +299,7 @@ export default function PublicInvoicePage() {
                 </div>
                 <h3 className="text-sm font-black text-slate-900">Payment Verified ✅</h3>
                 <p className="text-xs text-slate-600 font-semibold leading-relaxed">
-                  Your payment information has been verified and sent to the business owner for confirmation.
+                  Your payment information has been automatically verified and sent to the business owner for confirmation.
                 </p>
                 <div className="text-[9px] bg-emerald-500/15 text-emerald-700 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
                   Status: Verified — Awaiting Approval
@@ -320,11 +314,23 @@ export default function PublicInvoicePage() {
                 </div>
                 <h3 className="text-sm font-black text-slate-900">Payment Submitted ⏳</h3>
                 <p className="text-xs text-slate-600 font-semibold leading-relaxed">
-                  We are reviewing your payment information.
+                  We are manually reviewing your payment information.
                 </p>
                 <div className="text-[9px] bg-amber-500/15 text-amber-800 px-3 py-1 rounded-full font-bold uppercase tracking-wider mt-1">
                   Status: Needs Review
                 </div>
+              </div>
+            </div>
+          ) : invoice.status === "BLOCKED" ? (
+            <div className="pt-8 border-t border-slate-100 mt-4">
+              <div className="bg-red-50 border border-red-100 text-red-700 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-2.5">
+                <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-1">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-black text-slate-900">Invoice Blocked</h3>
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                  This invoice has been blocked from further verification attempts. Please contact the freelancer directly.
+                </p>
               </div>
             </div>
           ) : !showPaymentForm ? (
@@ -373,7 +379,7 @@ export default function PublicInvoicePage() {
                   ) : (
                     <div className="space-y-1 z-30 pointer-events-none">
                       <p className="text-xs font-bold text-slate-700">Select receipt image or PDF</p>
-                      <p className="text-[10px] text-slate-500 font-semibold">Gemini AI will verify payee name, amount, date, and project scope</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">Gemini AI will automatically scan and verify your payment</p>
                     </div>
                   )}
                 </div>
@@ -388,33 +394,6 @@ export default function PublicInvoicePage() {
                     </p>
                   </div>
                 )}
-              </div>
-
-              {/* Transaction Reference ID Input */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Transaction Reference / Session ID *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 09026326040812345678901234"
-                  value={transactionRef}
-                  onChange={(e) => setTransactionRef(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs font-semibold text-slate-800"
-                  required
-                />
-              </div>
-
-              {/* Sender Account Last 4 Digits Input */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Last 4 Digits of Sender Account *</label>
-                <input
-                  type="text"
-                  maxLength={4}
-                  placeholder="e.g. 1234"
-                  value={senderAccountLast4}
-                  onChange={(e) => setSenderAccountLast4(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs font-semibold text-slate-800"
-                  required
-                />
               </div>
 
               {isConfirmedSuccessfully ? (
@@ -441,7 +420,7 @@ export default function PublicInvoicePage() {
                     ) : (
                       <CheckCircle className="w-4 h-4" />
                     )}
-                    Submit
+                    Verify Payment
                   </Button>
                 </div>
               )}
@@ -454,7 +433,7 @@ export default function PublicInvoicePage() {
         <div className="flex items-center justify-between text-[10px] text-slate-500 px-3">
           <span className="font-semibold flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-            End-to-End Encrypted Invoice Node
+            AI-Powered Fraud Detection
           </span>
           <span className="font-bold uppercase tracking-wider">Powered by Kavio</span>
         </div>
