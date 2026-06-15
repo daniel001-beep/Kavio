@@ -91,7 +91,7 @@ export default function CreateInvoicePage() {
         // Autofill payment instructions with Narration reminder
         const freelancerName = session?.user?.name || "Freelancer";
         setPaymentInstructions(
-          `Please transfer to:\n${freelancerName} Studio / Wema Bank / Acct: 0123456789\n\nWhen making payment, include ${nextNumber} in your transfer narration/reference.`
+          `Please transfer to:\n${freelancerName} Studio / Wema Bank / Acct: 0123456789`
         );
 
       } catch (e) {
