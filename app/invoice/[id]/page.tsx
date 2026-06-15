@@ -13,6 +13,7 @@ import {
   Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import OpayButton from "@/components/OpayButton";
 
 interface InvoiceData {
   id: string;
@@ -22,6 +23,9 @@ interface InvoiceData {
   status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW" | "BLOCKED";
   projectDescription: string;
   paymentInstructions?: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
   createdAt: string;
   client: {
     id: string;
@@ -56,14 +60,12 @@ export default function PublicInvoicePage() {
       const res = await fetch(`/api/invoices/${id}`);
       if (res.ok) {
         const data = await res.json();
-        setInvoice(data);
+        setInvoice(data.invoice);
         
         // Auto-trigger VIEWED status updates in background if currently SENT
-        if (data.status === "SENT") {
-          fetch(`/api/invoices/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "VIEWED" })
+        if (data.invoice.status === "SENT") {
+          fetch(`/api/invoices/${id}/view`, {
+            method: "POST"
           }).then(() => {
             // Quietly update local representation
             setInvoice(prev => prev ? { ...prev, status: "VIEWED" } : null);
@@ -277,6 +279,16 @@ export default function PublicInvoicePage() {
                 <p className="text-xs text-slate-800 font-mono font-bold leading-relaxed whitespace-pre-line">
                   {invoice.paymentInstructions || "Please contact the freelancer directly for payment rails."}
                 </p>
+              </div>
+
+              {/* OPay checkout option */}
+              <div className="pt-2">
+                <OpayButton
+                  invoiceAmount={invoice.amount}
+                  freelancerAccount={invoice.accountNumber || "0123456789"}
+                  freelancerBank={invoice.bankName || "OPay"}
+                  freelancerName={invoice.user.name}
+                />
               </div>
             </div>
           )}

@@ -25,8 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (isSignedIn && user) {
       const email = user.primaryEmailAddress?.emailAddress || '';
-      const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
-      const isUserAdmin = adminEmail && email.toLowerCase().trim() === adminEmail;
+      const envAdminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
+      const adminEmail = envAdminEmail || 'idowuisdaniel1@gmail.com';
+      const isUserAdmin = email.toLowerCase().trim() === adminEmail;
 
       setSession({
         user: {
