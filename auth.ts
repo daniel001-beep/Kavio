@@ -24,8 +24,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         try {
           const { db } = await import("@/src/db");
-          const { users } = await import("@/src/db/schema");
+          const { users, auditLogs } = await import("@/src/db/schema");
           const { eq } = await import("drizzle-orm");
+          const { headers } = await import("next/headers");
+
+          let locationIp = "127.0.0.1";
+          let userAgent = "Velox Auth";
+          try {
+            const headersList = await headers();
+            const xForwardedFor = headersList.get("x-forwarded-for") || "";
+            locationIp = xForwardedFor ? xForwardedFor.split(",")[0].trim() : "127.0.0.1";
+            userAgent = headersList.get("user-agent") || "Velox Auth";
+          } catch (e) {}
 
           const existingUser = await db.query.users.findFirst({
             where: eq(users.email, email),
@@ -47,6 +57,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               password: hashedPassword,
               isAdmin: !!isAdmin,
             }).returning();
+
+            try {
+              await db.insert(auditLogs).values({
+                userId: newUser.id,
+                eventType: "ACCOUNT_CREATED",
+                entityType: "user",
+                entityId: newUser.id,
+                ipAddress: locationIp,
+                userAgent: userAgent,
+                metadata: { email: newUser.email, provider: "credentials" }
+              });
+            } catch(e) {}
 
             return {
               id: newUser.id,
@@ -115,6 +137,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
 
             // Wrong password
+            try {
+              await db.insert(auditLogs).values({
+                userId: existingUser.id,
+                eventType: "FAILED_LOGIN_ATTEMPT",
+                entityType: "user",
+                entityId: existingUser.id,
+                ipAddress: locationIp,
+                userAgent: userAgent,
+                metadata: { email: existingUser.email, provider: "credentials" }
+              });
+            } catch(e) {}
+
             return null;
           }
         } catch (err) {
@@ -130,6 +164,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: "jwt",
+  },
+  events: {
+    async signOut(message) {
+      if (message && 'token' in message && message.token) {
+        try {
+          const { db } = await import("@/src/db");
+          const { auditLogs } = await import("@/src/db/schema");
+          const { headers } = await import("next/headers");
+          
+          let locationIp = "127.0.0.1";
+          let userAgent = "Velox Auth";
+          try {
+            const headersList = await headers();
+            const xForwardedFor = headersList.get("x-forwarded-for") || "";
+            locationIp = xForwardedFor ? xForwardedFor.split(",")[0].trim() : "127.0.0.1";
+            userAgent = headersList.get("user-agent") || "Velox Auth";
+          } catch (e) {}
+
+          await db.insert(auditLogs).values({
+            userId: message.token.id as string || null,
+            eventType: "SUCCESSFUL_LOGOUT",
+            entityType: "user",
+            entityId: message.token.id as string || "unknown",
+            ipAddress: locationIp,
+            userAgent: userAgent,
+            metadata: { email: message.token.email }
+          });
+        } catch (e) {
+          console.error("Logout audit failed:", e);
+        }
+      }
+    }
   },
   callbacks: {
     async signIn({ user, account }: any) {
@@ -150,7 +216,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           await db.insert(auditLogs).values({
             userId: user.id || null,
-            eventType: "AUTH_SUCCESS",
+            eventType: "SUCCESSFUL_LOGIN",
             entityType: "user",
             entityId: user.id || "unknown",
             ipAddress: locationIp,

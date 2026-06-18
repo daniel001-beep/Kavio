@@ -294,7 +294,7 @@ export default function InvoicesPage() {
       {/* Desktop Header Area */}
       <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10 mx-4 md:mx-8 mt-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             Invoices
             {isLoading && invoices.length > 0 && (
               <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
@@ -312,8 +312,8 @@ export default function InvoicesPage() {
       </div>
 
       {/* Tab Switcher: Invoices vs Payments (Mobile Native Pill Tabs) */}
-      <div className="px-4 md:px-8 relative z-10">
-        <div className="bg-slate-100 rounded-2xl p-1 flex w-full">
+      <div className="px-4 md:px-8 relative z-10 flex md:justify-start">
+        <div className="bg-slate-100 rounded-2xl p-1 flex w-full md:w-[400px]">
           <button
             onClick={() => setActiveSubTab("INVOICES")}
             className={`flex-1 py-2 text-sm text-center transition-all border-none cursor-pointer ${
@@ -432,7 +432,7 @@ export default function InvoicesPage() {
                 <p className="text-slate-400 text-sm mt-1 text-center">Create a new invoice and share payment link with clients.</p>
               </div>
               <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                <a className="w-full bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 mt-4 min-h-[52px] active:scale-[0.98] transition-transform no-underline">
+                <a className="w-full md:w-auto md:px-10 bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 mt-4 min-h-[52px] active:scale-[0.98] transition-transform no-underline">
                   Create Your First Invoice
                 </a>
               </Link>

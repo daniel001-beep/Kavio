@@ -413,8 +413,8 @@ export default function ClientsPage() {
       {/* Desktop Header Area */}
       <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10 mx-4 md:mx-8 mt-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-[#00B140]" />
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <Users className="w-7 h-7 md:w-8 md:h-8 text-[#00B140]" />
             Clients Registry
             {isLoading && clients.length > 0 && (
               <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />

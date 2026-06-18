@@ -342,7 +342,7 @@ export default function DashboardClient() {
       {/* Desktop Header Row */}
       <div className="hidden md:flex md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10">
         <div className="space-y-1.5">
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
             Collections Dashboard
           </h1>
           <p className="text-slate-500 text-sm">

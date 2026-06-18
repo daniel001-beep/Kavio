@@ -454,7 +454,7 @@ export default function CollectionsPage() {
       {/* Desktop Header */}
       <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 px-4 md:px-0 mt-4 md:mt-0">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Collections Center</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Collections Center</h2>
           <p className="text-slate-500 text-sm font-medium mt-1">Active follow-ups, payment reminders, and WhatsApp nudges.</p>
         </div>
         <div className="bg-emerald-50/60 border border-emerald-100/80 backdrop-blur-sm rounded-2xl px-5 py-3 flex items-center gap-3 shadow-sm">
