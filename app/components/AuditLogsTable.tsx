@@ -73,7 +73,7 @@ export default function AuditLogsTable() {
         const { data, error: sbError } = await supabase
           .from("audit_log")
           .select("*")
-          .order("timestamp", { ascending: false })
+          .order("created_at", { ascending: false })
           .limit(20);
 
         if (sbError) {
@@ -84,10 +84,10 @@ export default function AuditLogsTable() {
           const mapped: AuditLog[] = data.map((log: any) => ({
             id: log.id,
             user_tenant: log.metadata?.email || log.user_id || "System Agent",
-            action_event: log.event_type || "SYSTEM_EVENT",
+            action_event: log.action || log.event_type || "SYSTEM_EVENT",
             location_ip: log.ip_address || "127.0.0.1",
             device_info: log.user_agent || "System Client",
-            created_at: log.timestamp || new Date().toISOString()
+            created_at: log.created_at || log.timestamp || new Date().toISOString()
           }));
           setLogs(mapped);
         }
@@ -101,11 +101,11 @@ export default function AuditLogsTable() {
             const fallbackData = await res.json();
             const mapped: AuditLog[] = (fallbackData.auditLogs || []).map((log: any) => ({
               id: log.id,
-              user_tenant: log.userEmail || log.userName || log.metadata?.email || "System Agent",
-              action_event: log.eventType,
+              user_tenant: log.metadata?.email || log.userId || "System Agent",
+              action_event: log.action || "SYSTEM_EVENT",
               location_ip: log.ipAddress || "127.0.0.1",
               device_info: log.userAgent || "System Client",
-              created_at: log.timestamp || new Date().toISOString()
+              created_at: log.createdAt || new Date().toISOString()
             }));
             setLogs(mapped.slice(0, 20));
           } else {
@@ -140,10 +140,10 @@ export default function AuditLogsTable() {
               const uiLog: AuditLog = {
                 id: newRecord.id,
                 user_tenant: newRecord.metadata?.email || newRecord.user_id || "System Agent",
-                action_event: newRecord.event_type || "SYSTEM_EVENT",
+                action_event: newRecord.action || newRecord.event_type || "SYSTEM_EVENT",
                 location_ip: newRecord.ip_address || "127.0.0.1",
                 device_info: newRecord.user_agent || "System Client",
-                created_at: newRecord.timestamp || new Date().toISOString()
+                created_at: newRecord.created_at || newRecord.timestamp || new Date().toISOString()
               };
 
               // 3. Zero-Lag Optimistic Prepend to State Array
@@ -233,13 +233,13 @@ export default function AuditLogsTable() {
 
         {/* 1. Native Connection Status Badge */}
         <div className="flex items-center self-start sm:self-center">
-          {realtimeStatus === "SUBSCRIBED" ? (
+          {realtimeStatus === "SUBSCRIBED" || logs.length > 0 ? (
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              🟢 WebSocket Online
+              🟢 Secure Feed Active
             </div>
           ) : (
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm transition-all duration-300">

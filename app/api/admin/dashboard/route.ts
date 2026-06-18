@@ -9,7 +9,8 @@ import {
   userActivityLogs, 
   featureUsageEvents, 
   supportTickets, 
-  adminNotifications 
+  adminNotifications,
+  auditLogs
 } from "@/src/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -47,6 +48,7 @@ export async function GET() {
     const allFeatureEvents = await db.select().from(featureUsageEvents);
     const allSupportTickets = await db.select().from(supportTickets);
     const allNotifications = await db.select().from(adminNotifications).orderBy(desc(adminNotifications.createdAt)).limit(50);
+    const allAuditLogs = await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(50);
 
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -346,7 +348,8 @@ export async function GET() {
       },
       fraud: fraudFlags,
       tickets: allSupportTickets,
-      notifications: allNotifications
+      notifications: allNotifications,
+      auditLogs: allAuditLogs
     });
   } catch (error) {
     console.error("Founder dashboard route error:", error);
