@@ -10,14 +10,6 @@ import {
   CheckCircle2,
   Loader2,
   ShieldCheck,
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertTriangle,
-  FileText,
-  CheckCircle2,
-  Loader2,
-  ShieldCheck,
   Zap,
   Download
 } from "lucide-react";
