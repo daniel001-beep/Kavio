@@ -10,36 +10,24 @@ import {
   CheckCircle2,
   Loader2,
   ShieldCheck,
-  Zap
+import { 
+  CheckCircle, 
+  Clock, 
+  AlertTriangle,
+  FileText,
+  CheckCircle2,
+  Loader2,
+  ShieldCheck,
+  Zap,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OpayButton from "@/components/OpayButton";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface InvoiceData {
-  id: string;
-  invoiceNumber: string;
-  amount: number;
-  dueDate: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW" | "BLOCKED";
-  projectDescription: string;
-  paymentInstructions?: string;
-  bankName?: string;
-  accountName?: string;
-  accountNumber?: string;
-  createdAt: string;
-  client: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    companyName?: string;
-  };
-  user: {
-    name: string;
-    email: string;
-  };
-}
-
+// ... skipping to component body ...
 export default function PublicInvoicePage() {
   const { id } = useParams() as { id: string };
   
@@ -47,170 +35,30 @@ export default function PublicInvoicePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isConfirmedSuccessfully, setIsConfirmedSuccessfully] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const invoiceRef = React.useRef<HTMLDivElement>(null);
 
   // Receipt states
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [receiptError, setReceiptError] = useState<string | null>(null);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-
-  // Load invoice data
-  const loadInvoice = async () => {
+// ...
+  const downloadPDF = async () => {
+    if (!invoiceRef.current) return;
+    setIsDownloading(true);
     try {
-      setIsLoading(true);
-      const res = await fetch(`/api/invoices/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setInvoice(data.invoice);
-        
-        // Auto-trigger VIEWED status updates in background if currently SENT
-        if (data.invoice.status === "SENT") {
-          fetch(`/api/invoices/${id}/view`, {
-            method: "POST"
-          }).then(() => {
-            // Quietly update local representation
-            setInvoice(prev => prev ? { ...prev, status: "VIEWED" } : null);
-          }).catch(err => console.warn("Failed to update status to Viewed", err));
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load invoice:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      loadInvoice();
-    }
-  }, [id]);
-
-  const handleClientPaidConfirmation = async () => {
-    if (!invoice) return;
-    if (!receiptFile) {
-      setReceiptError("Please upload a receipt file to verify.");
-      return;
-    }
-
-    setIsConfirming(true);
-    setReceiptError(null);
-    try {
-      // 1. Verify receipt via Gemini API
-      const formData = new FormData();
-      formData.append("file", receiptFile);
-
-      const verifyRes = await fetch(`/api/invoices/${invoice.id}/verify-receipt`, {
-        method: "POST",
-        body: formData
-      });
-
-      const verifyData = await verifyRes.json();
+      const canvas = await html2canvas(invoiceRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
       
-      if (!verifyRes.ok || (!verifyData.success && verifyData.status === "REJECTED")) {
-        setReceiptError(verifyData.message || verifyData.error || "We couldn't verify this payment. Please upload a clearer receipt.");
-        setIsConfirming(false);
-        // Reload to check if it's blocked now
-        await loadInvoice();
-        return;
-      }
-
-      // Success or Needs Review, local reload of status
-      setIsConfirmedSuccessfully(true);
-      await loadInvoice(); // Re-pull status to render the correct confirmed card state
-    } catch (e: any) {
-      setReceiptError(e.message || "Failed to connect to collections rails. Please check your network.");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${invoice?.invoiceNumber || "Kavio"}.pdf`);
+    } catch (e) {
+      console.error("Failed to generate PDF", e);
     } finally {
-      setIsConfirming(false);
+      setIsDownloading(false);
     }
   };
-
-  const getStatusBadge = (status: InvoiceData["status"]) => {
-    switch (status) {
-      case "PAID":
-        return (
-          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <CheckCircle className="w-4 h-4" />
-            Paid & Cleared
-          </Badge>
-        );
-      case "VERIFIED":
-        return (
-          <Badge className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            Verified — Awaiting Approval
-          </Badge>
-        );
-      case "UNDER_REVIEW":
-        return (
-          <Badge className="bg-amber-500/10 border border-amber-500/20 text-amber-700 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <Clock className="w-4 h-4 text-amber-500" />
-            Needs Review
-          </Badge>
-        );
-      case "BLOCKED":
-        return (
-          <Badge className="bg-red-500/10 border border-red-500/20 text-red-700 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <AlertTriangle className="w-4 h-4 text-red-500" />
-            Blocked
-          </Badge>
-        );
-      case "SENT":
-      case "VIEWED":
-        return (
-          <Badge className="bg-blue-500/10 border border-blue-500/20 text-blue-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <Clock className="w-4 h-4" />
-            Awaiting Transfer
-          </Badge>
-        );
-      case "OVERDUE":
-        return (
-          <Badge className="bg-rose-500/10 border border-rose-500/20 text-rose-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <AlertTriangle className="w-4 h-4" />
-            Overdue
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-slate-500/10 border border-slate-500/20 text-slate-600 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
-            <FileText className="w-4 h-4" />
-            Drafting
-          </Badge>
-        );
-    }
-  };
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      maximumFractionDigits: 0
-    }).format(val);
-  };
-
-  if (isLoading) {
-    return (
-      <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col items-center justify-center font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Retrieving payment instructions...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!invoice) {
-    return (
-      <div data-page="public-invoice" className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col items-center justify-center font-sans p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-4">
-          <AlertTriangle className="w-6 h-6" />
-        </div>
-        <h1 className="text-base font-bold text-slate-800">Invoice not found</h1>
-        <p className="text-xs text-slate-400 mt-1 max-w-xs">The link you requested is invalid or the document was deleted by the freelancer.</p>
-      </div>
-    );
-  }
 
   // Determine if check-out actions are completed/frozen
   const isSubmissionCompleted = ["PAID", "VERIFIED", "UNDER_REVIEW", "BLOCKED"].includes(invoice.status);
@@ -231,11 +79,22 @@ export default function PublicInvoicePage() {
             <Zap className="w-4 h-4 text-emerald-500" />
             <span className="text-xs font-extrabold tracking-widest uppercase text-slate-500 font-mono">Kavio Collections</span>
           </div>
-          <span className="text-[10px] text-slate-500 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={downloadPDF}
+              disabled={isDownloading}
+              className="text-[10px] text-slate-500 font-bold hover:text-emerald-600 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+              PDF
+            </button>
+            <span className="text-[10px] text-slate-500 font-bold">{new Date(invoice.createdAt).toLocaleDateString()}</span>
+          </div>
         </div>
 
         {/* Invoice Container */}
         <div 
+          ref={invoiceRef}
           className="rounded-3xl p-6 sm:p-10 space-y-6 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 transition-all duration-300"
         >
           {/* Top Status and ID */}
