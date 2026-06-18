@@ -15,7 +15,7 @@ export default function FintechLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen bg-[#f4f5f7] p-1.5 xs:p-3 sm:p-4 md:p-6 flex flex-col justify-center overflow-hidden fintech-layout-root">
+    <div className="h-screen w-full bg-[#f4f5f7] p-1.5 xs:p-3 sm:p-4 md:p-6 flex flex-col justify-center overflow-hidden fintech-layout-root">
       <div className="h-full flex bg-white rounded-[20px] xs:rounded-[24px] sm:rounded-[32px] shadow-sm overflow-hidden relative">
         <Navbar />
         <div className="flex-1 flex flex-col min-w-0 bg-white">
@@ -24,7 +24,7 @@ export default function FintechLayout({
             <HeaderUser />
           </header>
 
-          <main className="grow overflow-y-auto p-3 xs:p-4 sm:p-6 md:p-8 pb-24 md:pb-8 bg-white">{children}</main>
+          <main className="grow overflow-y-auto overflow-x-hidden p-3 xs:p-4 sm:p-6 md:p-8 pb-24 md:pb-8 bg-white">{children}</main>
         </div>
         <BottomNav />
       </div>

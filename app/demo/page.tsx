@@ -197,7 +197,7 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#f8fafc] flex flex-col overflow-hidden text-slate-800 font-sans fintech-layout-root">
+    <div className="h-screen w-full bg-[#f8fafc] flex flex-col overflow-hidden text-slate-800 font-sans fintech-layout-root">
       
       {/* Dynamic Demo Mode Warning Banner */}
       <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2.5 text-center text-xs font-black uppercase tracking-widest shrink-0 flex items-center justify-center gap-2 shadow-inner">

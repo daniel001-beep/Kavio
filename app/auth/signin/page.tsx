@@ -6,8 +6,18 @@ import { Zap, Loader2 } from 'lucide-react';
 // Force dynamic rendering — Clerk components cannot be statically prerendered
 export const dynamic = 'force-dynamic';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function SignInPage() {
   const { isLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push('/dashboard');
+    }
+  }, [isSignedIn, router]);
 
   if (!isLoaded || isSignedIn) {
     return (
