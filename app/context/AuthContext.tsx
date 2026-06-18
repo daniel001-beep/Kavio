@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext<{
   session: any;
@@ -44,12 +45,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoaded, isSignedIn, user]);
 
+  const router = useRouter();
+
   const signOut = async () => {
     setIsSigningOut(true);
-    // Yield to the browser so the green logout screen paints instantly before Clerk blocks the thread
-    await new Promise(r => setTimeout(r, 10));
-    await clerkSignOut();
-    window.location.href = '/auth/signin';
+    clerkSignOut({ redirectUrl: '/auth/signin' });
   };
 
   return (
