@@ -197,8 +197,8 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-1 gap-3.5 pt-2">
               {[
                 { id: "1-3", title: "1 to 3 clients", desc: "Highly focused retainer or project scopes." },
-                { id: "4-10", title: "4 to 10 clients", desc: "A robust volume of contract cycles." },
-                { id: "10+", title: "More than 10 clients", desc: "Enterprise scale and multiple client stakeholders." }
+                { id: "3-10", title: "3-10 clients", desc: "Growing fast." },
+                { id: "10+", title: "More than 10 clients", desc: "Large scale and multiple client stakeholders." }
               ].map(opt => (
                 <button
                   key={opt.id}
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-1 gap-3.5 pt-2">
               {[
                 { id: "late_payments", title: "Getting paid late by clients", desc: "Chasing outstanding payments manually." },
-                { id: "tracking", title: "Tracking who owes me money", desc: "No central ledger to view pending balances." },
+                { id: "tracking", title: "Tracking who owes me money", desc: "No central dashboard to view pending balances." },
                 { id: "awkward_reminders", title: "Drafting awkward reminders", desc: "Awkward silences during follow-up messages." }
               ].map(opt => (
                 <button

@@ -382,18 +382,40 @@ export default function ClientsPage() {
   const clientsOutstandingCount = clientsWithOutstanding.length;
   const clientsOverdueCount = clients.filter(c => getClientData(c.id).overdue > 0).length;
 
+  const formatCurrencyMobile = (val: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0
+    }).format(val);
+  };
+
   return (
-    <div className="relative flex flex-col space-y-8 animate-in fade-in duration-500 pb-16 min-h-full">
+    <div className="relative flex flex-col space-y-4 animate-in fade-in duration-500 pb-24 min-h-full">
       {/* Background Decorative Blur Glows */}
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[120px] pointer-events-none z-0" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-50/20 rounded-full blur-[120px] pointer-events-none z-0" />
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10">
+      {/* Mobile Native Header */}
+      <div className="md:hidden pt-6 pb-2 px-4 flex items-center justify-between relative z-10">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          Clients Registry
+          {isLoading && clients.length > 0 && <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />}
+        </h1>
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="bg-[#00B140] hover:bg-[#009933] text-white p-2 rounded-xl transition-all duration-300 flex items-center justify-center active:scale-[0.98] border-none"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Desktop Header Area */}
+      <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10 mx-4 md:mx-8 mt-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Users className="w-6 h-6 text-[#00B140]" />
-            Clients & CRM
+            Clients Registry
             {isLoading && clients.length > 0 && (
               <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
             )}
@@ -410,30 +432,25 @@ export default function ClientsPage() {
         </button>
       </div>
 
-      {/* Aggregate metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Connections</span>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mt-2 group-hover:text-[#00B140] transition-colors duration-300">{totalClients} Clients</h3>
-          <p className="text-xs text-slate-400 mt-1.5 font-medium">{activeClients} actively invoiced</p>
-        </div>
-
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Outstanding Accounts</span>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mt-2 group-hover:text-amber-600 transition-colors duration-300">{clientsOutstandingCount} Clients</h3>
-          <p className="text-xs text-slate-400 mt-1.5 font-medium">Awaiting bank wires</p>
-        </div>
-
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider">Overdue Accounts</span>
-          <h3 className="text-2xl font-bold text-rose-600 tracking-tight mt-2 group-hover:text-rose-700 transition-colors duration-300">{clientsOverdueCount} Clients</h3>
-          <p className="text-xs text-rose-500 mt-1.5 font-medium">Requires follow-up</p>
-        </div>
-
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Collected Valuation</span>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mt-2 font-mono group-hover:text-emerald-600 transition-colors duration-300">₦{invoices.filter(i=>i.status==='PAID').reduce((s,i)=>s+i.amount,0).toLocaleString()}</h3>
-          <p className="text-xs text-emerald-600 mt-1.5 font-medium">Settled invoices value</p>
+      {/* Aggregate metrics (Horizontal Scroll) */}
+      <div className="overflow-x-auto -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative z-10 md:mx-4 md:px-0 mt-4 md:mt-0">
+        <div className="flex w-max space-x-3 pr-4 md:grid md:grid-cols-4 md:w-full md:space-x-0 md:gap-4 md:pr-0">
+          <div className="min-w-[140px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative z-10 active:scale-[0.98] transition-transform duration-100">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Total Connections</span>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight font-mono truncate">{totalClients}</h3>
+          </div>
+          <div className="min-w-[140px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative z-10 active:scale-[0.98] transition-transform duration-100">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Outstanding</span>
+            <h3 className="text-2xl font-black text-amber-500 tracking-tight font-mono truncate">{clientsOutstandingCount}</h3>
+          </div>
+          <div className="min-w-[140px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative z-10 active:scale-[0.98] transition-transform duration-100">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Overdue</span>
+            <h3 className="text-2xl font-black text-rose-500 tracking-tight font-mono truncate">{clientsOverdueCount}</h3>
+          </div>
+          <div className="min-w-[140px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative z-10 active:scale-[0.98] transition-transform duration-100">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Valuation</span>
+            <h3 className="text-2xl font-black text-emerald-600 tracking-tight font-mono truncate">₦{invoices.filter(i=>i.status==='PAID').reduce((s,i)=>s+i.amount,0).toLocaleString()}</h3>
+          </div>
         </div>
       </div>
 
@@ -452,30 +469,29 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* Search and List */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 relative z-10 hover:shadow-md transition-all duration-300">
+      {/* Search and List Container */}
+      <div className="bg-transparent md:bg-white md:border md:border-slate-100 md:rounded-3xl md:p-8 md:shadow-sm space-y-4 md:space-y-6 relative z-10 px-4 md:px-0">
         
         {/* Filtering Options */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center justify-between md:border-b md:border-slate-100 md:pb-5">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by name, company, email..."
+              placeholder="Search by name, company..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200/65 rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#00B140] transition-all duration-200 placeholder:text-slate-400 text-slate-900"
+              className="w-full bg-white md:bg-slate-50 border border-slate-100 md:border-slate-200/65 rounded-2xl pl-10 pr-4 py-3 md:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#00B140] transition-all duration-200 placeholder:text-slate-400 text-slate-900 shadow-sm md:shadow-none"
             />
           </div>
           
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             {/* Tag filter */}
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-550">
-              <Tag className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex-1 md:flex-none">
               <select
                 value={tagFilter}
                 onChange={(e) => setTagFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-150 text-slate-600 font-semibold cursor-pointer"
+                className="w-full bg-white md:bg-slate-50 border border-slate-100 md:border-slate-200 rounded-xl px-3 py-2.5 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-150 text-slate-600 font-semibold cursor-pointer shadow-sm md:shadow-none"
               >
                 <option value="ALL">All Tags</option>
                 {allAvailableTags.map((tag, i) => (
@@ -485,14 +501,13 @@ export default function ClientsPage() {
             </div>
 
             {/* Risk Filter */}
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-550">
-              <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex-1 md:flex-none">
               <select
                 value={riskFilter}
                 onChange={(e) => setRiskFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-150 text-slate-600 font-semibold cursor-pointer"
+                className="w-full bg-white md:bg-slate-50 border border-slate-100 md:border-slate-200 rounded-xl px-3 py-2.5 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-150 text-slate-600 font-semibold cursor-pointer shadow-sm md:shadow-none"
               >
-                <option value="ALL">All Risk Statuses</option>
+                <option value="ALL">All Risks</option>
                 <option value="Reliable">Reliable</option>
                 <option value="Moderate Risk">Moderate</option>
                 <option value="High Risk">High Risk</option>
@@ -502,15 +517,15 @@ export default function ClientsPage() {
         </div>
 
         {/* Clients Bento List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {filteredClients.length === 0 ? (
-            <div className="col-span-2 py-16 flex flex-col items-center gap-4 text-center bg-slate-50/20 rounded-3xl border border-slate-100 p-6">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300">
-                <Users className="w-6 h-6" />
+            <div className="col-span-1 md:col-span-2 py-16 flex flex-col items-center gap-4 text-center bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+              <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-300">
+                <Users className="w-7 h-7" />
               </div>
               <div>
-                <h4 className="text-slate-655 font-semibold mt-4">No client profiles matching query</h4>
-                <p className="text-slate-400 text-sm mt-1">Clear filters or define new clients to trigger automated invoicing.</p>
+                <h4 className="text-slate-500 font-medium text-base mt-3">No client profiles found</h4>
+                <p className="text-slate-400 text-sm mt-1">Clear filters or define new clients to track invoices.</p>
               </div>
             </div>
           ) : (
@@ -525,122 +540,67 @@ export default function ClientsPage() {
                 healthScore
               } = getClientData(client.id);
 
-              const tags = clientTagsList[client.id] || [];
-
               return (
                 <div 
                   key={client.id}
-                  className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:border-slate-200/60 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-5 relative group z-10"
+                  className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-100 flex flex-col justify-between gap-4 relative group z-10 active:scale-[0.98]"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-emerald-50 text-emerald-700 font-bold rounded-full w-12 h-12 text-lg flex items-center justify-center shrink-0 border border-emerald-100/50 shadow-sm">
-                          {getInitials(client.name)}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-base leading-tight flex items-center gap-2">
-                            {client.name}
-                          </h3>
-                          <p className="text-xs text-slate-405 font-semibold mt-0.5">{client.companyName || "Solo Business Owner"}</p>
-                        </div>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-emerald-50 text-[#00B140] font-bold rounded-full w-10 h-10 flex items-center justify-center shrink-0 border border-emerald-100/50">
+                        {getInitials(client.name)}
                       </div>
-
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-xs font-bold text-emerald-750 bg-emerald-50 border border-emerald-100/60 px-2.5 py-1 rounded-full">
-                          {invoicesCount} Invoices
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-405 mt-0.5">Health: {healthScore}%</span>
+                      <div className="flex flex-col">
+                        <h3 className="font-bold text-slate-900 text-[15px] leading-tight">
+                          {client.name}
+                        </h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">{client.companyName || "Independent"}</p>
                       </div>
                     </div>
-
-                    {/* Metadata contact lines */}
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 font-medium py-3 border-t border-b border-slate-100/60 my-4">
-                      <div className="flex items-center gap-2 truncate">
-                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="font-mono text-sm text-slate-400 truncate">{client.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 truncate">
-                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{client.phone}</span>
-                      </div>
-                      {client.location && (
-                        <div className="flex items-center gap-2 truncate col-span-2">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{client.location}</span>
-                        </div>
-                      )}
-                      {client.industry && (
-                        <div className="flex items-center gap-2 truncate col-span-2">
-                          <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{client.industry}</span>
-                        </div>
-                      )}
+                    {/* Action buttons top right */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); openEditModal(client); }} className="p-1.5 text-slate-400 hover:text-[#00B140] bg-slate-50 rounded-lg transition-colors border-none" title="Edit Profile">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePurgeClient(client.id, client.email); }} className="p-1.5 text-slate-400 hover:text-rose-500 bg-slate-50 rounded-lg transition-colors border-none" title="Purge Record">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-
-                    {/* Tags log */}
-                    {tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {tags.map((tg, idx) => (
-                          <span key={idx} className="px-2 py-1 text-[10px] font-bold text-slate-505 rounded-lg border border-slate-200 bg-slate-50">
-                            {tg}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
-                  <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100/60 mt-3">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div>
+                  <div className="flex flex-col gap-1.5 mt-1">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-mono text-xs text-slate-500 truncate">{client.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-mono text-xs text-slate-500">{client.phone}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                    <div className="flex items-center gap-4">
+                      <div className="flex flex-col">
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Billed</span>
-                        <p className="text-xs font-bold text-slate-900 font-mono mt-0.5">₦{totalBilled.toLocaleString()}</p>
+                        <span className="text-sm font-bold text-slate-900 font-mono mt-0.5">{formatCurrencyMobile(totalBilled)}</span>
                       </div>
-                      <div>
+                      <div className="flex flex-col">
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Paid</span>
-                        <p className="text-xs font-bold text-emerald-605 font-mono mt-0.5">₦{totalPaid.toLocaleString()}</p>
+                        <span className="text-sm font-bold text-emerald-600 font-mono mt-0.5">{formatCurrencyMobile(totalPaid)}</span>
                       </div>
-                      <div>
+                      <div className="flex flex-col">
                         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Owed</span>
-                        <p className={`text-xs font-bold font-mono mt-0.5 ${outstanding > 0 ? "text-amber-500 font-bold" : "text-slate-400"}`}>
-                          ₦{outstanding.toLocaleString()}
-                        </p>
+                        <span className={`text-sm font-bold font-mono mt-0.5 ${outstanding > 0 ? "text-amber-500" : "text-slate-400"}`}>
+                          {formatCurrencyMobile(outstanding)}
+                        </span>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                      {/* Risk Badge */}
-                      {riskStatus === "Reliable" && (
-                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-100/60 px-2.5 py-0.5 rounded-full text-xs font-bold">
-                          Reliable
-                        </span>
-                      )}
-                      {riskStatus === "Moderate Risk" && (
-                        <span className="bg-amber-50 text-amber-700 border border-amber-100/60 px-2.5 py-0.5 rounded-full text-xs font-bold">
-                          Moderate
-                        </span>
-                      )}
-                      {riskStatus === "High Risk" && (
-                        <span className="bg-rose-50 text-rose-600 border border-rose-100/60 px-2.5 py-0.5 rounded-full text-xs font-bold">
-                          High Risk
-                        </span>
-                      )}
-
-                      {/* Action controls */}
-                      <div className="flex items-center gap-1">
-                        <Link href={`/dashboard/clients/${client.id}`} passHref legacyBehavior>
-                          <button className="p-2 text-slate-400 hover:text-emerald-650 hover:bg-slate-50 border border-slate-100/60 rounded-xl transition-all duration-200 bg-transparent cursor-pointer" title="Open CRM Profile">
-                            <ExternalLink className="w-4 h-4" />
-                          </button>
-                        </Link>
-                        <button onClick={() => openEditModal(client)} className="p-2 text-slate-400 hover:text-emerald-650 hover:bg-slate-50 border border-slate-100/60 rounded-xl transition-all duration-200 bg-transparent cursor-pointer" title="Edit Profile">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handlePurgeClient(client.id, client.email)} className="p-2 text-slate-450 hover:text-rose-550 hover:bg-rose-50 border border-slate-100/60 hover:border-rose-105 rounded-xl transition-all duration-200 bg-transparent cursor-pointer" title="Purge Record">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
+                    <Link href={`/dashboard/clients/${client.id}`} passHref legacyBehavior>
+                      <a className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-1.5 rounded-lg transition-colors border border-slate-200/50 flex items-center justify-center">
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </Link>
                   </div>
                 </div>
               );

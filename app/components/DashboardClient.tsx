@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useDashboardData, Invoice } from "@/app/hooks/useDashboardData";
 import { usePWAInstall } from "@/app/hooks/usePWAInstall";
+import WhatsAppNudgeModal, { WhatsAppNudgePayload } from "@/app/components/WhatsAppNudgeModal";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -212,6 +213,7 @@ export default function DashboardClient() {
   const [paymentNotes, setPaymentNotes] = useState("");
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   const [invoiceTab, setInvoiceTab] = useState<"ALL" | "PENDING" | "PAID">("ALL");
+  const [nudgePayload, setNudgePayload] = useState<WhatsAppNudgePayload | null>(null);
 
   // Manual payment modal handler
   const handleRecordPayment = async (e: React.FormEvent) => {
@@ -250,28 +252,20 @@ export default function DashboardClient() {
       textMessage = `Hi ${invoice.client.name}, I hope this message finds you well. I'm checking in on the status of invoice ${invoice.invoiceNumber} (NGN ${invoice.amount.toLocaleString()}), which is now past due. You can find the payment instructions and bank details here: ${paymentLink}. Thank you!`;
     }
 
-    // Prompt user to verify/enter WhatsApp phone number
-    const targetPhone = prompt(
-      `Confirm WhatsApp Number for ${invoice.client.name} (include country code, e.g. +234):`,
-      invoice.client.phone || "+234"
-    );
-    
-    if (targetPhone === null) {
-      return; // User cancelled
-    }
-    
-    const validatedPhone = targetPhone.trim();
-    if (!validatedPhone) {
-      alert("A valid phone number is required to trigger WhatsApp nudges.");
-      return;
-    }
+    setNudgePayload({
+      invoiceId: invoice.id,
+      clientName: invoice.client.name,
+      clientPhone: invoice.client.phone || "",
+      messageText: textMessage,
+      templateType,
+    });
+  };
 
-    // Log the reminder event to database
-    logReminder(invoice.id, templateType, "WHATSAPP");
+  const handleNudgeConfirm = (phone: string, payload: WhatsAppNudgePayload) => {
+    logReminder(payload.invoiceId, payload.templateType, "WHATSAPP");
 
-    // Redirect to WhatsApp
-    const cleanPhone = validatedPhone.replace(/[^0-9+]/g, "");
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMessage)}`;
+    const cleanPhone = phone.replace(/[^0-9+]/g, "");
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(payload.messageText)}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -340,13 +334,13 @@ export default function DashboardClient() {
   const pendingInvoices = invoices.filter(inv => inv.status !== "PAID" && inv.status !== "DRAFT");
 
   return (
-    <div className="relative flex flex-col space-y-8 animate-in fade-in duration-500 pb-16 min-h-full">
+    <div className="relative flex flex-col space-y-4 animate-in fade-in duration-500 pb-24 min-h-full px-4 md:px-8">
       {/* Background Decorative Blur Glows */}
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[120px] pointer-events-none z-0" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-50/20 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Top Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10">
+      {/* Desktop Header Row */}
+      <div className="hidden md:flex md:items-center justify-between gap-6 bg-white/80 backdrop-blur-md text-slate-800 p-8 rounded-[2rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] relative z-10">
         <div className="space-y-1.5">
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             Collections Dashboard
@@ -366,95 +360,127 @@ export default function DashboardClient() {
         </div>
       </div>
 
-      {/* Onboarding Suggestion Widget */}
+      {/* Mobile Native Hero & CTA */}
+      <div className="md:hidden pt-6 pb-2">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Good evening 👋</p>
+        <h1 className="text-2xl font-bold text-slate-900 mt-0.5">Idowu Daniel</h1>
+        <p className="text-sm text-slate-400 mt-1">As of {todayReadable}</p>
+      </div>
+
+      <div className="md:hidden relative z-10 w-full mb-2">
+        <Link href="/dashboard/invoices/create" passHref legacyBehavior>
+          <a className="w-full bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform duration-100 no-underline text-base">
+            <Plus className="w-5 h-5" />
+            Create Invoice
+          </a>
+        </Link>
+      </div>
+
+      {/* Mobile Recovery Tip Banner */}
       {onboardingResponses && (
-        <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
-          <div className="flex items-center gap-4 text-left">
-            <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
+        <div className="md:hidden bg-slate-900 rounded-2xl p-4 flex items-center justify-between gap-3 relative z-10 active:scale-[0.98] transition-transform duration-100 -mx-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="text-[#00B140] shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-700">
-                {onboardingResponses.challenge === "late_payments" && "We've optimized your dashboard to track late invoices. Go to Collections to send quick WhatsApp nudges."}
-                {onboardingResponses.challenge === "tracking" && "We've highlighted outstanding balances below. Use the clients registry to track payment health."}
-                {onboardingResponses.challenge === "awkward_reminders" && "Kavio provides pre-written message templates. Click Nudge on any invoice to send a polite reminder."}
-                {!["late_payments", "tracking", "awkward_reminders"].includes(onboardingResponses.challenge) && "Use the Collections Center to monitor due dates and send pre-written payment links."}
-              </p>
-            </div>
+            <p className="text-sm font-medium text-white leading-snug truncate">
+              {onboardingResponses.challenge === "late_payments" ? "Track and nudge late invoices." : "Monitor your due dates easily."}
+            </p>
           </div>
           <Link href="/dashboard/collections" passHref legacyBehavior>
-            <button className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm">
-              Open Collections Center
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <a className="text-white text-xs font-bold uppercase tracking-wider shrink-0 flex items-center no-underline">
+              Open <ChevronRight className="w-4 h-4 ml-1" />
+            </a>
           </Link>
         </div>
       )}
-
-      {/* PWA App Installation Promotion Banner */}
-      {isPWAInstallable && (
-        <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
-          <div className="flex items-center gap-4 text-left">
-            <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
-              <Sparkles className="w-5 h-5" />
+      
+      {/* Desktop Onboarding Widgets */}
+      <div className="hidden md:flex flex-col gap-4">
+        {onboardingResponses && (
+          <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-4 text-left">
+              <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700">
+                  {onboardingResponses.challenge === "late_payments" && "We've optimized your dashboard to track late invoices. Go to Collections to send quick WhatsApp nudges."}
+                  {onboardingResponses.challenge === "tracking" && "We've highlighted outstanding balances below. Use the clients registry to track payment health."}
+                  {onboardingResponses.challenge === "awkward_reminders" && "Kavio provides pre-written message templates. Click Nudge on any invoice to send a polite reminder."}
+                  {!["late_payments", "tracking", "awkward_reminders"].includes(onboardingResponses.challenge) && "Use the Collections Center to monitor due dates and send pre-written payment links."}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-sm font-semibold text-slate-850">Install Kavio App</h4>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Add Kavio to your home screen for quick offline access and persistent collections tracking.
-              </p>
-            </div>
+            <Link href="/dashboard/collections" passHref legacyBehavior>
+              <button className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm">
+                Open Collections Center
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
           </div>
-          <button 
-            onClick={triggerPWAInstall}
-            className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm"
-          >
-            Add to Home Screen
-          </button>
-        </div>
-      )}
+        )}
+
+        {isPWAInstallable && (
+          <div className="bg-gradient-to-r from-emerald-50/50 to-white border border-slate-100 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-4 text-left">
+              <div className="text-[#00B140] shrink-0 p-2.5 bg-emerald-50 rounded-xl">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-850">Install Kavio App</h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Add Kavio to your home screen for quick offline access and persistent collections tracking.
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={triggerPWAInstall}
+              className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm"
+            >
+              Add to Home Screen
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Aggregate Cards (Outstanding Revenue Dashboard) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 relative z-10">
         
         {/* Total Outstanding */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Outstanding</span>
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-all duration-100 relative z-10 flex flex-col justify-between min-h-[96px]">
+          <div className="flex items-start justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider leading-tight">Total<br/>Outstanding</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
           </div>
-          <h3 className="text-3xl font-bold text-slate-900 tracking-tight mt-3 font-mono group-hover:text-amber-600 transition-colors duration-300">{formatCurrency(outstandingSum)}</h3>
-          <p className="text-xs text-slate-400 mt-1.5">Pending client payments</p>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-2 font-mono truncate">{formatCurrency(outstandingSum)}</h3>
         </div>
 
         {/* Total Overdue */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Overdue</span>
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-all duration-100 relative z-10 flex flex-col justify-between min-h-[96px]">
+          <div className="flex items-start justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider leading-tight">Total<br/>Overdue</span>
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
           </div>
-          <h3 className="text-3xl font-bold text-rose-600 tracking-tight mt-3 font-mono group-hover:text-rose-700 transition-colors duration-300">{formatCurrency(overdueSum)}</h3>
-          <p className="text-xs text-slate-400 mt-1.5">Past due invoices</p>
+          <h3 className="text-xl sm:text-2xl font-black text-rose-600 tracking-tight mt-2 font-mono truncate">{formatCurrency(overdueSum)}</h3>
         </div>
 
-        {/* Total Paid / Total Recovered */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Recovered</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        {/* Total Recovered */}
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-all duration-100 relative z-10 flex flex-col justify-between min-h-[96px]">
+          <div className="flex items-start justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider leading-tight">Total<br/>Recovered</span>
+            <span className="w-2 h-2 rounded-full bg-[#00B140] shrink-0" />
           </div>
-          <h3 className="text-3xl font-bold text-emerald-600 tracking-tight mt-3 font-mono group-hover:text-emerald-700 transition-colors duration-300">{formatCurrency(paidSum)}</h3>
-          <p className="text-xs text-slate-400 mt-1.5">Total revenue collected</p>
+          <h3 className="text-xl sm:text-2xl font-black text-[#00B140] tracking-tight mt-2 font-mono truncate">{formatCurrency(paidSum)}</h3>
         </div>
 
         {/* Total Invoices Count */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-slate-200/60 transition-all duration-300 relative z-10 group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tracked Invoices</span>
-            <span className="w-2 h-2 rounded-full bg-slate-400" />
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-all duration-100 relative z-10 flex flex-col justify-between min-h-[96px]">
+          <div className="flex items-start justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider leading-tight">Tracked<br/>Invoices</span>
+            <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
           </div>
-          <h3 className="text-3xl font-bold text-slate-900 tracking-tight mt-3 group-hover:text-[#00B140] transition-colors duration-300">{invoices.length} Invoices</h3>
-          <p className="text-xs text-slate-400 mt-1.5">Across {clientsCount} clients</p>
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-2 font-mono truncate">{invoices.length}</h3>
         </div>
       </div>
 
@@ -937,6 +963,13 @@ export default function DashboardClient() {
           </div>
         </div>
       )}
+
+      {/* WhatsApp Nudge Modal */}
+      <WhatsAppNudgeModal
+        payload={nudgePayload}
+        onClose={() => setNudgePayload(null)}
+        onConfirm={handleNudgeConfirm}
+      />
 
     </div>
   );

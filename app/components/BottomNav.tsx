@@ -25,7 +25,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100/80 z-50 pb-[env(safe-area-inset-bottom,12px)] pt-2 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] flex items-center justify-around w-full">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 pb-safe bg-white/95 backdrop-blur-md border-t border-slate-100 z-50 flex items-center justify-around w-full">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href || (tab.href !== '/dashboard' && pathname.startsWith(tab.href));
@@ -34,30 +34,26 @@ export default function BottomNav() {
           <Link
             key={tab.label}
             href={tab.href}
-            className="flex flex-col items-center justify-center gap-0.5 transition-all no-underline group relative py-1.5 px-1 min-w-0"
+            className="flex flex-col items-center justify-center flex-1 gap-1 min-h-[64px] no-underline relative active:scale-[0.98] transition-transform duration-100"
           >
-            <div
-              className={`p-1.5 rounded-xl transition-all ${
-                isActive 
-                  ? "bg-emerald-50 text-emerald-600" 
-                  : "text-slate-400 group-hover:text-slate-700"
-              }`}
-            >
-              <Icon className="w-[18px] h-[18px]" />
-            </div>
+            {/* Active Indicator dot */}
+            {isActive && (
+              <span className="absolute top-1 w-1 h-1 bg-[#00B140] rounded-full" />
+            )}
+            
+            <Icon 
+              className={`w-[22px] h-[22px] mt-2 transition-colors ${
+                isActive ? "text-[#00B140]" : "text-slate-400"
+              }`} 
+            />
             
             <span
-              className={`text-[9px] font-bold tracking-tight transition-colors text-center w-full truncate ${
-                isActive ? "text-emerald-700" : "text-slate-400 group-hover:text-slate-700"
+              className={`text-[10px] tracking-tight transition-colors text-center w-full truncate ${
+                isActive ? "font-semibold text-[#00B140]" : "font-medium text-slate-400"
               }`}
             >
               {tab.label}
             </span>
-
-            {/* Active Indicator dot */}
-            {isActive && (
-              <span className="absolute top-1 w-1 h-1 bg-emerald-500 rounded-full" />
-            )}
           </Link>
         );
       })}

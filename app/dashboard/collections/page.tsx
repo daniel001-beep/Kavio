@@ -434,13 +434,25 @@ export default function CollectionsPage() {
   };
 
   return (
-    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-20 relative">
+    <div className="flex flex-col space-y-4 animate-in fade-in duration-500 pb-24 relative min-h-full">
       {/* Decorative ambient glow */}
-      <div className="absolute top-[-5%] left-[-5%] w-[400px] h-[400px] bg-emerald-150/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[350px] h-[350px] bg-emerald-100/5 rounded-full blur-[90px] pointer-events-none" />
+      <div className="absolute top-[-5%] left-[-5%] w-[400px] h-[400px] bg-emerald-150/10 rounded-full blur-[100px] pointer-events-none z-0" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[350px] h-[350px] bg-emerald-100/5 rounded-full blur-[90px] pointer-events-none z-0" />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      {/* Mobile Native Header */}
+      <div className="md:hidden pt-6 pb-2 px-4 flex items-center justify-between relative z-10">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          Collections
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />}
+        </h1>
+        <div className="bg-emerald-50/60 border border-emerald-100/80 backdrop-blur-sm rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+          <TrendingUp className="w-4 h-4 text-emerald-600" />
+          <h4 className="text-sm font-black text-emerald-600 font-mono">{formatCurrency(recoveredSum)}</h4>
+        </div>
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10 px-4 md:px-0 mt-4 md:mt-0">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Collections Center</h2>
           <p className="text-slate-500 text-sm font-medium mt-1">Active follow-ups, payment reminders, and WhatsApp nudges.</p>
@@ -456,217 +468,206 @@ export default function CollectionsPage() {
         </div>
       </div>
 
-      {/* AI Verification Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-slate-50/60 p-4 rounded-2xl border border-slate-100 backdrop-blur-sm relative z-10">
-        <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100/80 transition-all duration-300 hover:shadow-md">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pending Verification</p>
-          <h4 className="text-2xl font-black text-amber-500 mt-1.5 font-mono">{aiMetrics.pendingVerification}</h4>
-        </div>
-        <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100/80 transition-all duration-300 hover:shadow-md">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Awaiting Approval</p>
-          <h4 className="text-2xl font-black text-emerald-600 mt-1.5 font-mono">{aiMetrics.awaitingApproval}</h4>
-        </div>
-        <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100/80 transition-all duration-300 hover:shadow-md">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Verified Today</p>
-          <h4 className="text-2xl font-black text-blue-600 mt-1.5 font-mono">{aiMetrics.verifiedToday}</h4>
-        </div>
-        <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100/80 transition-all duration-300 hover:shadow-md">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rejected Receipts</p>
-          <h4 className="text-2xl font-black text-rose-600 mt-1.5 font-mono">{aiMetrics.rejectedReceipts}</h4>
-        </div>
-        <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100/80 transition-all duration-300 hover:shadow-md col-span-2 md:col-span-1">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Fraud Alerts</p>
-          <h4 className="text-2xl font-black text-red-650 mt-1.5 font-mono flex items-center justify-center gap-1.5">
-            {aiMetrics.fraudAlerts} {aiMetrics.fraudAlerts > 0 && "🚨"}
-          </h4>
+      {/* AI Verification Stats Row (Horizontal Scroll on Mobile) */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative z-10">
+        <div className="flex w-max md:w-full space-x-3 pr-4 md:pr-0 md:space-x-0 md:grid md:grid-cols-5 md:gap-4 md:bg-slate-50/60 md:p-4 md:rounded-2xl md:border md:border-slate-100 md:backdrop-blur-sm">
+          <div className="min-w-[120px] text-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100/80 transition-all duration-300 active:scale-[0.98]">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pending</p>
+            <h4 className="text-2xl font-black text-amber-500 mt-1.5 font-mono">{aiMetrics.pendingVerification}</h4>
+          </div>
+          <div className="min-w-[120px] text-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100/80 transition-all duration-300 active:scale-[0.98]">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Approval</p>
+            <h4 className="text-2xl font-black text-emerald-600 mt-1.5 font-mono">{aiMetrics.awaitingApproval}</h4>
+          </div>
+          <div className="min-w-[120px] text-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100/80 transition-all duration-300 active:scale-[0.98]">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Verified</p>
+            <h4 className="text-2xl font-black text-blue-600 mt-1.5 font-mono">{aiMetrics.verifiedToday}</h4>
+          </div>
+          <div className="min-w-[120px] text-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100/80 transition-all duration-300 active:scale-[0.98]">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rejected</p>
+            <h4 className="text-2xl font-black text-rose-600 mt-1.5 font-mono">{aiMetrics.rejectedReceipts}</h4>
+          </div>
+          <div className="min-w-[120px] text-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100/80 transition-all duration-300 active:scale-[0.98] col-span-2 md:col-span-1">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Fraud</p>
+            <h4 className="text-2xl font-black text-red-650 mt-1.5 font-mono flex items-center justify-center gap-1.5">
+              {aiMetrics.fraudAlerts} {aiMetrics.fraudAlerts > 0 && "🚨"}
+            </h4>
+          </div>
         </div>
       </div>
 
-      {/* Stats Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Outstanding Revenue</p>
-              <h3 className="text-2xl font-black text-slate-800 font-mono mt-1">{formatCurrency(outstandingSum)}</h3>
-              <p className="text-[10px] text-slate-450 font-medium mt-1">Pending client settlement</p>
+      {/* Stats Bento Grid (Horizontal Scroll on Mobile) */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden relative z-10 pb-2">
+        <div className="flex w-max md:w-full space-x-3 pr-4 md:pr-0 md:space-x-0 md:grid md:grid-cols-3 md:gap-6">
+          <div className="min-w-[240px] md:min-w-0 border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] active:scale-[0.98] flex flex-col p-5 justify-center gap-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Outstanding</p>
+                <h3 className="text-2xl font-black text-slate-800 font-mono mt-1">{formatCurrency(outstandingSum)}</h3>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-100">
+                <Clock className="w-4 h-4 text-slate-400" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center border border-slate-100">
-              <Clock className="w-5 h-5 text-slate-400" />
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-[10px] text-slate-450 font-medium">Pending client settlement</p>
+          </div>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Overdue Revenue</p>
-              <h3 className="text-2xl font-black text-rose-600 font-mono mt-1">{formatCurrency(overdueSum)}</h3>
-              <p className="text-[10px] text-rose-400 font-medium mt-1">Action required immediately</p>
+          <div className="min-w-[240px] md:min-w-0 border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] active:scale-[0.98] flex flex-col p-5 justify-center gap-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Overdue</p>
+                <h3 className="text-2xl font-black text-rose-600 font-mono mt-1">{formatCurrency(overdueSum)}</h3>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
-              <AlertTriangle className="w-5 h-5 text-rose-500" />
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-[10px] text-rose-400 font-medium">Action required immediately</p>
+          </div>
 
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Nudge Logs Count</p>
-              <h3 className="text-2xl font-black text-emerald-700 font-mono mt-1">{reminders.length} Logs</h3>
-              <p className="text-[10px] text-emerald-600 font-medium mt-1">Active nudges sent this month</p>
+          <div className="min-w-[240px] md:min-w-0 border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden transition-all duration-300 hover:-translate-y-[2px] active:scale-[0.98] flex flex-col p-5 justify-center gap-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Reminder History</p>
+                <h3 className="text-2xl font-black text-emerald-700 font-mono mt-1">{reminders.length}</h3>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <MessageSquare className="w-4 h-4 text-emerald-55" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-              <MessageSquare className="w-5 h-5 text-emerald-55" />
-            </div>
-          </CardContent>
-        </Card>
+            <p className="text-[10px] text-emerald-600 font-medium">Active nudges sent this month</p>
+          </div>
+        </div>
       </div>
 
       {/* Payments Queue Panel (AI Verification pipeline review) */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 hover:shadow-md transition-all duration-300 relative z-10">
+      <div className="bg-transparent md:bg-white md:border md:border-slate-100 md:rounded-3xl md:p-8 md:shadow-sm space-y-4 md:space-y-6 relative z-10 px-4 md:px-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              AI Payments Queue Awaiting Freelancer Approval
+              Payments Queue
             </h3>
             <p className="text-[11px] text-slate-450 mt-1.5 leading-relaxed">
-              Receipts uploaded by clients. Review AI authenticity confidence scores, fraud indicators, and authorize settlement.
+              Review AI authenticity confidence scores, fraud indicators, and authorize settlement.
             </p>
           </div>
         </div>
 
         {queueItems.length === 0 ? (
-          <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80">
+          <div className="text-center py-12 bg-white md:bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80 mx-0">
             <p className="text-slate-400 text-xs font-bold">No payments in the approval queue. Client receipt submissions will appear here. ⏳</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase text-[9px] tracking-wider">
-                  <th className="py-3.5 px-4 font-black">Client</th>
-                  <th className="py-3.5 px-4 font-black">Invoice</th>
-                  <th className="py-3.5 px-4 font-black">Amount</th>
-                  <th className="py-3.5 px-4 font-black">Uploaded</th>
-                  <th className="py-3.5 px-4 font-black">AI Score</th>
-                  <th className="py-3.5 px-4 text-center font-black">Receipt</th>
-                  <th className="py-3.5 px-4 font-black">Status & Flags</th>
-                  <th className="py-3.5 px-4 text-right font-black">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-semibold text-slate-650">
-                {queueItems.map((item) => {
-                  const hasFlags = item.fraudFlags && item.fraudFlags.length > 0;
-                  const isSelected = selectedQueueClientId === item.client.id;
-                  return (
-                    <tr 
-                      key={item.id} 
-                      onClick={() => setSelectedQueueClientId(item.client.id)}
-                      className={`transition-all duration-200 cursor-pointer ${
-                        isSelected 
-                          ? "bg-emerald-50/40 border-l-2 border-emerald-500 shadow-sm" 
-                          : "hover:bg-slate-50/50"
-                      }`}
-                    >
-                      <td className={`py-4.5 px-4 font-bold text-slate-900 transition-all ${
-                        isSelected ? "border-l-2 border-emerald-500 pl-3 text-emerald-700" : ""
-                      }`}>{item.client.name}</td>
-                      <td className="py-4.5 px-4 font-mono font-bold text-slate-400">{item.invoice.invoiceNumber}</td>
-                      <td className="py-4.5 px-4 font-mono font-bold text-slate-800">{formatCurrency(item.invoice.amount)}</td>
-                      <td className="py-4.5 px-4 text-slate-400 font-medium">{new Date(item.createdAt).toLocaleDateString()}</td>
-                      <td className="py-4.5 px-4">
-                        <span className={`px-2 py-0.5 rounded-md font-bold font-mono text-[10px] ${
-                          item.confidenceScore > 95 
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                            : "bg-amber-50 text-amber-600 border border-amber-100"
-                        }`}>
-                          {item.confidenceScore}%
-                        </span>
-                      </td>
-                      <td className="py-4.5 px-4 text-center">
-                        {item.receiptImageBase64 ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedReceiptImage(item.receiptImageBase64);
-                            }}
-                            className="h-8 px-2.5 rounded-lg border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-[10px] flex items-center gap-1.5 w-fit mx-auto transition-all duration-150"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            View
-                          </Button>
-                        ) : (
-                          <span className="text-slate-400">None</span>
-                        )}
-                      </td>
-                      <td className="py-4.5 px-4 space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          {item.status === "VERIFIED" && (
-                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase border border-emerald-100">Verified</span>
-                          )}
-                          {item.status === "UNDER_REVIEW" && (
-                            <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase border border-amber-100">Review</span>
-                          )}
-                          {item.status === "FAILED" && (
-                            <span className="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full uppercase border border-rose-100">Failed</span>
-                          )}
-                        </div>
-                        {hasFlags && (
-                           <div className="flex flex-wrap gap-1 max-w-[200px] mt-1">
-                            {item.fraudFlags.map((flag: string) => (
-                              <span key={flag} className="text-[8px] font-extrabold text-rose-650 bg-rose-50 border border-rose-100 px-1 py-0.5 rounded-sm uppercase flex items-center gap-0.5">
-                                ⚠️ {flag.replace("_", " ")}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-4.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleQueueAction(item.invoice.id, item.id, "APPROVE");
-                            }}
-                            className="h-8.5 px-3.5 rounded-xl bg-[#00B140] hover:bg-[#009933] text-white text-[11px] font-bold flex items-center gap-1.5 border-none shadow-sm cursor-pointer transition-all duration-150 hover:translate-y-[-1px] active:translate-y-[0px]"
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            Confirm
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleQueueAction(item.invoice.id, item.id, "REJECT");
-                            }}
-                            className="h-8.5 px-3 rounded-xl border-slate-200 text-rose-600 hover:text-rose-700 hover:bg-rose-50/50 text-[11px] font-bold flex items-center gap-1.5 transition-all duration-150"
-                          >
-                            <XCircle className="w-3.5 h-3.5" />
-                            Reject
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleQueueAction(item.invoice.id, item.id, "REQUEST_NEW");
-                            }}
-                            className="h-8.5 px-3 rounded-xl border-slate-200 text-amber-600 hover:text-amber-700 hover:bg-amber-55/50 text-[11px] font-bold flex items-center gap-1.5 transition-all duration-150"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            Request New
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 px-0">
+            {queueItems.map((item) => {
+              const hasFlags = item.fraudFlags && item.fraudFlags.length > 0;
+              const isSelected = selectedQueueClientId === item.client.id;
+              return (
+                <div 
+                  key={item.id} 
+                  onClick={() => setSelectedQueueClientId(item.client.id)}
+                  className={`bg-white border rounded-2xl p-4 flex flex-col lg:flex-row justify-between lg:items-center gap-4 transition-all duration-200 active:scale-[0.98] shadow-sm ${
+                    isSelected ? "border-emerald-500 bg-emerald-50/20" : "border-slate-100 hover:border-slate-200"
+                  }`}
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between lg:justify-start gap-4">
+                      <h4 className={`font-bold text-[15px] ${isSelected ? "text-emerald-700" : "text-slate-900"}`}>{item.client.name}</h4>
+                      <span className="font-mono text-xs text-slate-400">{item.invoice.invoiceNumber}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs font-medium">
+                      <span className="font-mono font-bold text-slate-800">{formatCurrency(item.invoice.amount)}</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-400">{new Date(item.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`px-2 py-0.5 rounded-md font-bold font-mono text-[10px] ${
+                        item.confidenceScore > 95 
+                          ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                          : "bg-amber-50 text-amber-600 border border-amber-100"
+                      }`}>
+                        {item.confidenceScore}% Score
+                      </span>
+                      {item.status === "VERIFIED" && (
+                        <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase border border-emerald-100">Verified</span>
+                      )}
+                      {item.status === "UNDER_REVIEW" && (
+                        <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase border border-amber-100">Review</span>
+                      )}
+                      {item.status === "FAILED" && (
+                        <span className="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full uppercase border border-rose-100">Failed</span>
+                      )}
+                    </div>
+                    {hasFlags && (
+                       <div className="flex flex-wrap gap-1 mt-1">
+                        {item.fraudFlags.map((flag: string) => (
+                          <span key={flag} className="text-[8px] font-extrabold text-rose-650 bg-rose-50 border border-rose-100 px-1 py-0.5 rounded-sm uppercase flex items-center gap-0.5">
+                            ⚠️ {flag.replace("_", " ")}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-row lg:flex-col justify-between items-center lg:items-end gap-3 mt-2 lg:mt-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    {item.receiptImageBase64 ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedReceiptImage(item.receiptImageBase64);
+                        }}
+                        className="h-8 px-3 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-xs flex items-center gap-1.5 active:scale-[0.98]"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Receipt
+                      </Button>
+                    ) : (
+                      <span className="text-slate-400 text-xs">No Receipt</span>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQueueAction(item.invoice.id, item.id, "APPROVE");
+                        }}
+                        className="h-8 w-8 p-0 md:w-auto md:px-3 rounded-xl bg-[#00B140] hover:bg-[#009933] text-white text-[11px] font-bold flex items-center justify-center gap-1.5 border-none shadow-sm active:scale-[0.98]"
+                        title="Approve"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span className="hidden md:inline">Confirm</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQueueAction(item.invoice.id, item.id, "REJECT");
+                        }}
+                        className="h-8 w-8 p-0 md:w-auto md:px-3 rounded-xl border-slate-200 text-rose-600 hover:text-rose-700 hover:bg-rose-50/50 text-[11px] font-bold flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        title="Reject"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span className="hidden md:inline">Reject</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQueueAction(item.invoice.id, item.id, "REQUEST_NEW");
+                        }}
+                        className="h-8 w-8 p-0 md:w-auto md:px-3 rounded-xl border-slate-200 text-amber-600 hover:text-amber-700 hover:bg-amber-50 text-[11px] font-bold flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        title="Request New"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span className="hidden md:inline">Request</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -674,11 +675,11 @@ export default function CollectionsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
         
         {/* LEFT COLUMN: Actions & Lists */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-4 md:space-y-6 px-4 md:px-0">
           
           {/* Overdue Receivables section */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+          <div className="bg-transparent md:bg-white md:border md:border-slate-100 md:rounded-3xl md:p-6 md:shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 md:mb-6">
               <div>
                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                   <AlertTriangle className="w-4.5 h-4.5 text-rose-500" />
@@ -696,7 +697,7 @@ export default function CollectionsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
               </div>
             ) : overdueInvoicesList.length === 0 ? (
-              <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80">
+              <div className="text-center py-12 bg-white md:bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80">
                 <p className="text-slate-450 text-xs font-bold">Awesome! You have no overdue invoices. 🟢</p>
               </div>
             ) : (
@@ -704,7 +705,7 @@ export default function CollectionsPage() {
                 {overdueInvoicesList.map(inv => {
                   const risk = getRiskLevel(inv);
                   return (
-                    <div key={inv.id} className="p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-200/80 hover:shadow-sm transition-all duration-300">
+                    <div key={inv.id} className="p-4 bg-white md:bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-200/80 shadow-sm md:shadow-none transition-all duration-300 active:scale-[0.98]">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-bold text-slate-900">{inv.client.name}</span>
@@ -714,7 +715,7 @@ export default function CollectionsPage() {
                         <p className="text-xs text-slate-500 truncate max-w-xs sm:max-w-sm lg:max-w-md">{inv.projectDescription}</p>
                       </div>
 
-                      <div className="flex items-center gap-3 justify-between md:justify-end">
+                      <div className="flex items-center gap-3 justify-between md:justify-end border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
                         <div className="text-right">
                           <p className="text-sm font-bold text-slate-800 font-mono">{formatCurrency(inv.amount)}</p>
                         </div>
@@ -722,15 +723,16 @@ export default function CollectionsPage() {
                         <div className="flex items-center gap-2">
                           <Button 
                             onClick={() => triggerWhatsAppNudge(inv, "OVERDUE_3D")}
-                            className="bg-[#00B140] hover:bg-[#009933] text-white rounded-xl h-8.5 px-3.5 text-[11px] font-bold flex items-center gap-1.5 transition-all duration-150 shadow-sm"
+                            className="bg-[#00B140] hover:bg-[#009933] text-white rounded-xl h-8 w-8 p-0 md:h-8.5 md:w-auto md:px-3.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all duration-150 shadow-sm border-none"
+                            title="Nudge"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
-                            Nudge
+                            <span className="hidden md:inline">Nudge</span>
                           </Button>
                           <Button 
                             variant="outline"
                             onClick={() => copyReminderTemplate(inv)}
-                            className="h-8.5 w-8.5 p-0 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all duration-150"
+                            className="h-8 w-8 p-0 md:h-8.5 md:w-8.5 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all duration-150"
                             title="Copy Template"
                           >
                             <Copy className="w-3.5 h-3.5" />
@@ -738,7 +740,7 @@ export default function CollectionsPage() {
                           <Button 
                             variant="outline"
                             onClick={() => markAsPaid(inv.id)}
-                            className="h-8.5 px-3 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-[11px] font-bold transition-all duration-150"
+                            className="h-8 px-3 md:h-8.5 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-[11px] font-bold transition-all duration-150"
                           >
                             Paid
                           </Button>
@@ -752,8 +754,8 @@ export default function CollectionsPage() {
           </div>
 
           {/* Due This Week section */}
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+          <div className="bg-transparent md:bg-white md:border md:border-slate-100 md:rounded-3xl md:p-6 md:shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 md:mb-6">
               <div>
                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                   <Calendar className="w-4.5 h-4.5 text-emerald-600" />
@@ -771,13 +773,13 @@ export default function CollectionsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
               </div>
             ) : dueThisWeekInvoicesList.length === 0 ? (
-              <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80">
+              <div className="text-center py-12 bg-white md:bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/80">
                 <p className="text-slate-450 text-xs font-bold">No invoices due within the next 7 days. 📅</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {dueThisWeekInvoicesList.map(inv => (
-                  <div key={inv.id} className="p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-200/80 hover:shadow-sm transition-all duration-300">
+                  <div key={inv.id} className="p-4 bg-white md:bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-200/80 shadow-sm md:shadow-none transition-all duration-300 active:scale-[0.98]">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-slate-800">{inv.client.name}</span>
@@ -787,7 +789,7 @@ export default function CollectionsPage() {
                       <p className="text-xs text-slate-500 truncate max-w-xs sm:max-w-sm lg:max-w-md">{inv.projectDescription}</p>
                     </div>
 
-                    <div className="flex items-center gap-3 justify-between md:justify-end">
+                    <div className="flex items-center gap-3 justify-between md:justify-end border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
                       <div className="text-right">
                         <p className="text-sm font-bold text-slate-800 font-mono">{formatCurrency(inv.amount)}</p>
                       </div>
@@ -795,22 +797,24 @@ export default function CollectionsPage() {
                       <div className="flex items-center gap-2">
                         <Button 
                           onClick={() => triggerWhatsAppNudge(inv, "DUE_TOMORROW")}
-                          className="bg-[#00B140] hover:bg-[#009933] text-white rounded-xl h-8.5 px-3.5 text-[11px] font-bold flex items-center gap-1.5 transition-all duration-150 shadow-sm"
+                          className="bg-[#00B140] hover:bg-[#009933] text-white rounded-xl h-8 w-8 p-0 md:h-8.5 md:w-auto md:px-3.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all duration-150 shadow-sm border-none"
+                          title="Nudge"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
-                          Nudge
+                          <span className="hidden md:inline">Nudge</span>
                         </Button>
                         <Button 
                           variant="outline"
                           onClick={() => copyReminderTemplate(inv)}
-                          className="h-8.5 w-8.5 p-0 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all duration-150"
+                          className="h-8 w-8 p-0 md:h-8.5 md:w-8.5 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all duration-150"
+                          title="Copy Template"
                         >
                           <Copy className="w-3.5 h-3.5" />
                         </Button>
                         <Link href={`/dashboard/clients/${inv.client.id}`} passHref>
                           <Button 
                             variant="outline"
-                            className="h-8.5 px-3 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-[11px] font-bold transition-all duration-150"
+                            className="h-8 px-3 md:h-8.5 rounded-xl border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-[11px] font-bold transition-all duration-150"
                           >
                             Profile
                           </Button>
@@ -826,14 +830,14 @@ export default function CollectionsPage() {
         </div>
 
         {/* RIGHT COLUMN: Reminder Logs & Activity History */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-4 md:space-y-6 px-4 md:px-0">
           
           <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 mb-4">
               <Clock className="w-4 h-4 text-emerald-650" />
               Recent Recovery Nudge Log
             </h3>
-            <p className="text-[11px] text-slate-450 mb-6">Logs of manual reminders tracked in this workspace.</p>
+            <p className="text-[11px] text-slate-450 mb-6">History of manual reminders tracked in this workspace.</p>
 
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
@@ -899,9 +903,9 @@ export default function CollectionsPage() {
           )}
 
           {/* Quick reminders card */}
-          <Card className="border-none rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 text-white shadow-xl relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
+          <div className="border-none rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 text-white shadow-xl relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
             <div className="absolute top-[-50px] right-[-50px] w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-            <CardContent className="p-6 space-y-4 relative z-10">
+            <div className="p-6 space-y-4 relative z-10">
               <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-500/10">
                 <ShieldCheck className="w-5 h-5" />
               </div>
@@ -911,8 +915,8 @@ export default function CollectionsPage() {
                 <li>Verify the sender and recipient banks details in the Payments Queue list.</li>
                 <li>Gemini flags potential frauds automatically (mismatched names, dates, or duplicate references).</li>
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
         </div>
 

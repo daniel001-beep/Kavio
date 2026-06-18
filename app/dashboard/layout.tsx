@@ -6,7 +6,7 @@ import "../fintech/fintech.css";
 
 export const metadata: Metadata = {
   title: "Kavio - Portfolio Dashboard",
-  description: "Enterprise portfolio dashboard and ledger balance statistics.",
+  description: "Kavio Freelancer Dashboard",
 };
 
 export default function DashboardLayout({

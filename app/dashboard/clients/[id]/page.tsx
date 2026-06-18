@@ -340,7 +340,7 @@ export default function ClientProfilePage() {
               <div>
                 <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
                   <CalendarDays className="w-4 h-4 text-emerald-600" />
-                  CRM & Follow-up parameters
+                  Client Settings & Follow-ups
                 </h3>
                 <p className="text-[10px] text-slate-400 mt-1">Configure followups and preferred contacts</p>
               </div>
@@ -380,7 +380,7 @@ export default function ClientProfilePage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">CRM Memo Notes</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase">Client Notes</label>
                   <Input 
                     type="text" 
                     value={crmNotes} 
@@ -396,7 +396,7 @@ export default function ClientProfilePage() {
                   className="w-full py-2 bg-emerald-600 text-white font-bold hover:bg-emerald-500 rounded-xl text-xs flex items-center justify-center gap-1.5"
                 >
                   {crmSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  Save CRM Settings
+                  Save Settings
                 </Button>
               </form>
             </CardContent>

@@ -234,7 +234,7 @@ export default function ReportPage() {
           <div className="w-full border border-slate-100 rounded-2xl p-6 sm:p-8 space-y-6 bg-white print:border-none print:p-0">
             <div className="flex justify-between items-start border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Kavio Freelancer Ledger</h3>
+                <h3 className="text-sm font-bold text-slate-800">Kavio Freelancer Report</h3>
                 <p className="text-[10px] text-slate-400 font-semibold mt-1.5">Account Holder: {userEmail || "Registered User"}</p>
               </div>
               <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold px-2.5 py-0.5 rounded-full text-[9px] uppercase">
@@ -326,7 +326,7 @@ export default function ReportPage() {
 
       </div>
 
-      {/* Section 4: Paid Invoices Ledger Log */}
+      {/* Section 4: Paid Invoices Record Log */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 border border-slate-100 hover:shadow-md transition-all duration-300 relative z-10 print:border-none print:shadow-none print:p-0">
         <div>
           <h2 className="text-lg font-bold text-slate-800 tracking-tight">Transaction History: Settled Balances</h2>

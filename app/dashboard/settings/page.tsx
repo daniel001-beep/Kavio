@@ -198,112 +198,97 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col space-y-8 animate-in fade-in duration-500 pb-16 relative">
+    <div className="flex flex-col space-y-4 animate-in fade-in duration-500 pb-32 lg:pb-16 relative min-h-full">
       {/* Ambient glow effects */}
       <div className="absolute top-[-5%] left-[-5%] w-[350px] h-[350px] bg-emerald-150/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[-10%] w-[300px] h-[300px] bg-emerald-100/5 rounded-full blur-[90px] pointer-events-none" />
       
       {/* Header */}
-      <div className="relative z-10">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
+      <div className="relative z-10 px-4 lg:px-0 pt-6 lg:pt-0">
+        <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
         <p className="text-slate-500 text-sm font-medium mt-1">Configure details, currency preferences, security credentials, and Pro settings</p>
       </div>
  
       {/* Main Layout grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 relative z-10">
         
         {/* Navigation Sidebar Cards */}
-        <div className="lg:col-span-1 flex flex-col gap-2.5">
+        <div className="lg:col-span-1 flex flex-row lg:flex-col gap-2.5 overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 pb-2 lg:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x">
           <button
             onClick={() => { setActiveTab("PROFILE"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
+            className={`flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] ${
               activeTab === "PROFILE"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold lg:border-l-2 border border-emerald-100 lg:border-y-transparent lg:border-r-transparent"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100 lg:border-transparent lg:border-l-2"
             }`}
           >
-            <User className="w-[18px] h-[18px]" />
-            Account Information
+            <User className="w-[18px] h-[18px] shrink-0" />
+            <span className="whitespace-nowrap">Account Info</span>
           </button>
  
           <button
             onClick={() => { setActiveTab("SECURITY"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
+            className={`flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] ${
               activeTab === "SECURITY"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold lg:border-l-2 border border-emerald-100 lg:border-y-transparent lg:border-r-transparent"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100 lg:border-transparent lg:border-l-2"
             }`}
           >
-            <Lock className="w-[18px] h-[18px]" />
-            Security & Credentials
+            <Lock className="w-[18px] h-[18px] shrink-0" />
+            <span className="whitespace-nowrap">Security</span>
           </button>
  
           <button
             onClick={() => { setActiveTab("TIER"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
+            className={`flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] ${
               activeTab === "TIER"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold lg:border-l-2 border border-emerald-100 lg:border-y-transparent lg:border-r-transparent"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100 lg:border-transparent lg:border-l-2"
             }`}
           >
-            <CreditCard className="w-[18px] h-[18px]" />
-            Subscription Plan
+            <CreditCard className="w-[18px] h-[18px] shrink-0" />
+            <span className="whitespace-nowrap">Subscription</span>
           </button>
  
           <button
             onClick={() => { setActiveTab("PWA"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
+            className={`flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] ${
               activeTab === "PWA"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold lg:border-l-2 border border-emerald-100 lg:border-y-transparent lg:border-r-transparent"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100 lg:border-transparent lg:border-l-2"
             }`}
           >
-            <Sparkles className="w-[18px] h-[18px] text-amber-500" />
-            Install App (PWA)
+            <Sparkles className="w-[18px] h-[18px] text-amber-500 shrink-0" />
+            <span className="whitespace-nowrap">Install App</span>
           </button>
  
           <button
             onClick={() => { setActiveTab("SUPPORT"); setStatusMessage(null); }}
-            className={`flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 ${
+            className={`flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] ${
               activeTab === "SUPPORT"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold"
-                : "bg-white text-slate-55 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-500 font-extrabold lg:border-l-2 border border-emerald-100 lg:border-y-transparent lg:border-r-transparent"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100 lg:border-transparent lg:border-l-2"
             }`}
           >
-            <Phone className="w-[18px] h-[18px] text-emerald-55" />
-            Contact & Support
+            <Phone className="w-[18px] h-[18px] text-emerald-500 shrink-0" />
+            <span className="whitespace-nowrap">Support</span>
           </button>
  
           {session?.user?.isAdmin && (
             <button
               onClick={() => window.location.href = "/fintech/admin"}
-              className="flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm border-l-2 bg-indigo-50 text-indigo-700 border-indigo-500 hover:bg-indigo-100"
+              className="flex items-center gap-2 lg:gap-3.5 px-4 lg:px-5 py-3 lg:py-4 rounded-2xl text-[13px] font-bold transition-all shadow-sm shrink-0 snap-start active:scale-[0.98] bg-indigo-50 text-indigo-700 lg:border-l-2 border-indigo-500 hover:bg-indigo-100 border border-indigo-100 lg:border-y-transparent lg:border-r-transparent"
             >
-              <ShieldCheck className="w-[18px] h-[18px] text-indigo-600" />
-              Super Admin Console
+              <ShieldCheck className="w-[18px] h-[18px] text-indigo-600 shrink-0" />
+              <span className="whitespace-nowrap">Admin Console</span>
             </button>
           )}
- 
-          {/* Mobile-only Sign Out button inside sidebar */}
-          <button
-            id="mobile-settings-signout"
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-            className="lg:hidden flex items-center gap-3.5 px-5 py-4 rounded-xl text-[13px] font-bold text-left transition-all shadow-sm bg-rose-50 border-l-2 border-rose-500 text-rose-600 hover:bg-rose-100 active:scale-[0.98] disabled:opacity-60 mt-2"
-          >
-            {isSigningOut ? (
-              <Loader2 className="w-[18px] h-[18px] animate-spin" />
-            ) : (
-              <LogOut className="w-[18px] h-[18px]" />
-            )}
-            {isSigningOut ? "Signing out..." : "Sign Out"}
-          </button>
         </div>
 
         {/* Content Box Panels */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 px-4 lg:px-0">
           <Card className="border border-slate-100 rounded-3xl shadow-sm bg-white overflow-hidden hover:shadow-md transition-all duration-300">
-            <CardContent className="p-8">
+            <CardContent className="p-6 md:p-8">
               
               {/* Messages banner */}
               {statusMessage && (
@@ -723,11 +708,11 @@ export default function SettingsPage() {
       </div>
 
       {/* Mobile-only sticky footer strip */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/90 backdrop-blur-md border-t border-rose-100 flex items-center gap-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-safe pt-3 bg-white/95 backdrop-blur-md border-t border-slate-100 flex items-center gap-3 pb-6 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
         {session?.user?.isAdmin && (
           <button
             onClick={() => window.location.href = "/fintech/admin"}
-            className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/25 cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-[13px] bg-indigo-50 text-indigo-600 border border-indigo-100 active:scale-[0.98] transition-all cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4" />
             Admin Panel
@@ -737,7 +722,7 @@ export default function SettingsPage() {
           id="mobile-sticky-signout"
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm bg-rose-500 text-white hover:bg-rose-600 active:scale-[0.98] transition-all shadow-lg shadow-rose-500/25 disabled:opacity-60 cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-[13px] bg-rose-50 text-rose-600 border border-rose-100 active:scale-[0.98] transition-all disabled:opacity-60 cursor-pointer"
         >
           {isSigningOut ? (
             <Loader2 className="w-4 h-4 animate-spin" />
