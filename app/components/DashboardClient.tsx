@@ -378,17 +378,17 @@ export default function DashboardClient() {
 
       {/* Mobile Recovery Tip Banner */}
       {onboardingResponses && (
-        <div className="md:hidden bg-slate-900 rounded-2xl p-4 flex items-center justify-between gap-3 relative z-10 active:scale-[0.98] transition-transform duration-100 -mx-0">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="md:hidden bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 relative z-10 active:scale-[0.98] shadow-sm transition-transform duration-100 -mx-0">
+          <div className="flex items-center gap-3">
             <div className="text-[#00B140] shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
-            <p className="text-sm font-medium text-white leading-snug truncate">
+            <p className="text-sm font-bold text-slate-800 leading-snug break-words">
               {onboardingResponses.challenge === "late_payments" ? "Track and nudge late invoices." : "Monitor your due dates easily."}
             </p>
           </div>
           <Link href="/dashboard/collections" passHref legacyBehavior>
-            <a className="text-white text-xs font-bold uppercase tracking-wider shrink-0 flex items-center no-underline">
+            <a className="text-[#00B140] text-xs font-bold uppercase tracking-wider shrink-0 flex items-center no-underline">
               Open <ChevronRight className="w-4 h-4 ml-1" />
             </a>
           </Link>

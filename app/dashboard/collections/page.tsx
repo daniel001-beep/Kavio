@@ -903,14 +903,13 @@ export default function CollectionsPage() {
           )}
 
           {/* Quick reminders card */}
-          <div className="border-none rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 text-white shadow-xl relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
-            <div className="absolute top-[-50px] right-[-50px] w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="border border-slate-200 rounded-3xl bg-white text-slate-800 shadow-sm relative overflow-hidden transition-all duration-300 hover:shadow-md">
             <div className="p-6 space-y-4 relative z-10">
-              <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-500/10">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400">Recovery Tips</h3>
-              <ul className="space-y-3.5 text-[11px] font-medium text-slate-300 leading-relaxed list-disc pl-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-emerald-600">Recovery Tips</h3>
+              <ul className="space-y-3.5 text-[11px] font-bold text-slate-600 leading-relaxed list-disc pl-4 break-words">
                 <li>Double check the uploaded transfer receipt using the preview modal before confirming.</li>
                 <li>Verify the sender and recipient banks details in the Payments Queue list.</li>
                 <li>Gemini flags potential frauds automatically (mismatched names, dates, or duplicate references).</li>
