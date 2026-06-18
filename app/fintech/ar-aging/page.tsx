@@ -148,16 +148,16 @@ export default function ARAgingPage() {
       const allowanceCents = Math.floor(totals.requiredAllowance * 100);
 
       // Book transaction representing dynamic bad debt allowance provisioning
-      const idempotencyKey = `bad_debt_${Date.now()}`;
+      const Duplicate PreventionKey = `bad_debt_${Date.now()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Duplicate Prevention-Key': Duplicate PreventionKey
         },
         body: JSON.stringify({
           amount: -allowanceCents,
-          idempotencyKey: idempotencyKey,
+          Duplicate PreventionKey: Duplicate PreventionKey,
           description: "GAAP Provision: Allowance for Doubtful Accounts Adjustment",
           metadata: {
             client_name: "GAAP Bad Debt Provision",
@@ -193,9 +193,9 @@ export default function ARAgingPage() {
               </div>
               <h1 className="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
                 <BarChart3 className="w-9 h-9 text-teal-600 animate-pulse" />
-                AR Aging & Provisioning
+                Unpaid Invoices & Provisioning
               </h1>
-              <p className="text-slate-400 text-sm mt-1">Audit outstanding invoices, bucket bad debt risk, and post doubtful account allowances</p>
+              <p className="text-slate-400 text-sm mt-1">Review unpaid invoices, bucket bad debt risk, and post doubtful account allowances</p>
             </div>
             
             <button
@@ -208,7 +208,7 @@ export default function ARAgingPage() {
             </button>
           </div>
 
-          {/* AR Aging Dashboard HUD */}
+          {/* Unpaid Invoices Dashboard HUD */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm flex items-center gap-5">

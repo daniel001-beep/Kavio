@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: "Invalid user session context. Unauthorized access blocked by Zero-Trust API gateway." }, { status: 401 });
     }
 
-    console.log("[Ledger Integrity Audit] Beginning full-chain cryptographic audit...");
+    console.log("[Ledger Security Check] Beginning full-chain security check...");
     
     // Fetch all transactions chronologically for this user only
     const rawTxList = await db.select().from(transactions).where(eq(transactions.userId, userId)).orderBy(asc(transactions.createdAt));
@@ -87,7 +87,7 @@ export async function GET() {
     }, { status: 200 });
 
   } catch (err: any) {
-    console.error("❌ Ledger Integrity Audit Error:", err);
+    console.error("❌ Ledger Security Check Error:", err);
     return NextResponse.json({
       status: "ERROR",
       message: "Internal server error during audit.",

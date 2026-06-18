@@ -31,7 +31,7 @@ export default function SignInPage() {
             <Zap className="w-5 h-5 text-white animate-pulse" />
           </div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-            Redirecting to command center...
+            Redirecting to dashboard...
           </p>
         </div>
       </div>

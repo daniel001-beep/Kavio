@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const { 
       userId, 
       amount, 
-      idempotencyKey, 
+      Duplicate PreventionKey, 
       orderId, 
       metadata = {}, 
       description = 'Webhook transaction', 
@@ -44,8 +44,8 @@ export async function POST(req: Request) {
     if (isNaN(parsedAmount) || parsedAmount === 0) {
       return NextResponse.json({ error: 'Valid non-zero amount is required (in cents)' }, { status: 400 });
     }
-    if (!idempotencyKey) {
-      return NextResponse.json({ error: 'idempotencyKey is required' }, { status: 400 });
+    if (!Duplicate PreventionKey) {
+      return NextResponse.json({ error: 'Duplicate PreventionKey is required' }, { status: 400 });
     }
 
     // 2. Multi-Tier Security Verification
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     const amountBigInt = BigInt(Math.floor(parsedAmount));
     const timestamp = new Date();
 
-    // 3. Isolated Database Transaction with Per-Tenant Row Locking & Idempotency
+    // 3. Isolated Database Transaction with Per-Tenant Row Locking & Duplicate Prevention
     const MAX_RETRIES = 3;
     let result;
 
@@ -95,16 +95,16 @@ export async function POST(req: Request) {
             console.warn('[Webhook] Lock SELECT FOR UPDATE bypassed (likely local database emulator):', lockErr);
           }
 
-          // B. Idempotency Check: Prevent duplicate ledger processing
+          // B. Duplicate Prevention Check: Prevent duplicate ledger processing
           const existingTx = await tx.query.transactions.findFirst({
-            where: eq(transactions.idempotencyKey, idempotencyKey),
+            where: eq(transactions.Duplicate PreventionKey, Duplicate PreventionKey),
           });
 
           if (existingTx) {
             return { success: true, transaction: existingTx, idempotent: true };
           }
 
-          // C. Cryptographic Ledger Hash Chain: Fetch previous completed transaction
+          // C. Secure Transaction Log: Fetch previous completed transaction
           const lastTx = await tx.query.transactions.findFirst({
             where: eq(transactions.userId, userId),
             orderBy: [desc(transactions.createdAt)],
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
           const [newTx] = await tx.insert(transactions).values({
             userId,
             orderId: orderId || null,
-            idempotencyKey,
+            Duplicate PreventionKey,
             amount: Number(amountBigInt),
             status: isCompleted ? 'completed' : 'pending',
             hash,
@@ -167,7 +167,7 @@ export async function POST(req: Request) {
               eventType: 'TRANSACTION_CREATED',
               entityType: 'transaction',
               entityId: newTx.id,
-              changes: { amount: amountBigInt.toString(), idempotencyKey, source: 'webhook' },
+              changes: { amount: amountBigInt.toString(), Duplicate PreventionKey, source: 'webhook' },
               ipAddress: 'Webhook Ingestion',
               userAgent: 'External payment gateway provider',
               metadata: { description: description || 'Webhook ledger transaction', amount: Number(amountBigInt) / 100 }
@@ -235,9 +235,9 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('[Webhook API Error]:', error);
 
-    // Postgres unique constraint violation on idempotency key
-    if (error.code === '23505' && error.constraint === 'transaction_idempotency_key_key') {
-      return NextResponse.json({ error: 'Duplicate transaction (Idempotency Key Collision)' }, { status: 409 });
+    // Postgres unique constraint violation on Duplicate Prevention key
+    if (error.code === '23505' && error.constraint === 'transaction_Duplicate Prevention_key_key') {
+      return NextResponse.json({ error: 'Duplicate transaction (Duplicate Prevention Key Collision)' }, { status: 409 });
     }
 
     return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });

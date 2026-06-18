@@ -184,16 +184,16 @@ export default function ReconciliationPage() {
       const feeCents = Math.floor(parseFloat(modalAmount) * 100);
       const isFee = modalType === 'FEE';
 
-      const idempotencyKey = `adj_${Date.now()}_${Math.random()}`;
+      const Duplicate PreventionKey = `adj_${Date.now()}_${Math.random()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Duplicate Prevention-Key': Duplicate PreventionKey
         },
         body: JSON.stringify({
           amount: isFee ? -feeCents : feeCents,
-          idempotencyKey: idempotencyKey,
+          Duplicate PreventionKey: Duplicate PreventionKey,
           description: modalDesc,
           metadata: {
             client_name: isFee ? "Bank Charge Settlement" : "Interest Income",

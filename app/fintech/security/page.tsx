@@ -46,7 +46,7 @@ export default function SecurityMonitorPage() {
     }
   }, [status, router]);
 
-  // Run Real-Time Hashing Audit
+  // Run Real-Time Security Check
   const runIntegrityAudit = async () => {
     try {
       setLoadingAudit(true);
@@ -200,7 +200,7 @@ export default function SecurityMonitorPage() {
                 <UserCheck className="w-6 h-6 animate-pulse" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-words">Idempotency Guard</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-words">Duplicate Prevention Guard</p>
                 <h3 className="text-xl lg:text-2xl font-black text-emerald-600 mt-1 break-words">SHIELDED</h3>
                 <p className="text-xs text-slate-400 mt-0.5 break-words">Zero double-payout risk</p>
               </div>

@@ -118,7 +118,7 @@ export default function OnboardingPage() {
                 Welcome to Kavio!
               </h1>
               <p className="text-slate-500 text-sm font-semibold leading-relaxed">
-                Kavio helps freelancers get paid faster and know exactly who owes them money. Let's customize your command center in 4 simple steps.
+                Kavio helps freelancers get paid faster and know exactly who owes them money. Let's customize your dashboard in 4 simple steps.
               </p>
             </div>
             <Button 

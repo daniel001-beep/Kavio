@@ -63,12 +63,12 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* Real-Time Ledger Pulse */}
+        {/* Real-Time Transaction Pulse */}
         <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex items-center justify-between mb-6 relative z-10">
             <div>
-              <h2 className="text-lg font-bold text-slate-100">Real-Time Ledger Pulse</h2>
+              <h2 className="text-lg font-bold text-slate-100">Real-Time Transaction Pulse</h2>
               <p className="text-xs text-slate-400 font-medium">Atomic Rollback & Integrity Verification</p>
             </div>
             <div className="p-2 bg-slate-800/80 rounded-md border border-slate-700">

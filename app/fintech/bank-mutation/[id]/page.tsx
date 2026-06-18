@@ -88,7 +88,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
     setIsAllocating(true);
 
-    const idempotencyKey = `alloc_${id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const Duplicate PreventionKey = `alloc_${id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const txId = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     if (userEmail) {
@@ -146,11 +146,11 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Duplicate Prevention-Key': Duplicate PreventionKey
         },
         body: JSON.stringify({
           amount: -Math.round(amt * 100), // negative cents
-          idempotencyKey,
+          Duplicate PreventionKey,
           description: `Capital Allocation: ${product?.title || 'Treasury'}`,
           status: 'Paid',
           metadata: {
@@ -213,7 +213,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         <div className="flex flex-col items-center justify-center py-20">
           <h1 className="text-2xl font-bold text-slate-100 mb-4">Product Not Found</h1>
           <button onClick={() => router.push('/fintech/bank-mutation')} className="text-blue-500 hover:text-blue-400">
-            Return to Bank Mutation
+            Return to Bank Transactions
           </button>
         </div>
       </DashboardLayout>
@@ -231,7 +231,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors mb-4 font-bold text-xs uppercase tracking-wider"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-semibold">Back to Bank Mutation</span>
+          <span className="text-sm font-semibold">Back to Bank Transactions</span>
         </button>
  
         {/* Header Section */}
@@ -357,7 +357,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                   Your capital allocation of <span className="font-mono font-bold text-slate-800">${Number(allocationAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span> to {product.title} has been recorded.
                 </p>
 
-                {/* Ledger Audit Entry Visualizer */}
+                {/* Transaction Record Visualizer */}
                 <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-[10px] space-y-2 text-slate-500">
                   <div className="flex justify-between border-b border-slate-100 pb-1">
                     <span>DEBIT (OPERATING)</span>

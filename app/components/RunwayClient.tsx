@@ -123,7 +123,7 @@ export default function RunwayClient({ initialTransactions = [] }: RunwayClientP
               <Calculator className="w-8 h-8" />
               Master Runway Simulator
             </h1>
-            <p className="text-slate-500 text-sm mt-1 font-semibold">Live runway intelligence modelling startup survival on top of your actual transaction ledger.</p>
+            <p className="text-slate-500 text-sm mt-1 font-semibold">Live Future Cash Flow Predictor startup survival on top of your actual transaction ledger.</p>
           </div>
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto mt-4 sm:mt-0">
@@ -328,7 +328,7 @@ export default function RunwayClient({ initialTransactions = [] }: RunwayClientP
                   <TrendingDown className="w-6 h-6 text-rose-500 shrink-0 mt-1" />
                 )}
                 <div>
-                  <h4 className="text-sm font-bold text-slate-800 mb-1">Audit-Ready Financial Intelligence</h4>
+                  <h4 className="text-sm font-bold text-slate-800 mb-1">Financial Intelligence</h4>
                   <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                     {useYieldSweep 
                       ? `By keeping capital swept in T-Bills, you earn $${yieldOffset.toLocaleString(undefined, { maximumFractionDigits: 0 })} in yield monthly. This extends your runway by ${(monthsRemaining - (baseCapital / (totalMonthlyBurn + yieldOffset))).toFixed(1)} months without dilution!`

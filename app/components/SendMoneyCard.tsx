@@ -165,7 +165,7 @@ export default function SendMoneyCard({ onTransferSuccess }: SendMoneyCardProps)
           <div className="relative mb-2">
             <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
             <textarea 
-              placeholder="Transfer Note (Internal Audit Log)" 
+              placeholder="Transfer Note (Internal History)" 
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="block w-full min-h-[80px] bg-slate-950/50 border border-slate-700 rounded-lg p-3 px-4 text-center text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"

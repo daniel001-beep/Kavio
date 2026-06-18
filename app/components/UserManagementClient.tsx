@@ -59,7 +59,7 @@ export default function UserManagementClient({ initialUsers }: UserManagementCli
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-slate-100 tracking-tight">User Management</h1>
-              <p className="text-sm text-slate-400 mt-1">Audit accounts, verify KYC, and manage platform access.</p>
+              <p className="text-sm text-slate-400 mt-1">Review accounts, verify identity, and manage platform access.</p>
             </div>
           </div>
         </div>

@@ -329,7 +329,7 @@ export default function ReportPage() {
       {/* Section 4: Paid Invoices Ledger Log */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 border border-slate-100 hover:shadow-md transition-all duration-300 relative z-10 print:border-none print:shadow-none print:p-0">
         <div>
-          <h2 className="text-lg font-bold text-slate-800 tracking-tight">Audit Trail: Settled Ledger Credits</h2>
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">Transaction History: Settled Balances</h2>
           <p className="text-xs text-slate-450 font-semibold mt-1 print:hidden">Verified log of all completed payments used in these calculations</p>
         </div>
 

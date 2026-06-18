@@ -59,7 +59,7 @@ export default function AgenticCommandBar() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Agentic Command Center: 'Export Q1 ledger to CSV'..."
+            placeholder="AI Assistant: 'Show me unpaid invoices'..."
             className="w-full bg-transparent border-none py-6 pl-16 pr-12 text-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-0"
           />
           <button 

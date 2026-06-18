@@ -318,7 +318,7 @@ export default function InvoicesPage() {
               : "border-transparent text-slate-400 hover:text-slate-700"
           }`}
         >
-          Payments Ledger
+          Payments Record
         </button>
       </div>
 

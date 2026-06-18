@@ -223,10 +223,10 @@ export default function AuditLogsTable() {
           </div>
           <div>
             <h2 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
-              Platform Access & Real-Time Event Audit Logs
+              Platform Access & Real-Time Security History
             </h2>
             <p className="text-xs text-slate-500 font-semibold mt-0.5">
-              Securely capturing and auditing incoming security authentication & network activity logs.
+              Securely capturing incoming security and network activity.
             </p>
           </div>
         </div>
@@ -279,7 +279,7 @@ export default function AuditLogsTable() {
           /* Error state */
           <div className="p-12 text-center flex flex-col items-center justify-center max-w-xl mx-auto">
             <RefreshCw className="w-8 h-8 text-rose-500 animate-spin mb-4" />
-            <h3 className="text-slate-800 font-bold text-sm">Failed to connect to ledger</h3>
+            <h3 className="text-slate-800 font-bold text-sm">Failed to connect to records</h3>
             <p className="text-slate-500 text-xs mt-1 leading-relaxed">{error}</p>
           </div>
         ) : logs.length === 0 ? (

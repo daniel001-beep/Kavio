@@ -205,7 +205,7 @@ export default function SettingsPage() {
       
       {/* Header */}
       <div className="relative z-10">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Command Center</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
         <p className="text-slate-500 text-sm font-medium mt-1">Configure details, currency preferences, security credentials, and Pro settings</p>
       </div>
  

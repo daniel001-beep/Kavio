@@ -867,7 +867,7 @@ export default function CollectionsPage() {
             <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4 hover:shadow-md transition-all duration-300">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-3">
                 <User className="w-4 h-4 text-emerald-650" />
-                Client Reliability Auditor
+                Client Reliability Tracker
               </h3>
               <div>
                 <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Inspecting Client</p>

@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const idempotencyKey = headersList.get("idempotency-key");
+    const Duplicate PreventionKey = headersList.get("Duplicate Prevention-key");
 
     const body = await req.json();
 
@@ -54,9 +54,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!idempotencyKey) {
+    if (!Duplicate PreventionKey) {
       return NextResponse.json(
-        { error: "Idempotency-Key header is required" },
+        { error: "Duplicate Prevention-Key header is required" },
         { status: 400 },
       );
     }
@@ -71,9 +71,9 @@ export async function POST(req: Request) {
     for (let i = 0; i < MAX_RETRIES; i++) {
       try {
         result = await db.transaction(async (tx) => {
-          // 1. Idempotency Check: Prevent duplicate processing
+          // 1. Duplicate Prevention Check: Prevent duplicate processing
           const existingTx = await tx.query.transactions.findFirst({
-            where: eq(transactions.idempotencyKey, idempotencyKey),
+            where: eq(transactions.Duplicate PreventionKey, Duplicate PreventionKey),
           });
 
           if (existingTx) {
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
             .values({
               userId,
               orderId: orderId || null,
-              idempotencyKey,
+              Duplicate PreventionKey,
               amount: Number(amountBigInt),
               status: status === "Paid" ? "completed" : "pending",
               hash,
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
               eventType: "TRANSACTION_CREATED",
               entityType: "transaction",
               entityId: newTx.id,
-              changes: { amount: amountBigInt.toString(), idempotencyKey },
+              changes: { amount: amountBigInt.toString(), Duplicate PreventionKey },
               ipAddress: locationIp,
               userAgent: userAgent,
               metadata: {
@@ -198,13 +198,13 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Transaction Error:", error);
 
-    // Check for Postgres unique constraint violation on idempotency key
+    // Check for Postgres unique constraint violation on Duplicate Prevention key
     if (
       error.code === "23505" &&
-      error.constraint === "transaction_idempotency_key_key"
+      error.constraint === "transaction_Duplicate Prevention_key_key"
     ) {
       return NextResponse.json(
-        { error: "Duplicate transaction (Idempotency Key Collision)" },
+        { error: "Duplicate transaction (Duplicate Prevention Key Collision)" },
         { status: 409 },
       );
     }

@@ -209,16 +209,16 @@ export default function JournalsPage() {
       const amountCents = Math.floor(amountVal * 100);
 
       // Create transaction in real database as "Pending" (Unpaid Invoice)
-      const idempotencyKey = `journal_${Date.now()}_${Math.random()}`;
+      const Duplicate PreventionKey = `journal_${Date.now()}_${Math.random()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Duplicate Prevention-Key': Duplicate PreventionKey
         },
         body: JSON.stringify({
           amount: formData.type === 'Expense' ? -amountCents : amountCents,
-          idempotencyKey: idempotencyKey,
+          Duplicate PreventionKey: Duplicate PreventionKey,
           description: formData.title,
           metadata: {
             client_name: formData.customer || 'Client',
@@ -300,7 +300,7 @@ export default function JournalsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h1 className="text-3xl font-black text-blue-600 tracking-tight">Journal List</h1>
-                <p className="text-slate-400 text-sm mt-1">Manage and audit double-entry ledger journals</p>
+                <p className="text-slate-400 text-sm mt-1">Manage account balances</p>
               </div>
               <button 
                 onClick={() => setActiveTab('create')}

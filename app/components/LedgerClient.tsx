@@ -344,16 +344,16 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
     setActiveTab('list');
 
     try {
-      const idempotencyKey = `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const Duplicate PreventionKey = `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const res = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Duplicate Prevention-Key': Duplicate PreventionKey
         },
         body: JSON.stringify({
           amount: Math.round(parseFloat(amount) * 100), // convert to cents
-          idempotencyKey: idempotencyKey,
+          Duplicate PreventionKey: Duplicate PreventionKey,
           description: description,
           status: status,
           metadata: {
@@ -484,7 +484,7 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
                   </span>
                 )}
               </div>
-              <p className="text-slate-400 text-sm mt-1">Audit and generate invoices and billing documents</p>
+              <p className="text-slate-400 text-sm mt-1">Review and generate invoices and billing documents</p>
             </div>
             <button 
               onClick={() => setActiveTab('create')}

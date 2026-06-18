@@ -14,7 +14,7 @@ export default function AuditTimeline({ transactions }: AuditTimelineProps) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
         <Shield className="w-12 h-12 mb-4 opacity-20" />
-        <p className="text-sm font-medium">No recent audit events</p>
+        <p className="text-sm font-medium">No recent security events</p>
       </div>
     );
   }

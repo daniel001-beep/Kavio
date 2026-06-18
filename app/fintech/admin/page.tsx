@@ -710,7 +710,7 @@ export default function AdminDashboardPage() {
 
                     {/* Metadata Section */}
                     <div className="space-y-3 bg-slate-50 p-4 border border-slate-100 rounded-2xl text-xs">
-                      <h4 className="font-black text-slate-800 uppercase tracking-wider text-[10px]">Security Auditing & Presence</h4>
+                      <h4 className="font-black text-slate-800 uppercase tracking-wider text-[10px]">Security History & Presence</h4>
                       <div className="grid grid-cols-2 gap-4 pt-2">
                         <div>
                           <span className="text-slate-400 font-semibold">Registered:</span>
@@ -735,7 +735,7 @@ export default function AdminDashboardPage() {
                     <div className="space-y-4">
                       <h4 className="font-black text-slate-800 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                        Audit Timeline Activity Feed
+                        Security History Timeline
                       </h4>
                       {drawerLoading ? (
                         <div className="space-y-4 py-4">
@@ -1119,7 +1119,7 @@ export default function AdminDashboardPage() {
                   <AlertCircle className="w-5 h-5 text-emerald-600 animate-pulse" />
                   Admin HQ Activity Alert Logs
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">Audit log of system alerts, registrations, support triggers, and large invoices.</p>
+                <p className="text-xs text-slate-400 mt-1">History of system alerts, registrations, support triggers, and large invoices.</p>
               </div>
             </div>
 
@@ -1226,7 +1226,7 @@ export default function AdminDashboardPage() {
                   <Activity className="w-4 h-4 text-emerald-600" />
                   System Activity Log
                 </h4>
-                <p className="text-xs text-slate-400 mt-2">Audit all user event triggers, signups, logins, and metadata trails.</p>
+                <p className="text-xs text-slate-400 mt-2">Track all user event triggers, signups, logins, and metadata trails.</p>
               </div>
               <button 
                 onClick={() => triggerCSVDownload('activity')}
