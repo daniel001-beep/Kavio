@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const AuthContext = createContext<{
   session: any;
@@ -16,6 +16,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { signOut: clerkSignOut } = useClerk();
   const [session, setSession] = useState<any>(null);
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Reset the signing out state the moment we land on the auth page
+    if (pathname === '/auth/signin' || pathname === '/auth/signup') {
+      setIsSigningOut(false);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -47,13 +56,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const signOut = async () => {
-    // Immediately tell Clerk to sign out and route to signin
+    setIsSigningOut(true);
     clerkSignOut({ redirectUrl: '/auth/signin' });
   };
 
   return (
     <AuthContext.Provider value={{ session, status, signOut }}>
-      {children}
+      {isSigningOut ? (
+        <div className="fixed inset-0 z-[99999] bg-[#fafbfe] flex items-center justify-center pointer-events-none">
+          <div className="flex flex-col items-center gap-3">
+             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 animate-pulse">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+              Signing out...
+            </p>
+          </div>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 }
