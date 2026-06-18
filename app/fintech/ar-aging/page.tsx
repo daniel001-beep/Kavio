@@ -148,16 +148,16 @@ export default function ARAgingPage() {
       const allowanceCents = Math.floor(totals.requiredAllowance * 100);
 
       // Book transaction representing dynamic bad debt allowance provisioning
-      const Duplicate PreventionKey = `bad_debt_${Date.now()}`;
+      const duplicatePreventionKey = `bad_debt_${Date.now()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Duplicate Prevention-Key': Duplicate PreventionKey
+          'Duplicate-Prevention-Key': duplicatePreventionKey
         },
         body: JSON.stringify({
           amount: -allowanceCents,
-          Duplicate PreventionKey: Duplicate PreventionKey,
+          duplicatePreventionKey: duplicatePreventionKey,
           description: "GAAP Provision: Allowance for Doubtful Accounts Adjustment",
           metadata: {
             client_name: "GAAP Bad Debt Provision",

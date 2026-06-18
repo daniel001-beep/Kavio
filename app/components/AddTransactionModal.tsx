@@ -44,13 +44,13 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }: AddT
     try {
       const amountVal = parseFloat(amount);
       const amountCents = Math.floor(amountVal * 100);
-      const Duplicate PreventionKey = `manual_${Date.now()}_${Math.random()}`;
+      const duplicatePreventionKey = `manual_${Date.now()}_${Math.random()}`;
 
       const res = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Duplicate Prevention-Key': Duplicate PreventionKey,
+          'Duplicate-Prevention-Key': duplicatePreventionKey,
         },
         body: JSON.stringify({
           amount: type === 'expense' ? -amountCents : amountCents,

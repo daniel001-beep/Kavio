@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const { 
       userId, 
       amount, 
-      Duplicate PreventionKey, 
+      duplicatePreventionKey, 
       orderId, 
       metadata = {}, 
       description = 'Webhook transaction', 
@@ -44,8 +44,8 @@ export async function POST(req: Request) {
     if (isNaN(parsedAmount) || parsedAmount === 0) {
       return NextResponse.json({ error: 'Valid non-zero amount is required (in cents)' }, { status: 400 });
     }
-    if (!Duplicate PreventionKey) {
-      return NextResponse.json({ error: 'Duplicate PreventionKey is required' }, { status: 400 });
+    if (!duplicatePreventionKey) {
+      return NextResponse.json({ error: 'duplicatePreventionKey is required' }, { status: 400 });
     }
 
     // 2. Multi-Tier Security Verification
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 
           // B. Duplicate Prevention Check: Prevent duplicate ledger processing
           const existingTx = await tx.query.transactions.findFirst({
-            where: eq(transactions.Duplicate PreventionKey, Duplicate PreventionKey),
+            where: eq(transactions.duplicatePreventionKey, duplicatePreventionKey),
           });
 
           if (existingTx) {
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
           const [newTx] = await tx.insert(transactions).values({
             userId,
             orderId: orderId || null,
-            Duplicate PreventionKey,
+            duplicatePreventionKey,
             amount: Number(amountBigInt),
             status: isCompleted ? 'completed' : 'pending',
             hash,
@@ -167,7 +167,7 @@ export async function POST(req: Request) {
               eventType: 'TRANSACTION_CREATED',
               entityType: 'transaction',
               entityId: newTx.id,
-              changes: { amount: amountBigInt.toString(), Duplicate PreventionKey, source: 'webhook' },
+              changes: { amount: amountBigInt.toString(), duplicatePreventionKey, source: 'webhook' },
               ipAddress: 'Webhook Ingestion',
               userAgent: 'External payment gateway provider',
               metadata: { description: description || 'Webhook ledger transaction', amount: Number(amountBigInt) / 100 }

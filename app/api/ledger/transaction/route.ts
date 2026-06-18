@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const Duplicate PreventionKey = headersList.get("Duplicate Prevention-key");
+    const duplicatePreventionKey = headersList.get("Duplicate-Prevention-Key");
 
     const body = await req.json();
 
@@ -54,9 +54,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!Duplicate PreventionKey) {
+    if (!duplicatePreventionKey) {
       return NextResponse.json(
-        { error: "Duplicate Prevention-Key header is required" },
+        { error: "Duplicate-Prevention-Key header is required" },
         { status: 400 },
       );
     }
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         result = await db.transaction(async (tx) => {
           // 1. Duplicate Prevention Check: Prevent duplicate processing
           const existingTx = await tx.query.transactions.findFirst({
-            where: eq(transactions.Duplicate PreventionKey, Duplicate PreventionKey),
+            where: eq(transactions.duplicatePreventionKey, duplicatePreventionKey),
           });
 
           if (existingTx) {
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
             .values({
               userId,
               orderId: orderId || null,
-              Duplicate PreventionKey,
+              duplicatePreventionKey,
               amount: Number(amountBigInt),
               status: status === "Paid" ? "completed" : "pending",
               hash,
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
               eventType: "TRANSACTION_CREATED",
               entityType: "transaction",
               entityId: newTx.id,
-              changes: { amount: amountBigInt.toString(), Duplicate PreventionKey },
+              changes: { amount: amountBigInt.toString(), duplicatePreventionKey },
               ipAddress: locationIp,
               userAgent: userAgent,
               metadata: {

@@ -209,16 +209,16 @@ export default function JournalsPage() {
       const amountCents = Math.floor(amountVal * 100);
 
       // Create transaction in real database as "Pending" (Unpaid Invoice)
-      const Duplicate PreventionKey = `journal_${Date.now()}_${Math.random()}`;
+      const duplicatePreventionKey = `journal_${Date.now()}_${Math.random()}`;
       const response = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Duplicate Prevention-Key': Duplicate PreventionKey
+          'Duplicate-Prevention-Key': duplicatePreventionKey
         },
         body: JSON.stringify({
           amount: formData.type === 'Expense' ? -amountCents : amountCents,
-          Duplicate PreventionKey: Duplicate PreventionKey,
+          duplicatePreventionKey: duplicatePreventionKey,
           description: formData.title,
           metadata: {
             client_name: formData.customer || 'Client',

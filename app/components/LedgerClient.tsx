@@ -344,16 +344,16 @@ export default function LedgerClient({ initialTransactions = [] }: LedgerClientP
     setActiveTab('list');
 
     try {
-      const Duplicate PreventionKey = `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const duplicatePreventionKey = `inv_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const res = await fetch('/api/ledger/transaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Duplicate Prevention-Key': Duplicate PreventionKey
+          'Duplicate-Prevention-Key': duplicatePreventionKey
         },
         body: JSON.stringify({
           amount: Math.round(parseFloat(amount) * 100), // convert to cents
-          Duplicate PreventionKey: Duplicate PreventionKey,
+          duplicatePreventionKey: duplicatePreventionKey,
           description: description,
           status: status,
           metadata: {

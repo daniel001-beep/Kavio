@@ -88,7 +88,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
     setIsAllocating(true);
 
-    const Duplicate PreventionKey = `alloc_${id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const duplicatePreventionKey = `alloc_${id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const txId = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     if (userEmail) {
@@ -146,11 +146,11 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Duplicate Prevention-Key': Duplicate PreventionKey
+          'Duplicate-Prevention-Key': duplicatePreventionKey
         },
         body: JSON.stringify({
           amount: -Math.round(amt * 100), // negative cents
-          Duplicate PreventionKey,
+          duplicatePreventionKey,
           description: `Capital Allocation: ${product?.title || 'Treasury'}`,
           status: 'Paid',
           metadata: {

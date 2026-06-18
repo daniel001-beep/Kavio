@@ -54,7 +54,7 @@ export default function DeveloperPortalPage() {
     const amountNum = parseFloat(sandboxAmount) || 0;
     const steps = [
       `> Connecting to route: ${sandboxEndpoint}`,
-      `> Payload parsed: { amount: ${Math.round(amountNum * 100)} cents, Duplicate PreventionKey: "idemp_${Math.random().toString(36).substring(2, 9)}" }`,
+      `> Payload parsed: { amount: ${Math.round(amountNum * 100)} cents, duplicatePreventionKey: "idemp_${Math.random().toString(36).substring(2, 9)}" }`,
       `> Checking double-entry balance constraints...`,
       `> [ACID isolated] Debit: -$${amountNum.toFixed(2)} [Client Main Account]`,
       `> [ACID isolated] Credit: +$${amountNum.toFixed(2)} [System Settlement Offset]`,
