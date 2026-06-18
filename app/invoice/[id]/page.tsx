@@ -19,7 +19,29 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 interface InvoiceData {
-// ... skipping to component body ...
+  id: string;
+  invoiceNumber: string;
+  amount: number;
+  dueDate: string;
+  status: "DRAFT" | "SENT" | "VIEWED" | "OVERDUE" | "PAID" | "VERIFIED" | "UNDER_REVIEW" | "BLOCKED";
+  projectDescription: string;
+  paymentInstructions?: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  createdAt: string;
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    companyName?: string;
+  };
+  user: {
+    name: string;
+    email: string;
+  };
+}
 export default function PublicInvoicePage() {
   const { id } = useParams() as { id: string };
   
