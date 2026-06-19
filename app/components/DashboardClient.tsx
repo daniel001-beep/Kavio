@@ -351,11 +351,9 @@ export default function DashboardClient() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-            <button className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm">
-              <Plus className="w-4 h-4" />
-              Create Invoice
-            </button>
+          <Link href="/dashboard/invoices/create" className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm">
+            <Plus className="w-4 h-4" />
+            Create Invoice
           </Link>
         </div>
       </div>
@@ -368,11 +366,9 @@ export default function DashboardClient() {
       </div>
 
       <div className="md:hidden relative z-10 w-full mb-2">
-        <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-          <a className="w-full bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform duration-100 no-underline text-base">
-            <Plus className="w-5 h-5" />
-            Create Invoice
-          </a>
+        <Link href="/dashboard/invoices/create" className="w-full bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform duration-100 no-underline text-base">
+          <Plus className="w-5 h-5" />
+          Create Invoice
         </Link>
       </div>
 
@@ -387,10 +383,8 @@ export default function DashboardClient() {
               {onboardingResponses.challenge === "late_payments" ? "Track and nudge late invoices." : "Monitor your due dates easily."}
             </p>
           </div>
-          <Link href="/dashboard/collections" passHref legacyBehavior>
-            <a className="text-[#00B140] text-xs font-bold uppercase tracking-wider shrink-0 flex items-center no-underline">
-              Open <ChevronRight className="w-4 h-4 ml-1" />
-            </a>
+          <Link href="/dashboard/collections" className="text-[#00B140] text-xs font-bold uppercase tracking-wider shrink-0 flex items-center no-underline">
+            Open <ChevronRight className="w-4 h-4 ml-1" />
           </Link>
         </div>
       )}
@@ -412,11 +406,9 @@ export default function DashboardClient() {
                 </p>
               </div>
             </div>
-            <Link href="/dashboard/collections" passHref legacyBehavior>
-              <button className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm">
-                Open Collections Center
-                <ChevronRight className="w-4 h-4" />
-              </button>
+            <Link href="/dashboard/collections" className="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-200 shrink-0 flex items-center gap-2 border-none cursor-pointer hover:shadow-sm">
+              Open Collections Center
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
         )}
@@ -654,11 +646,9 @@ export default function DashboardClient() {
             </div>
             
             <div className="flex justify-end pt-4 border-t border-slate-100">
-              <Link href="/dashboard/invoices" passHref legacyBehavior>
-                <a className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
-                  View All Invoices Hub
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </a>
+              <Link href="/dashboard/invoices" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
+                View All Invoices Hub
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
@@ -694,8 +684,8 @@ export default function DashboardClient() {
                     topClients.map((c) => (
                       <tr key={c.id} className="hover:bg-slate-50/20 transition-colors duration-150">
                         <td className="py-4 px-5">
-                          <Link href={`/dashboard/clients/${c.id}`} passHref legacyBehavior>
-                            <a className="font-bold text-slate-900 hover:text-[#00B140] transition-colors block leading-tight">{c.name}</a>
+                          <Link href={`/dashboard/clients/${c.id}`} className="font-bold text-slate-900 hover:text-[#00B140] transition-colors block leading-tight">
+                            {c.name}
                           </Link>
                           <span className="text-xs text-slate-400 font-mono mt-0.5">{c.email}</span>
                         </td>
@@ -719,11 +709,9 @@ export default function DashboardClient() {
             </div>
 
             <div className="flex justify-end pt-4 border-t border-slate-100">
-              <Link href="/dashboard/clients" passHref legacyBehavior>
-                <a className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
-                  Open Clients Directory
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </a>
+              <Link href="/dashboard/clients" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-all hover:underline">
+                Open Clients Directory
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>

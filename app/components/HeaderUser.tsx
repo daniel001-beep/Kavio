@@ -1,6 +1,7 @@
 "use client";
 
-import { useSession } from "@/app/context/AuthContext";
+import { useSession, useSignOut } from "@/app/context/AuthContext";
+import { LogOut } from "lucide-react";
 
 /**
  * HeaderUser — displays the logged-in user's name, email, and a
@@ -8,6 +9,7 @@ import { useSession } from "@/app/context/AuthContext";
  */
 export default function HeaderUser() {
   const { data: session } = useSession();
+  const signOut = useSignOut();
 
   const name = session?.user?.name || session?.user?.email?.split("@")[0] || "User";
   const firstName = name.trim().split(" ")[0];
@@ -36,6 +38,14 @@ export default function HeaderUser() {
       <div className="text-left hidden sm:block">
         <p className="text-sm font-extrabold text-slate-900 leading-tight capitalize">{firstName}</p>
       </div>
+
+      <button
+        onClick={() => signOut()}
+        className="ml-2 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center"
+        title="Log Out"
+      >
+        <LogOut className="w-4 h-4" />
+      </button>
     </div>
   );
 }

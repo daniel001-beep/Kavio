@@ -10,17 +10,21 @@ import {
   TrendingUp, 
   Settings,
   LogOut, 
-  ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Briefcase,
+  ChevronsUpDown,
+  ChevronLeft
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useSession, useSignOut } from "@/app/context/AuthContext";
+import WorkspaceSwitcherModal from "./WorkspaceSwitcherModal";
 
 export default function EmployerNavbar() {
   const { data: session } = useSession();
   const signOut = useSignOut();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
 
   // Sync collapsed state with localStorage for persistent state across pages
   useEffect(() => {
@@ -58,25 +62,31 @@ export default function EmployerNavbar() {
       }`}
     >
       {/* Header Area */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100 shrink-0 min-h-[73px]">
-        <Link
-          href="/employer"
-          className={`no-underline items-center hover:opacity-85 transition-opacity shrink-0 min-w-0 ${isCollapsed ? 'hidden' : 'flex'}`}
-        >
-          <span className="text-xl font-bold text-slate-900 tracking-tight py-1 truncate">
-            Kavio
-          </span>
-          <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full ml-2 shrink-0">
-            Employer
-          </span>
-        </Link>
-        
-        <Link 
-          href="/employer" 
-          className={`mx-auto text-xl font-bold text-emerald-600 ${isCollapsed ? 'block' : 'hidden'}`}
-        >
-          K
-        </Link>
+      <div className="p-4 border-b border-slate-100 shrink-0 min-h-[73px] flex flex-col justify-center">
+        {!isCollapsed ? (
+          <button 
+            onClick={() => setIsWorkspaceModalOpen(true)}
+            className="w-full flex items-center justify-between bg-white hover:bg-slate-50 border border-transparent hover:border-slate-200 p-1.5 rounded-xl transition-all duration-200 group text-left"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider leading-none mb-1">Workspace</span>
+                <span className="text-sm font-bold text-slate-900 truncate leading-none">Employer</span>
+              </div>
+            </div>
+            <ChevronsUpDown className="w-4 h-4 text-slate-400 group-hover:text-slate-600 shrink-0" />
+          </button>
+        ) : (
+          <button 
+            onClick={() => setIsWorkspaceModalOpen(true)}
+            className="mx-auto w-10 h-10 rounded-xl bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition-colors"
+          >
+            <Briefcase className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Nav List */}
@@ -175,6 +185,11 @@ export default function EmployerNavbar() {
           </button>
         )}
       </div>
+      {/* Modals */}
+      <WorkspaceSwitcherModal 
+        isOpen={isWorkspaceModalOpen} 
+        onClose={() => setIsWorkspaceModalOpen(false)} 
+      />
     </aside>
   );
 }

@@ -1,42 +1,70 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Users, CreditCard, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import Link from "next/link";
+import { Users, CreditCard, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSession } from "@/app/context/AuthContext";
+import { getEmployerDashboardStats } from "@/app/actions/employer";
 
 export default function EmployerDashboard() {
-  const { data: session } = useSession();
-  
-  // Dummy data for the prototype until we connect to actual DB routes
+  const [statsData, setStatsData] = useState<{
+    totalWorkers: number;
+    amountDue: number;
+    paidThisMonth: number;
+    overdue: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const data = await getEmployerDashboardStats();
+        setStatsData(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadStats();
+  }, []);
+
+  if (loading || !statsData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
   const stats = [
     {
       title: "Total Workers",
-      value: "12",
+      value: statsData.totalWorkers.toString(),
       icon: Users,
-      trend: "+2 this month",
+      trend: "Active team members",
       trendUp: true,
     },
     {
       title: "Amount Due (Next 30 Days)",
-      value: "$8,450.00",
+      value: `$${statsData.amountDue.toLocaleString()}`,
       icon: Calendar,
-      trend: "+$1,200 from last month",
+      trend: "Upcoming payroll",
       trendUp: true,
     },
     {
       title: "Paid This Month",
-      value: "$12,300.00",
+      value: `$${statsData.paidThisMonth.toLocaleString()}`,
       icon: CreditCard,
-      trend: "-$400 from last month",
-      trendUp: false,
+      trend: "Total disbursements",
+      trendUp: true,
     },
     {
       title: "Overdue Payments",
-      value: "$0.00",
+      value: `$${statsData.overdue.toLocaleString()}`,
       icon: TrendingUp,
-      trend: "All caught up!",
-      trendUp: true,
+      trend: statsData.overdue === 0 ? "All caught up!" : "Requires attention",
+      trendUp: statsData.overdue === 0,
     }
   ];
 
@@ -96,14 +124,14 @@ export default function EmployerDashboard() {
           <h2 className="text-xl font-bold text-slate-900">Quick Actions</h2>
           <Card className="border-slate-200 shadow-sm rounded-3xl p-6">
             <div className="space-y-4">
-              <button className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm shadow-emerald-200">
+              <Link href="/employer/workers" className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm shadow-emerald-200">
                 <Users className="w-4 h-4" />
                 Add New Worker
-              </button>
-              <button className="w-full py-3 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
+              </Link>
+              <Link href="/employer/payments" className="w-full py-3 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
                 <CreditCard className="w-4 h-4" />
                 Record Payment
-              </button>
+              </Link>
             </div>
           </Card>
         </div>

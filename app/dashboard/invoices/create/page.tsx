@@ -173,10 +173,8 @@ export default function CreateInvoicePage() {
       
       {/* Top Breadcrumb */}
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/invoices" passHref legacyBehavior>
-          <button className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all flex items-center justify-center cursor-pointer">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+        <Link href="/dashboard/invoices" className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all flex items-center justify-center cursor-pointer">
+          <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice Factory</span>

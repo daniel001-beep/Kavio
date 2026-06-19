@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import WorkspaceSwitcherModal from "../../components/WorkspaceSwitcherModal";
 import { 
   User, 
   Lock, 
@@ -19,7 +21,8 @@ import {
   Smartphone,
   PlusSquare,
   Check,
-  LogOut
+  LogOut,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +37,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"PROFILE" | "SECURITY" | "TIER" | "ADMIN" | "PWA" | "SUPPORT">("PROFILE");
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
+  const router = useRouter();
+  const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -308,11 +313,34 @@ export default function SettingsPage() {
 
               {/* Tab 1: Profile Form */}
               {activeTab === "PROFILE" && (
-                <form onSubmit={handleSaveProfile} className="space-y-6">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-800 tracking-tight">Account Information</h2>
-                    <p className="text-xs text-slate-500 mt-1">Configure details for system personalization and billing outputs.</p>
+                <div className="space-y-6">
+                  {/* Workspace Switcher Section */}
+                  <div className="bg-slate-50/50 border border-slate-100 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Current Workspace
+                      </h3>
+                      <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-emerald-600" />
+                        Freelancer Workspace
+                      </h4>
+                      <p className="text-xs text-slate-500 font-medium mt-1">
+                        Track clients, invoices, earnings, and payment reminders.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => setIsWorkspaceModalOpen(true)}
+                      className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-bold py-2 px-5 rounded-xl text-xs transition-all hover:shadow-sm shrink-0 flex items-center gap-2"
+                    >
+                      Switch Workspace
+                    </Button>
                   </div>
+
+                  <form onSubmit={handleSaveProfile} className="space-y-6 pt-2">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-800 tracking-tight">Account Information</h2>
+                      <p className="text-xs text-slate-500 mt-1">Configure details for system personalization and billing outputs.</p>
+                    </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
@@ -413,6 +441,7 @@ export default function SettingsPage() {
                     </Button>
                   </div>
                 </form>
+              </div>
               )}
 
               {/* Tab 2: Security Form */}
@@ -733,6 +762,10 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      <WorkspaceSwitcherModal 
+        isOpen={isWorkspaceModalOpen} 
+        onClose={() => setIsWorkspaceModalOpen(false)} 
+      />
     </div>
   );
 }

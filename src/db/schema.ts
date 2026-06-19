@@ -32,6 +32,14 @@ export const users = pgTable("user", {
   lastActivity: timestamp("last_activity"),
 });
 
+export const workspaces = pgTable("workspace", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'freelancer' or 'employer'
+  name: text("name"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const accounts = pgTable(
   "account",
   {
@@ -531,6 +539,7 @@ export const workers = pgTable("worker", {
   email: text("email"),
   phone: text("phone"),
   role: text("role").notNull(), // Employee, Freelancer, Contractor, Vendor
+  accountNumber: text("account_number"),
   salaryAmount: doublePrecision("salary_amount").notNull().default(0),
   paymentFrequency: text("payment_frequency").notNull().default("monthly"), // weekly, biweekly, monthly, custom
   paymentDay: integer("payment_day"), // Day of month/week
@@ -576,7 +585,10 @@ export const subscriptions = pgTable("subscription", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   planTier: text("plan_tier").notNull().default("Starter"), // Starter, Team, Business, Growth
-  status: text("status").notNull().default("ACTIVE"),
+  status: text("status").notNull().default("trial"), // trial, active, expired
+  workerLimit: integer("worker_limit").default(1000), // Default high for early access
+  trialStart: timestamp("trial_start").defaultNow(),
+  trialEnd: timestamp("trial_end"),
   updatedAt: timestamp("updated_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });

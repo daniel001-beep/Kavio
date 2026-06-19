@@ -596,10 +596,8 @@ export default function ClientsPage() {
                         </span>
                       </div>
                     </div>
-                    <Link href={`/dashboard/clients/${client.id}`} passHref legacyBehavior>
-                      <a className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-1.5 rounded-lg transition-colors border border-slate-200/50 flex items-center justify-center">
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
+                    <Link href={`/dashboard/clients/${client.id}`} className="bg-slate-50 hover:bg-slate-100 text-slate-600 p-1.5 rounded-lg transition-colors border border-slate-200/50 flex items-center justify-center">
+                      <ExternalLink className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>

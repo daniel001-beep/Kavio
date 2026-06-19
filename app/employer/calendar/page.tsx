@@ -1,18 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getPayments } from "@/app/actions/employer";
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1)); // Default to June 2026 based on dummy data
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const dummyEvents = [
-    { id: 1, date: 15, worker: "Bob Jones", amount: 1200, status: "PAID" },
-    { id: 2, date: 30, worker: "Alice Smith", amount: 2500, status: "PENDING" },
-    { id: 3, date: 1, worker: "Charlie Brown", amount: 800, status: "OVERDUE" },
-  ];
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await getPayments();
+        // Convert dueDate string to actual Date object and get day of month
+        const mappedEvents = data.map(p => ({
+          id: p.id,
+          date: new Date(p.dueDate).getDate(),
+          month: new Date(p.dueDate).getMonth(),
+          year: new Date(p.dueDate).getFullYear(),
+          worker: p.workerName,
+          amount: p.amount,
+          status: p.status,
+        }));
+        setEvents(mappedEvents);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -34,7 +55,12 @@ export default function CalendarPage() {
         <p className="text-slate-500 mt-2 font-medium">Visualize upcoming payroll and invoice deadlines.</p>
       </div>
 
-      <Card className="border-slate-200 shadow-sm rounded-3xl p-6 lg:p-8">
+      {loading ? (
+        <div className="flex justify-center items-center h-48">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        </div>
+      ) : (
+        <Card className="border-slate-200 shadow-sm rounded-3xl p-6 lg:p-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl font-black text-slate-900">
@@ -64,7 +90,11 @@ export default function CalendarPage() {
           
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
-            const dayEvents = dummyEvents.filter(e => e.date === day);
+            const dayEvents = events.filter(e => 
+              e.date === day && 
+              e.month === currentDate.getMonth() && 
+              e.year === currentDate.getFullYear()
+            );
             
             return (
               <div key={day} className="bg-white min-h-[120px] p-2 border-t border-slate-100 hover:bg-slate-50 transition-colors group relative">
@@ -97,6 +127,7 @@ export default function CalendarPage() {
           })}
         </div>
       </Card>
+      )}
     </div>
   );
 }

@@ -285,10 +285,8 @@ export default function InvoicesPage() {
           Invoices
           {isLoading && invoices.length > 0 && <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />}
         </h1>
-        <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-          <a className="bg-[#00B140] hover:bg-[#009933] text-white p-2 rounded-xl transition-all duration-300 flex items-center justify-center active:scale-[0.98]">
-            <Plus className="w-5 h-5" />
-          </a>
+        <Link href="/dashboard/invoices/create" className="bg-[#00B140] hover:bg-[#009933] text-white p-2 rounded-xl transition-all duration-300 flex items-center justify-center active:scale-[0.98]">
+          <Plus className="w-5 h-5" />
         </Link>
       </div>
 
@@ -304,11 +302,9 @@ export default function InvoicesPage() {
           <p className="text-slate-500 text-sm mt-1.5">Draft, send, and collect client payments instantly</p>
         </div>
 
-        <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-          <button className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm">
-            <Plus className="w-4 h-4" />
-            Create Invoice
-          </button>
+        <Link href="/dashboard/invoices/create" className="bg-[#00B140] hover:bg-[#009933] text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100 hover:translate-y-[-2px] active:translate-y-0 flex items-center gap-2 border-none cursor-pointer text-sm">
+          <Plus className="w-4 h-4" />
+          Create Invoice
         </Link>
       </div>
 
@@ -432,29 +428,25 @@ export default function InvoicesPage() {
                 <h4 className="text-slate-500 font-medium text-base mt-3 text-center">No invoices found</h4>
                 <p className="text-slate-400 text-sm mt-1 text-center">Create a new invoice and share payment link with clients.</p>
               </div>
-              <Link href="/dashboard/invoices/create" passHref legacyBehavior>
-                <a className="w-full md:w-auto md:px-10 bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 mt-4 min-h-[52px] active:scale-[0.98] transition-transform no-underline">
-                  Create Your First Invoice
-                </a>
+              <Link href="/dashboard/invoices/create" className="w-full md:w-auto md:px-10 bg-[#00B140] hover:bg-[#009933] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 mt-4 min-h-[52px] active:scale-[0.98] transition-transform no-underline">
+                Create Your First Invoice
               </Link>
             </div>
           ) : (
             <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
               {filteredInvoices.map((inv) => (
-                <Link key={inv.id} href={`/invoice/${inv.id}`} passHref legacyBehavior>
-                  <a className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center justify-between min-h-[56px] active:scale-[0.98] transition-transform no-underline relative z-10 group hover:shadow-md">
-                    <div className="flex flex-col min-w-0 pr-4">
-                      <span className="font-semibold text-slate-900 truncate group-hover:text-[#00B140] transition-colors">{inv.client.name}</span>
-                      <span className="text-xs font-mono text-slate-400 mt-0.5">{inv.invoiceNumber}</span>
+                <Link key={inv.id} href={`/invoice/${inv.id}`} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center justify-between min-h-[56px] active:scale-[0.98] transition-transform no-underline relative z-10 group hover:shadow-md">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="font-semibold text-slate-900 truncate group-hover:text-[#00B140] transition-colors">{inv.client.name}</span>
+                    <span className="text-xs font-mono text-slate-400 mt-0.5">{inv.invoiceNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex flex-col items-end">
+                      <span className="font-mono font-bold text-slate-900">{formatCurrency(inv.amount)}</span>
+                      <div className="mt-1">{getStatusBadge(inv.status)}</div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="flex flex-col items-end">
-                        <span className="font-mono font-bold text-slate-900">{formatCurrency(inv.amount)}</span>
-                        <div className="mt-1">{getStatusBadge(inv.status)}</div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 group-hover:text-slate-400 transition-colors" />
-                    </div>
-                  </a>
+                    <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 group-hover:text-slate-400 transition-colors" />
+                  </div>
                 </Link>
               ))}
             </div>

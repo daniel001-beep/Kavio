@@ -1,25 +1,38 @@
 "use client";
 
-import React from "react";
-import { TrendingUp, DollarSign, Users, Activity, BarChart3, PieChart } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { TrendingUp, DollarSign, Users, Activity, BarChart3, PieChart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Cell, PieChart as RechartsPieChart, Pie } from 'recharts';
+import { getEmployerAnalytics } from "@/app/actions/employer";
 
 export default function AnalyticsPage() {
-  const payrollData = [
-    { name: 'Jan', amount: 8400 },
-    { name: 'Feb', amount: 9200 },
-    { name: 'Mar', amount: 8900 },
-    { name: 'Apr', amount: 10500 },
-    { name: 'May', amount: 11200 },
-    { name: 'Jun', amount: 12300 },
-  ];
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const distributionData = [
-    { name: 'Freelancers', value: 4500, color: '#10b981' }, // emerald-500
-    { name: 'Contractors', value: 5800, color: '#3b82f6' }, // blue-500
-    { name: 'Employees', value: 2000, color: '#8b5cf6' },   // violet-500
-  ];
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const result = await getEmployerAnalytics();
+        setData(result);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading || !data) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  const { totalPayroll, onTimePaymentRate, avgCostPerWorker, activeWorkers, distributionData, payrollData } = data;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto pb-10">
@@ -35,8 +48,8 @@ export default function AnalyticsPage() {
             <DollarSign className="w-4 h-4 text-emerald-600" />
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="text-3xl font-black text-slate-900">$60,500.00</div>
-            <p className="text-xs font-semibold text-emerald-600 mt-2">+15% vs last year</p>
+            <div className="text-3xl font-black text-slate-900">${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <p className="text-xs font-semibold text-emerald-600 mt-2">Total amount distributed</p>
           </CardContent>
         </Card>
         
@@ -46,8 +59,8 @@ export default function AnalyticsPage() {
             <Users className="w-4 h-4 text-blue-600" />
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="text-3xl font-black text-slate-900">$1,025.00</div>
-            <p className="text-xs font-semibold text-blue-600 mt-2">Based on 12 active workers</p>
+            <div className="text-3xl font-black text-slate-900">${avgCostPerWorker.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <p className="text-xs font-semibold text-blue-600 mt-2">Based on {activeWorkers} active workers</p>
           </CardContent>
         </Card>
 
@@ -57,8 +70,8 @@ export default function AnalyticsPage() {
             <Activity className="w-4 h-4 text-violet-600" />
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="text-3xl font-black text-slate-900">98.5%</div>
-            <p className="text-xs font-semibold text-violet-600 mt-2">Excellent standing</p>
+            <div className="text-3xl font-black text-slate-900">{onTimePaymentRate}%</div>
+            <p className="text-xs font-semibold text-violet-600 mt-2">Historical average</p>
           </CardContent>
         </Card>
       </div>
