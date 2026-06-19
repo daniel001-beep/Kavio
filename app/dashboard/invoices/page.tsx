@@ -17,7 +17,8 @@ import {
   DollarSign,
   Calendar,
   User,
-  CheckCircle2
+  CheckCircle2,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

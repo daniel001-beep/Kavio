@@ -22,6 +22,7 @@ export const users = pgTable("user", {
   password: text("password"),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  role: text("role").default("freelancer"), // 'freelancer' or 'employer'
   isAdmin: boolean("isAdmin").default(false),
   securityLockdown: boolean("security_lockdown").default(false),
   planType: text("plan_type").default("FREE"),
@@ -512,3 +513,70 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// 13. Employer-side: Businesses
+export const businesses = pgTable("business", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  industry: text("industry"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 14. Employer-side: Workers
+export const workers = pgTable("worker", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  employerId: text("employer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  businessId: uuid("business_id").references(() => businesses.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  role: text("role").notNull(), // Employee, Freelancer, Contractor, Vendor
+  salaryAmount: doublePrecision("salary_amount").notNull().default(0),
+  paymentFrequency: text("payment_frequency").notNull().default("monthly"), // weekly, biweekly, monthly, custom
+  paymentDay: integer("payment_day"), // Day of month/week
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE, INACTIVE
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 15. Employer-side: Payments
+export const employerPayments = pgTable("employer_payment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workerId: uuid("worker_id").notNull().references(() => workers.id, { onDelete: "cascade" }),
+  employerId: text("employer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amount: doublePrecision("amount").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  paidDate: timestamp("paid_date"),
+  paymentMethod: text("payment_method"),
+  status: text("status").notNull().default("PENDING"), // PENDING, PAID, OVERDUE
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 16. Employer-side: Receipts
+export const employerReceipts = pgTable("employer_receipt", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  paymentId: uuid("payment_id").notNull().references(() => employerPayments.id, { onDelete: "cascade" }),
+  receiptImageUrl: text("receipt_image_url").notNull(),
+  transactionRef: text("transaction_ref"),
+  note: text("note"),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
+// 17. User Activities Log
+export const activities = pgTable("activity", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  details: text("details"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// 18. Subscriptions
+export const subscriptions = pgTable("subscription", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  planTier: text("plan_tier").notNull().default("Starter"), // Starter, Team, Business, Growth
+  status: text("status").notNull().default("ACTIVE"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});

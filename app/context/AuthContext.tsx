@@ -38,15 +38,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const adminEmail = envAdminEmail || 'idowuisdaniel1@gmail.com';
       const isUserAdmin = email.toLowerCase().trim() === adminEmail;
 
-      setSession({
-        user: {
-          id: user.id,
-          email: email,
-          name: user.fullName || user.firstName || email.split('@')[0],
-          isAdmin: !!isUserAdmin
-        }
-      });
-      setStatus('authenticated');
+      // Fetch the role from our own database via API
+      fetch('/api/user/me')
+        .then(res => res.json())
+        .then(data => {
+          setSession({
+            user: {
+              id: user.id,
+              email: email,
+              name: user.fullName || user.firstName || email.split('@')[0],
+              isAdmin: !!isUserAdmin,
+              role: data.role || 'freelancer'
+            }
+          });
+          setStatus('authenticated');
+        })
+        .catch(() => {
+          // Fallback
+          setSession({
+            user: {
+              id: user.id,
+              email: email,
+              name: user.fullName || user.firstName || email.split('@')[0],
+              isAdmin: !!isUserAdmin,
+              role: 'freelancer'
+            }
+          });
+          setStatus('authenticated');
+        });
     } else {
       setSession(null);
       setStatus('unauthenticated');

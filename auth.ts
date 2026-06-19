@@ -75,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               name: newUser.name,
               email: newUser.email,
               isAdmin: newUser.isAdmin,
+              role: newUser.role,
             };
           } else {
             const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
@@ -102,6 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 name: existingUser.name,
                 email: existingUser.email,
                 isAdmin: existingUser.isAdmin,
+                role: existingUser.role,
               };
             }
 
@@ -133,6 +135,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 name: existingUser.name,
                 email: existingUser.email,
                 isAdmin: existingUser.isAdmin,
+                role: existingUser.role,
               };
             }
 
@@ -234,6 +237,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.isAdmin = user.isAdmin;
         token.email = user.email; // explicitly store email in token
+        token.role = user.role;
       }
       // Grant admin rights if the email matches the environment variable or explicit admin accounts
       const adminEmail = (process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase().trim();
@@ -247,6 +251,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.isAdmin = token.isAdmin as boolean;
         session.user.email = token.email as string; // explicitly surface email to middleware
+        session.user.role = token.role as string;
       }
       return session;
     },
