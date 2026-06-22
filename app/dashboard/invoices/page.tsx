@@ -435,19 +435,36 @@ export default function InvoicesPage() {
           ) : (
             <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
               {filteredInvoices.map((inv) => (
-                <Link key={inv.id} href={`/invoice/${inv.id}`} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center justify-between min-h-[56px] active:scale-[0.98] transition-transform no-underline relative z-10 group hover:shadow-md">
-                  <div className="flex flex-col min-w-0 pr-4">
+                <div key={inv.id} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center justify-between min-h-[56px] relative z-10 group hover:shadow-md transition-shadow">
+                  <Link href={`/invoice/${inv.id}`} className="flex flex-col min-w-0 pr-4 flex-1 cursor-pointer no-underline">
                     <span className="font-semibold text-slate-900 truncate group-hover:text-[#00B140] transition-colors">{inv.client.name}</span>
                     <span className="text-xs font-mono text-slate-400 mt-0.5">{inv.invoiceNumber}</span>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="flex flex-col items-end">
-                      <span className="font-mono font-bold text-slate-900">{formatCurrency(inv.amount)}</span>
+                  </Link>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <Link href={`/invoice/${inv.id}`} className="flex flex-col items-end no-underline cursor-pointer">
+                      <span className="font-mono font-bold text-slate-900 group-hover:text-[#00B140] transition-colors">{formatCurrency(inv.amount)}</span>
                       <div className="mt-1">{getStatusBadge(inv.status)}</div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 group-hover:text-slate-400 transition-colors" />
+                    </Link>
+                    {/* WhatsApp Nudge (only if not paid) */}
+                    {inv.status !== "PAID" && (
+                      <select
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            triggerWhatsAppNudge(inv, e.target.value);
+                            e.target.value = ""; // Reset
+                          }
+                        }}
+                        className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl px-2 py-1.5 text-[10px] sm:text-xs text-emerald-700 font-bold cursor-pointer transition-all duration-200 focus:outline-none"
+                      >
+                        <option value="">💬 Nudge</option>
+                        <option value="DUE_TOMORROW">Due Tomorrow</option>
+                        <option value="DUE_TODAY">Due Today</option>
+                        <option value="OVERDUE_3D">3 Days Overdue</option>
+                        <option value="OVERDUE_7D">Past Due Check-in</option>
+                      </select>
+                    )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}

@@ -53,6 +53,14 @@ export default function DashboardClient() {
   const { isInstallable: isPWAInstallable, triggerInstall: triggerPWAInstall } = usePWAInstall();
 
   const [onboardingResponses, setOnboardingResponses] = useState<any>(null);
+  const [greeting, setGreeting] = useState("Welcome back 👋");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning ☀️");
+    else if (hour < 18) setGreeting("Good afternoon ☕");
+    else setGreeting("Good evening 🌙");
+  }, []);
 
   // Redirect to onboarding if not completed yet
   useEffect(() => {
@@ -360,8 +368,8 @@ export default function DashboardClient() {
 
       {/* Mobile Native Hero & CTA */}
       <div className="md:hidden pt-6 pb-2">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Good evening 👋</p>
-        <h1 className="text-2xl font-bold text-slate-900 mt-0.5">Idowu Daniel</h1>
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{greeting}</p>
+        <h1 className="text-2xl font-bold text-slate-900 mt-0.5">{session?.user?.name || "Welcome"}</h1>
         <p className="text-sm text-slate-400 mt-1">As of {todayReadable}</p>
       </div>
 
@@ -525,8 +533,8 @@ export default function DashboardClient() {
               </div>
             </div>
 
-            <div className="overflow-hidden bg-white rounded-2xl border border-slate-100 w-full">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto bg-white rounded-2xl border border-slate-100 w-full">
+              <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="bg-slate-50/50 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                     <th className="py-4 px-5">Invoice</th>
@@ -660,8 +668,8 @@ export default function DashboardClient() {
               <p className="text-xs text-slate-400 mt-0.5">Clients sorted by highest volume of total invoices billed</p>
             </div>
 
-            <div className="overflow-hidden bg-white rounded-2xl border border-slate-100 w-full">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto bg-white rounded-2xl border border-slate-100 w-full">
+              <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                   <tr className="bg-slate-50/50 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                     <th className="py-4 px-5">Client Name</th>
