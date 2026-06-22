@@ -22,8 +22,10 @@ import {
   ExternalLink,
   ChevronRight,
   UserCheck,
-  Sparkles
+  Sparkles,
+  LogOut
 } from "lucide-react";
+import { useSession, useSignOut } from "@/app/context/AuthContext";
 import { useDashboardData, Invoice } from "@/app/hooks/useDashboardData";
 import { usePWAInstall } from "@/app/hooks/usePWAInstall";
 import WhatsAppNudgeModal, { WhatsAppNudgePayload } from "@/app/components/WhatsAppNudgeModal";
@@ -35,6 +37,8 @@ import { Input } from "@/components/ui/input";
 
 export default function DashboardClient() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const signOut = useSignOut();
   const {
     status,
     isLoading,
@@ -367,10 +371,19 @@ export default function DashboardClient() {
       </div>
 
       {/* Mobile Native Hero & CTA */}
-      <div className="md:hidden pt-6 pb-2">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{greeting}</p>
-        <h1 className="text-2xl font-bold text-slate-900 mt-0.5">{session?.user?.name || "Welcome"}</h1>
-        <p className="text-sm text-slate-400 mt-1">As of {todayReadable}</p>
+      <div className="md:hidden pt-6 pb-2 flex items-start justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{greeting}</p>
+          <h1 className="text-2xl font-bold text-slate-900 mt-0.5">{session?.user?.name || session?.user?.email?.split('@')[0] || "Welcome"}</h1>
+          <p className="text-sm text-slate-400 mt-1">As of {todayReadable}</p>
+        </div>
+        <button
+          onClick={() => signOut()}
+          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors flex items-center justify-center shrink-0"
+          title="Log Out"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="md:hidden relative z-10 w-full mb-2">
