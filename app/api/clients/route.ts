@@ -4,6 +4,7 @@ import { clients } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, desc } from "drizzle-orm";
 import { trackEvent } from "@/utils/tracker";
+import { getCached, setCached, deleteCached } from "@/src/lib/redis";
 
 export const dynamic = "force-dynamic";
 
@@ -16,13 +17,21 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const cacheKey = `clients_${userId}`;
+    const cachedData = await getCached(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, { status: 200, headers: { 'X-Cache': 'HIT' } });
+    }
+
     const clientRecords = await db
       .select()
       .from(clients)
       .where(eq(clients.userId, userId))
       .orderBy(desc(clients.createdAt));
 
-    return NextResponse.json(clientRecords, { status: 200 });
+    setCached(cacheKey, clientRecords, 60);
+
+    return NextResponse.json(clientRecords, { status: 200, headers: { 'X-Cache': 'MISS' } });
   } catch (error: any) {
     console.error("GET /api/clients error:", error);
     return NextResponse.json(
@@ -84,6 +93,8 @@ export async function POST(req: Request) {
       eventType: "CLIENT_CREATED",
       metadata: { clientId: newClient.id, name, email },
     });
+
+    await deleteCached(`clients_${userId}`);
 
     return NextResponse.json(newClient, { status: 201 });
   } catch (error: any) {
