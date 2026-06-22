@@ -4,6 +4,7 @@ import { invoices, clients } from "@/src/db/schema";
 import { getResilientSession } from "@/src/lib/auth-session";
 import { eq, desc } from "drizzle-orm";
 import { trackEvent } from "@/utils/tracker";
+import { getCached, setCached, deleteCached } from "@/src/lib/redis";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,12 @@ export async function GET() {
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const cacheKey = `invoices_${userId}`;
+    const cachedData = await getCached(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, { status: 200, headers: { 'X-Cache': 'HIT' } });
     }
 
     const invoiceRecords = await db
@@ -40,7 +47,10 @@ export async function GET() {
       .where(eq(invoices.userId, userId))
       .orderBy(desc(invoices.createdAt));
 
-    return NextResponse.json(invoiceRecords, { status: 200 });
+    // Cache the result for 60 seconds asynchronously
+    setCached(cacheKey, invoiceRecords, 60);
+
+    return NextResponse.json(invoiceRecords, { status: 200, headers: { 'X-Cache': 'MISS' } });
   } catch (error: any) {
     console.error("GET /api/invoices error:", error);
     return NextResponse.json(
@@ -91,11 +101,15 @@ export async function POST(req: Request) {
       })
       .returning();
 
+    // Track creation
     await trackEvent({
       userId,
       eventType: "INVOICE_CREATED",
       metadata: { invoiceId: newInvoice.id, invoiceNumber, amount: parsedAmount },
     });
+
+    // Invalidate the cache
+    await deleteCached(`invoices_${userId}`);
 
     return NextResponse.json(newInvoice, { status: 201 });
   } catch (error: any) {
